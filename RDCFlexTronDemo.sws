@@ -1,0 +1,18 @@
+{
+    "dependencies": [
+        "../Libraries/RDCFlexTron/RDCFlexTronLibrary26.0.sws",
+        "DataFlex-dev/Web UI FlexTron#1.0.52",
+        "DataFlex-dev/Web UI Material Theme#1.0.4"
+    ],
+    "description": "The RDCFlexTron library at work: a themed FlexTron host, the markup builders and icons, a modal panel and the Dark / Light / Follow Windows choice.",
+    "df": 26.0,
+    "paths": {
+        "indexHtml": "AppSrc/FlexTronScriptIncludes.html"
+    },
+    "projects": [
+        "RDCFlexTronDemo.src"
+    ],
+    "studio": {
+        "DefaultFormHeight": 12
+    }
+}
