@@ -19,10 +19,11 @@ While the library is developed, `RDCFlexTronDemo.sws` points at it by path -
 `../Libraries/RDCFlexTron/RDCFlexTronLibrary26.0.sws`, the library pool beside this folder - so a change
 to the library shows here straight away. Once the library is published this becomes a pinned package.
 
-Run `setup.bat` once. A path dependency is a local library to df-cli, and it skips the library's
-install step ("its install files are ignored"), so the style sheets would never reach `AppHtml`.
-`setup.bat` links `AppHtml\RDCFlexTron` to the library's own folder instead - a junction, so an edit to a
-sheet shows here straight away.
+Run `setup.bat` once, and again after changing one of the library's style sheets. A path dependency is a
+local library to df-cli, and it skips the library's install step ("its install files are ignored"), so
+the sheets would never reach `AppHtml`. `setup.bat` copies them into `AppHtml\RDCFlexTron`, where the
+published package installs them. (A junction to the library folder does not do: through one, the pages
+stayed unstyled.)
 
 Then open `RDCFlexTronDemo.sws` in the DataFlex 26 Studio, compile `RDCFlexTronDemo.src` and run it. The
 package manager installs the web framework and the theme into `AppHtml` itself.

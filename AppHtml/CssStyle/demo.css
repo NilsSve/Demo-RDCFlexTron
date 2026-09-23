@@ -39,6 +39,10 @@
     font-family: Consolas, monospace;
     color: var(--dfr-code-ink);
 }
+.bandlabel {
+    margin-right: 2px;
+    color: var(--dfr-ink-dim);
+}
 .rpbar svg {
     width: 16px;
     height: 16px;
