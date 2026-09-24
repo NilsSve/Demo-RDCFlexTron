@@ -1,8 +1,22 @@
 {
     "dependencies": [
-        "../Libraries/RDCFlexTron/RDC-FlexTron-Library-26.0.sws",
-        "DataFlex-dev/Web UI FlexTron#1.0.52",
-        "DataFlex-dev/Web UI Material Theme#1.0.4"
+        {
+            "source": "https://github.com/NilsSve/Library-RDCToolsLib.git",
+            "sws": "RDC-Windows-Sub-Classes-Library-26.0.sws",
+            "version": "7c4dd0feb1cefa91eec142461154f22283ebed7b"
+        },
+        {
+            "source": "https://github.com/NilsSve/Library-vwin32fh.git",
+            "sws": "StudioLibrary/vWin32fh-Library-DF26.0.sws",
+            "version": "5432741c37c80be755e78f5f9d45ba8329fddcaf"
+        },
+        "DataFlex-dev/Web UI FlexTron#1.0.54",
+        "DataFlex-dev/Web UI Material Theme#1.0.4",
+        {
+            "source": "https://github.com/NilsSve/Library-RDCFlexTron.git",
+            "sws": "RDC-FlexTron-Library-26.0.sws",
+            "version": "3863725b1cb4e266f12300cb1186cdbdd698e78f"
+        }
     ],
     "description": "The RDCFlexTron library at work: a themed FlexTron host, the markup builders and icons, a modal panel and the Dark / Light / Follow Windows choice.",
     "df": 26.0,

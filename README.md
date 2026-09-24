@@ -16,18 +16,21 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 
 ## Running it
 
-While the library is developed, `RDCFlexTronDemo.sws` points at it by path -
-`../Libraries/RDCFlexTron/RDC-FlexTron-Library-26.0.sws`, the library pool beside this folder - so a change
-to the library shows here straight away. Once the library is published this becomes a pinned package.
+`RDCFlexTronDemo.sws` takes the library as a package from GitHub, pinned to a commit
+(`https://github.com/NilsSve/Library-RDCFlexTron.git`, `RDC-FlexTron-Library-26.0.sws`). Open
+`RDCFlexTronDemo.sws` in the DataFlex 26 Studio, compile `RDCFlexTronDemo.src` and run it. The package
+manager installs the library, the web framework, the Material theme and the library's style sheets (into
+`AppHtml\RDCFlexTron`) itself.
 
-Run `setup.bat` once, and again after changing one of the library's style sheets. A path dependency is a
-local library to df-cli, and it skips the library's install step ("its install files are ignored"), so
-the sheets would never reach `AppHtml`. `setup.bat` copies them into `AppHtml\RDCFlexTron`, where the
-published package installs them. (A junction to the library folder does not do: through one, the pages
-stayed unstyled.)
+The Material theme package is required: without it the FlexTron pages wait several seconds for a theme
+stylesheet that never arrives before they show their controls.
 
-Then open `RDCFlexTronDemo.sws` in the DataFlex 26 Studio, compile `RDCFlexTronDemo.src` and run it. The
-package manager installs the web framework and the theme into `AppHtml` itself.
+To work on the library and see each change here at once, point the dependency at a clone by path instead
+(`"../Libraries/RDCFlexTron/RDC-FlexTron-Library-26.0.sws"`, the library pool beside this folder) and run
+`setup.bat`, once and again after changing one of the library's style sheets. A path dependency is a local
+library to df-cli, and it skips the library's install step ("its install files are ignored");
+`setup.bat` copies the sheets into `AppHtml\RDCFlexTron` instead. (A junction to the library folder does
+not do: through one, the pages stayed unstyled.)
 
 ## Licence
 
