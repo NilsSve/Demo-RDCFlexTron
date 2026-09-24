@@ -17,6 +17,12 @@
     width: 26px;
     height: 26px;
 }
+/* The RDC Tools mark beside the page title. It brings its own gold ground, so the light theme needs no
+   rule for it. */
+.demo h1 img.brand {
+    width: 32px;
+    height: 32px;
+}
 .demo h2 {
     margin: 16px 0 6px;
     font-size: 12px;

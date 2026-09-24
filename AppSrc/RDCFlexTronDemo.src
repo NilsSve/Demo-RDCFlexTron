@@ -55,11 +55,12 @@ Function DemoPageHtml Global Returns String
     String s sItems
     Move (CS_DemoSheets + (CssLink("demo"))) to s
     Move (s + (DivOpen("demo"))) to s
-    Move (s + (TagHtml("h1", "", ((DashIcon(CS_GlyphStack)) + "RDCFlexTron")))) to s
+    // The RDC Tools mark: the file the RDC libraries show in the DataFlex package manager.
+    Move (s + (TagHtml("h1", "", ((ImgHtml("Images/RDC-Mark.svg", "brand", "", "")) + "RDCFlexTron")))) to s
     Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
     Move (s + (TagText("h2", "", "On this window"))) to s
     Move (BulletItem("This page is a " + (CodeText("cFTWebHtmlBox")) + " in a " + (CodeText("cFTLocalWebControlHost")) + ", built with " + (CodeText("FTMarkupBuilders")) + ".")) to sItems
-    Move (sItems + (BulletItem("The icons are " + (CodeText("DashIcon")) + " glyphs: inline SVG, no image files."))) to sItems
+    Move (sItems + (BulletItem("The button icons are " + (CodeText("DashIcon")) + " glyphs: inline SVG, no image files."))) to sItems
     Move (sItems + (BulletItem("The buttons above sit in a host of their own. A click only records what was clicked; a timer does the work, off the WebView2 pump."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
