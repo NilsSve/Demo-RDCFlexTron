@@ -1,15 +1,5 @@
 {
     "dependencies": [
-        {
-            "source": "https://github.com/NilsSve/Library-RDCToolsLib.git",
-            "sws": "RDC-Windows-Sub-Classes-Library-26.0.sws",
-            "version": "7c4dd0feb1cefa91eec142461154f22283ebed7b"
-        },
-        {
-            "source": "https://github.com/NilsSve/Library-vwin32fh.git",
-            "sws": "StudioLibrary/vWin32fh-Library-DF26.0.sws",
-            "version": "5432741c37c80be755e78f5f9d45ba8329fddcaf"
-        },
         "DataFlex-dev/Web UI FlexTron#1.0.54",
         "DataFlex-dev/Web UI Material Theme#1.0.4",
         {
