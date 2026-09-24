@@ -6,9 +6,10 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   `DashIcon` glyphs;
 - a button band in a host of its own, with the click handed to a timer so nothing heavy runs inside
   the web click;
-- a `cFTModalPanel` with a content host and a button band, placed from the panel's measured size;
-- the Dark / Light / Follow Windows choice, saved under the program's registry key and applied at
-  the next start.
+- a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with a content host and a
+  button band, placed from the panel's measured size;
+- the Dark / Light / Follow Windows choice, saved under the program's registry key; the demo
+  restarts in the new theme.
 
 > **Private until FlexTron is released.** The library is a separate repository,
 > **Library-RDCFlexTron** - a package, so it carries no programs; this is where they go.

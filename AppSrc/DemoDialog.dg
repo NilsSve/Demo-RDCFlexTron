@@ -1,0 +1,132 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoDialog
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-09-24
+//
+// Description : The demo's modal panel: a cFTModalPanel with a content host on top and a button band
+//               of its own below it, both placed from the panel's measured size on every show and
+//               every resize.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use cFTModalPanel.pkg
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use FTAllWebControlClasses.pkg      // cFTWebHtmlBox
+Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, BarButtonHtml, CssLink
+Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
+Use cTimer.pkg
+Use DemoConstants.h.pkg             // CS_DemoSheets, CS_DemoPageFit - the library's style sheet links
+
+// RDCToolsLib's modal panel grows by this many units after construction, for the status bar it
+// builds, so the panel places its hosts from its measured size instead of trusting an anchor that
+// was bound before that growth.
+Define CI_DemoStatusBarUnits for 8
+
+Object oDemoDialog is a cFTModalPanel
+    Set Label to "A cFTModalPanel"
+    Set Location to 20 20
+    Set Size to 148 340                 // 140, plus the CI_DemoStatusBarUnits the base adds
+    Set piMinSize to 148 340
+
+    // THE CONTENT, in a host of its own.
+    Object oDlgHost is a cFTLocalWebControlHost
+        Set Location to 4 4
+        Set Size to 100 332
+        Set peAnchors to anTopLeftRight
+
+        // Above the html box that calls it: a function must be defined before the call.
+        Function BodyPage Returns String
+            String s
+            Move (CS_DemoSheets + (CssLink("demo"))) to s
+            Move (s + (DivOpen("demo"))) to s
+            Move (s + (TagHtml("h1", "", ((DashIcon(CS_GlyphListcheck)) + "A cFTModalPanel")))) to s
+            Move (s + (TagText("p", "", "A content host on top and a button band below, each placed from the panel's measured size on every show and every resize."))) to s
+            Move (s + (TagText("p", "", "Close runs from a timer: ending a panel from inside the web click would fault."))) to s
+            Move (s + "</div>") to s
+            Function_Return s
+        End_Function
+
+        Object oDlgBody is a cFTWebHtmlBox
+            Set piColumnSpan to 1
+            // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
+            Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Dialog body</div>'
+
+            // The runtime page - set here, so the Designer keeps the literal above.
+            Procedure End_Construct_Object
+                Forward Send End_Construct_Object
+                Set psHtml to (BodyPage(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    // THE BAND: the Close button, in a host of its own.
+    Object oDlgBand is a cFTLocalWebControlHost
+        Set Location to 108 4
+        Set Size to 30 332
+        Set peAnchors to anLeftRight
+
+        // "rpbar bottom" (demo.css) fills the host and keeps its buttons along the bottom edge.
+        Function BandPage Returns String
+            String s
+            Move (CS_DemoSheets + CS_DemoPageFit + (CssLink("demo"))) to s
+            Move (s + (DivOpen("rpbar bottom"))) to s
+            Move (s + (BarButtonHtml("rpbtn", "close", "", ((DashIcon(CS_GlyphClose)) + "Close"), "Close this dialog", True))) to s
+            Move (s + "</div>") to s
+            Function_Return s
+        End_Function
+
+        Object oDlgBand_hb is a cFTWebHtmlBox
+            Set pbServerOnClick to True
+            Set piColumnSpan to 1
+            Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Close</div>'
+
+            Procedure End_Construct_Object
+                Forward Send End_Construct_Object
+                Set psHtml to (BandPage(Self))
+            End_Procedure
+
+            // Deferred: ending a panel from inside the web click faults 4410.
+            Procedure OnClick String sId String sParam
+                If (sId = "close") ;
+                    Set pbEnabled of (oDlgCloseTimer(oDemoDialog(Self))) to True
+            End_Procedure
+        End_Object
+    End_Object
+
+    Object oDlgCloseTimer is a cTimer
+        Set piTimeout to 1
+        Set pbEnabled to False
+        Procedure OnTimer
+            Set pbEnabled to False
+            Send Close_Panel of (oDemoDialog(Self))
+        End_Procedure
+    End_Object
+
+    // Placed from the measured panel on every show and every resize: the base grows the panel after
+    // construction, so a bottom anchor would land short.
+    Procedure PlaceHosts
+        Integer iSize iH iW iBandTop
+        Get Size to iSize
+        Move (Hi(iSize)) to iH
+        Move (Low(iSize)) to iW
+        Move (iH - CI_DemoStatusBarUnits - 12 - 30) to iBandTop
+        If (iBandTop < 40) ;
+            Move 40 to iBandTop
+        Set Location of (oDlgBand(Self)) to iBandTop 4
+        Set Size     of (oDlgBand(Self)) to 30 (iW - 8)
+        Set Size     of (oDlgHost(Self)) to (iBandTop - 4) (iW - 8)
+    End_Procedure
+
+    Procedure OnResize
+        Forward Send OnResize
+        Send PlaceHosts
+    End_Procedure
+
+    Procedure Activating
+        Forward Send Activating
+        Send PlaceHosts
+    End_Procedure
+End_Object

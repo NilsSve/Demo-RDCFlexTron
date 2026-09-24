@@ -41,7 +41,18 @@
 }
 .bandlabel {
     margin-right: 2px;
-    color: var(--dfr-ink-dim);
+    color: var(--dfr-amber);
+}
+/* The dialog's button band: pinned to its host's four edges, with the buttons along the bottom.
+   height:100% (bars.css) does not reach through the framework's auto-height wrappers, so the band
+   sat at the top of its host; position:fixed with inset:0 is the geometry that nesting cannot
+   disturb. */
+.rpbar.bottom {
+    position: fixed;
+    inset: 0;
+    height: auto;
+    align-items: flex-end;
+    padding: 0 8px 2px;
 }
 .rpbar svg {
     width: 16px;

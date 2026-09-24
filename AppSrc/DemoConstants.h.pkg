@@ -1,0 +1,19 @@
+﻿//****************************************************************************
+// $Module type: Package
+// $Module name: DemoConstants.h
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-09-24
+//
+// Description : What the demo's pages share: the links to the library's style sheets.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+
+// The library's shared style sheets. The package installs them into AppHtml\RDCFlexTron; a page
+// links them itself, palette first - the link order is the cascade.
+Define CS_DemoSheets  for '<link rel="stylesheet" href="RDCFlexTron/palette.css"><link rel="stylesheet" href="RDCFlexTron/buttons.css"><link rel="stylesheet" href="RDCFlexTron/bars.css">'
+
+// For a page that must fill its host exactly and never scroll: the button bands.
+Define CS_DemoPageFit for '<link rel="stylesheet" href="RDCFlexTron/pagefit.css">'
