@@ -15,6 +15,7 @@
 Use cFTModalPanel.pkg
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use FTAllWebControlClasses.pkg      // cFTWebHtmlBox
+Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, BarButtonHtml, CssLink
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use cTimer.pkg
@@ -37,27 +38,29 @@ Object oDemoDialog is a cFTModalPanel
         Set Size to 100 332
         Set peAnchors to anTopLeftRight
 
-        // Above the html box that calls it: a function must be defined before the call.
-        Function BodyPage Returns String
+        // Above the html box that calls it: a function must be defined before the call. sTitleIcon is
+        // the page's TitleIconHtml.
+        Function BodyPage String sTitleIcon Returns String
             String s
             Move (CS_DemoSheets + (CssLink("demo"))) to s
             Move (s + (DivOpen("demo"))) to s
-            Move (s + (TagHtml("h1", "", ((DashIcon(CS_GlyphListcheck)) + "A cFTModalPanel")))) to s
+            Move (s + (TagHtml("h1", "", (sTitleIcon + "A cFTModalPanel")))) to s
             Move (s + (TagText("p", "", "A content host on top and a button band below, each placed from the panel's measured size on every show and every resize."))) to s
             Move (s + (TagText("p", "", "Close runs from a timer: ending a panel from inside the web click would fault."))) to s
             Move (s + "</div>") to s
             Function_Return s
         End_Function
 
-        Object oDlgBody is a cFTWebHtmlBox
+        Object oDlgBody is a cFTHtmlPage
             Set piColumnSpan to 1
+            Set psTitleIcon to CS_GlyphListcheck
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
             Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Dialog body</div>'
 
             // The runtime page - set here, so the Designer keeps the literal above.
             Procedure End_Construct_Object
                 Forward Send End_Construct_Object
-                Set psHtml to (BodyPage(Self))
+                Set psHtml to (BodyPage(Self, (TitleIconHtml(Self))))
             End_Procedure
         End_Object
     End_Object

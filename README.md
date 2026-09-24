@@ -2,8 +2,8 @@
 
 The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RDCFlexTronDemo.src`):
 
-- a themed `cFTLocalWebControlHost` whose page is built with the `FTMarkupBuilders` functions and
-  `DashIcon` glyphs;
+- a themed `cFTLocalWebControlHost` whose page, a `cFTHtmlPage`, is built with the `FTMarkupBuilders`
+  functions and `DashIcon` glyphs, with the RDC Tools mark as its title picture (`psTitleIcon`);
 - a button band in a host of its own, with the click handed to a timer so nothing heavy runs inside
   the web click;
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with a content host and a

@@ -30,6 +30,7 @@ Send SeedFTTheme
 Use cFTPanel.pkg                    // the main window: a Panel with the FT ground colour
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use FTAllWebControlClasses.pkg      // cFTWebHtmlBox and the rest of the web-control family
+Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, BarButtonHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use cTimer.pkg
@@ -51,27 +52,28 @@ Function DemoThemeName Global Integer iMode Returns String
 End_Function
 
 // The main window's page: the library in a few lines, built with the builders it describes.
-Function DemoPageHtml Global Returns String
+// sTitleIcon is the page's TitleIconHtml.
+Function DemoPageHtml Global String sTitleIcon Returns String
     String s sItems
     Move (CS_DemoSheets + (CssLink("demo"))) to s
     Move (s + (DivOpen("demo"))) to s
-    // The RDC Tools mark: the file the RDC libraries show in the DataFlex package manager.
-    Move (s + (TagHtml("h1", "", ((ImgHtml("Images/RDC-Mark.svg", "brand", "", "")) + "RDCFlexTron")))) to s
+    Move (s + (TagHtml("h1", "", (sTitleIcon + "RDCFlexTron")))) to s
     Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
     Move (s + (TagText("h2", "", "On this window"))) to s
-    Move (BulletItem("This page is a " + (CodeText("cFTWebHtmlBox")) + " in a " + (CodeText("cFTLocalWebControlHost")) + ", built with " + (CodeText("FTMarkupBuilders")) + ".")) to sItems
+    Move (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + " in a " + (CodeText("cFTLocalWebControlHost")) + ", built with " + (CodeText("FTMarkupBuilders")) + ".")) to sItems
+    Move (sItems + (BulletItem("The mark beside the title is the page's " + (CodeText("psTitleIcon")) + ": an image file here, a " + (CodeText("DashIcon")) + " glyph in the dialog."))) to sItems
     Move (sItems + (BulletItem("The button icons are " + (CodeText("DashIcon")) + " glyphs: inline SVG, no image files."))) to sItems
     Move (sItems + (BulletItem("The buttons above sit in a host of their own. A click only records what was clicked; a timer does the work, off the WebView2 pump."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
-    Move (s + (TagText("p", "", ("In use: " + (DemoThemeName(ghiFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
+    Move (s + (TagText("p", "", ("In use: " + (DemoThemeName(giFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
     Move (s + "</div>") to s
     Function_Return s
 End_Function
 
 // One theme button. The theme in use is shown disabled: choosing it again would change nothing.
 Function DemoThemeButton Global Integer iThis String sLabel Returns String
-    If (ghiFTThemeMode = iThis) ;
+    If (giFTThemeMode = iThis) ;
         Function_Return (BarButtonHtml("rpbtn", "", "", sLabel, "The theme in use", False))
     Function_Return (BarButtonHtml("rpbtn", "theme", (String(iThis)), sLabel, ("Switch to " + sLabel + " and restart the demo"), True))
 End_Function
@@ -138,15 +140,16 @@ Object oMain is a cFTPanel
         Set Size to 246 432
         Set peAnchors to anNone         // placed by PlaceHosts
 
-        Object oPage is a cFTWebHtmlBox
+        Object oPage is a cFTHtmlPage
             Set piColumnSpan to 1
+            Set psTitleIcon to "Images/RDC-Mark.svg"    // the RDC Tools mark, as the package manager shows it
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
             Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">RDCFlexTron demo page</div>'
 
             // The runtime page - set here, so the Designer keeps the literal above.
             Procedure End_Construct_Object
                 Forward Send End_Construct_Object
-                Set psHtml to (DemoPageHtml())
+                Set psHtml to (DemoPageHtml(TitleIconHtml(Self)))
             End_Procedure
         End_Object
     End_Object
