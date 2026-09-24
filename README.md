@@ -17,7 +17,7 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 ## Running it
 
 While the library is developed, `RDCFlexTronDemo.sws` points at it by path -
-`../Libraries/RDCFlexTron/RDCFlexTronLibrary26.0.sws`, the library pool beside this folder - so a change
+`../Libraries/RDCFlexTron/RDC-FlexTron-Library-26.0.sws`, the library pool beside this folder - so a change
 to the library shows here straight away. Once the library is published this becomes a pinned package.
 
 Run `setup.bat` once, and again after changing one of the library's style sheets. A path dependency is a

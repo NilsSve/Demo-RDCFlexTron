@@ -1,6 +1,6 @@
 {
     "dependencies": [
-        "../Libraries/RDCFlexTron/RDCFlexTronLibrary26.0.sws",
+        "../Libraries/RDCFlexTron/RDC-FlexTron-Library-26.0.sws",
         "DataFlex-dev/Web UI FlexTron#1.0.52",
         "DataFlex-dev/Web UI Material Theme#1.0.4"
     ],
