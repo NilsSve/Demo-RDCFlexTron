@@ -4,8 +4,8 @@
         "DataFlex-dev/Web UI Material Theme#1.0.4",
         {
             "source": "https://github.com/NilsSve/Library-RDCFlexTron.git",
-            "sws": "RDC-FlexTron-Library-26.0.sws",
-            "version": "d3412a7ed85c08155cb44de1a02451560319c1da"
+            "sws": "RDC-FlexTron-Library.sws",
+            "version": "998d583ce0abaa51317981e9f17ec4df4334796f"
         }
     ],
     "description": "The RDCFlexTron library at work: a themed FlexTron host, the markup builders and icons, a modal panel and the Dark / Light / Follow Windows choice.",
