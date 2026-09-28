@@ -45,24 +45,10 @@
     font-family: Consolas, monospace;
     color: var(--dfr-code-ink);
 }
-.bandlabel {
-    margin-right: 2px;
-    color: var(--dfr-amber);
-}
-/* The dialog's button band: pinned to its host's four edges, with the buttons along the bottom.
-   height:100% (bars.css) does not reach through the framework's auto-height wrappers, so the band
-   sat at the top of its host; position:fixed with inset:0 is the geometry that nesting cannot
-   disturb. */
-.rpbar.bottom {
-    position: fixed;
-    inset: 0;
-    height: auto;
-    align-items: flex-end;
-    padding: 0 8px 2px;
-}
-.rpbar svg {
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
-    vertical-align: -3px;
+
+/* PROTOTYPE (2026-09-27): ONE FT ROW - the least height of a row on a grid host (cDemoGridHost's
+   psDefaultRowHeight), so an empty row keeps the height of a row of buttons. 33px is the Material
+   theme's 29px control box with its 2px margins. Moves to ftcontrols.css with the class. */
+:root {
+    --ft-row: 33px;
 }

@@ -14,6 +14,3 @@
 // The library's shared style sheets. The package installs them into AppHtml\RDCFlexTron; a page
 // links them itself, palette first - the link order is the cascade.
 Define CS_DemoSheets  for '<link rel="stylesheet" href="RDCFlexTron/palette.css"><link rel="stylesheet" href="RDCFlexTron/buttons.css"><link rel="stylesheet" href="RDCFlexTron/bars.css">'
-
-// For a page that must fill its host exactly and never scroll: the button bands.
-Define CS_DemoPageFit for '<link rel="stylesheet" href="RDCFlexTron/pagefit.css">'

@@ -5,20 +5,49 @@
 // Web-site    : http://www.rdctools.com
 // Created     : 2026-09-23
 //
-// Description : The RDCFlexTron library at work in a Windows program: a themed FlexTron host whose
-//               page is built with the markup builders and icons, a button band, a modal panel with
-//               a band of its own (DemoDialog.dg), and the Dark / Light / Follow Windows choice.
+// Description : The RDCFlexTron library at work in a Windows program: ONE themed FlexTron host laid out
+//               as a grid (cDemoGridHost, a prototype) holding a page built with the markup builders and
+//               icons, cFTWebButton objects - real web buttons the Studio's Designer draws - and an Exit
+//               button; a modal panel with a Close button of its own (DemoDialog.dg); and the Dark /
+//               Light / Follow Windows choice.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //****************************************************************************
 Use DFAllEnt.pkg
+Use FTConstants.h.pkg               // the CI_FTTheme* modes, and where the theme choice is saved
+
+// The name of a theme mode, for the page and for SwitchTheme's message.
+Function DemoThemeName Global Integer iMode Returns String
+    If (iMode = CI_FTThemeLight) ;
+        Function_Return "Light"
+    If (iMode = CI_FTThemeSystem) ;
+        Function_Return "Follow Windows"
+    Function_Return "Dark"
+End_Function
 
 Object oApplication is a cApplication
     Set psCompany to "RDC Tools International"
     Set psProduct to "RDCFlexTron Demo"
     Set psVersion to "26.0"
     Set peHelpType to htNoHelp
+
+    // The theme is read once, when the program starts: a new choice starts a new copy of this program
+    // and ends this one.
+    Procedure RestartDemo
+        String sExe sCommand
+        Get GetApplicationFileName to sExe
+        Move ('"' + sExe + '"') to sCommand
+        Runprogram Background sCommand
+        Send Exit_Application
+    End_Procedure
+
+    // A theme button's click (cDemoThemeButton): save the choice, and start again in it.
+    Procedure SwitchTheme Integer iMode
+        Send WriteInteger CS_FTThemeSection CS_FTTheme iMode
+        Send Info_Box ((DemoThemeName(iMode)) + " is saved. The demo restarts when you close this message.") "Theme"
+        Send RestartDemo
+    End_Procedure
 End_Object
 
 // The theme is read from the saved choice (Settings\FTTheme under this program's registry key) as
@@ -29,27 +58,17 @@ Send SeedFTTheme
 
 Use cFTPanel.pkg                    // the main window: a Panel with the FT ground colour
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
-Use FTAllWebControlClasses.pkg      // cFTWebHtmlBox and the rest of the web-control family
+Use cDemoGridHost.pkg               // PROTOTYPE: the host as a grid, laid out like a Windows dialog
+Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebLabel, cFTWebHtmlBox and the rest of the family
 Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
-Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, BarButtonHtml, CssLink ...
+Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
-Use cTimer.pkg
-Use tWinStructs.pkg                 // tWinRect - the main window measures its client area
-Use Winuser.pkg                     // GetClientRect
-Use DemoConstants.h.pkg             // CS_DemoSheets, CS_DemoPageFit - the library's style sheet links
+Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
 Use DemoDialog.dg                   // oDemoDialog - the modal panel the band's last button opens
 
 // ---------------------------------------------------------------------------------------------------
 // The pages - global functions, so they are defined before the objects that call them.
 // ---------------------------------------------------------------------------------------------------
-
-Function DemoThemeName Global Integer iMode Returns String
-    If (iMode = CI_FTThemeLight) ;
-        Function_Return "Light"
-    If (iMode = CI_FTThemeSystem) ;
-        Function_Return "Follow Windows"
-    Function_Return "Dark"
-End_Function
 
 // The main window's page: the library in a few lines, built with the builders it describes.
 // sTitleIcon is the page's TitleIconHtml.
@@ -60,10 +79,12 @@ Function DemoPageHtml Global String sTitleIcon Returns String
     Move (s + (TagHtml("h1", "", (sTitleIcon + "RDCFlexTron")))) to s
     Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
     Move (s + (TagText("h2", "", "On this window"))) to s
-    Move (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + " in a " + (CodeText("cFTLocalWebControlHost")) + ", built with " + (CodeText("FTMarkupBuilders")) + ".")) to sItems
+    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of six columns and three rows - the buttons, this page and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
+    Move (sItems + (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + ", built with " + (CodeText("FTMarkupBuilders")) + "."))) to sItems
     Move (sItems + (BulletItem("The mark beside the title is the page's " + (CodeText("psTitleIcon")) + ": an image file here, a " + (CodeText("DashIcon")) + " glyph in the dialog."))) to sItems
-    Move (sItems + (BulletItem("The button icons are " + (CodeText("DashIcon")) + " glyphs: inline SVG, no image files."))) to sItems
-    Move (sItems + (BulletItem("The buttons above sit in a host of their own. A click only records what was clicked; a timer does the work, off the WebView2 pump."))) to sItems
+    Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. The icon is " + (CodeText("psGlyph")) + " - a " + (CodeText("DashIcon")) + " glyph, inline SVG - and the font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
+    Move (sItems + (BulletItem("Each column is as wide as its widest control. The empty column 4 takes the extra width and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
+    Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
     Move (s + (TagText("p", "", ("In use: " + (DemoThemeName(giFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
@@ -71,77 +92,108 @@ Function DemoPageHtml Global String sTitleIcon Returns String
     Function_Return s
 End_Function
 
-// One theme button. The theme in use is shown disabled: choosing it again would change nothing.
-Function DemoThemeButton Global Integer iThis String sLabel Returns String
-    If (giFTThemeMode = iThis) ;
-        Function_Return (BarButtonHtml("rpbtn", "", "", sLabel, "The theme in use", False))
-    Function_Return (BarButtonHtml("rpbtn", "theme", (String(iThis)), sLabel, ("Switch to " + sLabel + " and restart the demo"), True))
-End_Function
+// ---------------------------------------------------------------------------------------------------
+// The buttons
+// ---------------------------------------------------------------------------------------------------
 
-Function DemoBandHtml Global Returns String
-    String s
-    Move (CS_DemoSheets + CS_DemoPageFit + (CssLink("demo"))) to s
-    Move (s + (DivOpen("rpbar left"))) to s
-    Move (s + (TagText("span", "bandlabel", "Theme"))) to s
-    Move (s + (DemoThemeButton(CI_FTThemeDark, "Dark"))) to s
-    Move (s + (DemoThemeButton(CI_FTThemeLight, "Light"))) to s
-    Move (s + (DemoThemeButton(CI_FTThemeSystem, "Follow Windows"))) to s
-    Move (s + (SepHtml())) to s
-    Move (s + (BarButtonHtml("rpbtn", "dialog", "", ((DashIcon(CS_GlyphFile)) + "Open the dialog"), "A cFTModalPanel with a button band of its own", True))) to s
-    Move (s + "</div>") to s
-    Function_Return s
-End_Function
+/* A theme button: a cFTWebButton that knows which theme it stands for. The theme in use is shown
+   disabled - choosing it again would change nothing. The click goes to the application object's
+   SwitchTheme. */
+Class cDemoThemeButton is a cFTWebButton
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        { Category="Behavior" }
+        Property Integer piThemeMode CI_FTThemeDark
+    End_Procedure
+
+    Procedure End_Construct_Object
+        Forward Send End_Construct_Object
+        If (piThemeMode(Self) = giFTThemeMode) Begin
+            Set pbEnabled to False
+            Set psToolTip to "The theme in use"
+        End
+        Else ;
+            Set psToolTip to ("Switch to " + psCaption(Self) + " and restart the demo")
+    End_Procedure
+
+    Procedure OnButtonClick
+        Send SwitchTheme of ghoApplication (piThemeMode(Self))
+    End_Procedure
+End_Class
 
 // ---------------------------------------------------------------------------------------------------
 // The main window
 // ---------------------------------------------------------------------------------------------------
 
-/* The main window: the buttons in a band at the top, the page below it, both placed from the window's
-   MEASURED client area, in pixels, when it is shown and on every resize (PlaceHosts). A view's Size is
-   its client area and anchors do the rest, which is how DFRefactor's boards fill theirs; a main
-   Panel's Size is not, so sizes and anchors in dialog units left the page short of the window's
-   width and put a bottom band below its edge. */
+/* The main window: ONE host, laid out like a Windows dialog on a grid of six columns and three rows -
+   the buttons at the top, the page in the middle taking the extra height, Exit at the bottom right. The
+   grid does the layout, in the browser, on every resize; cFTPanel fits the host itself to the window's
+   client area (phoClientHost). */
 Object oMain is a cFTPanel
     Set Label to "RDCFlexTron Demo"
-    Set Location to 10 10
+    Set Location to 190 119
     Set Size to 300 440
     Set piMinSize to 180 360  
-    Set Icon to "Default.ico"
 
-    Property String psPendingId    ""
-    Property String psPendingParam ""
-
-    Object oBandHost is a cFTLocalWebControlHost
+    /* THE HOST: every control of the window, on one grid (cDemoGridHost). Each is an object of its own,
+       so the Studio's Designer draws it where it sits. */
+    Object oHost is a cDemoGridHost
         Set Location to 4 4
-        Set Size to 30 432
-        Set peAnchors to anNone         // placed by PlaceHosts
+        Set Size to 275 432
+        Set peAnchors to anNone         // placed by cFTPanel (phoClientHost)
+        Set piColumnCount to 6
+        Set psColumnWidths to "4/1fr"   // column 4 - empty - takes the extra width
+        Set psRowHeights to "1/1fr"     // row 1, the page, takes the extra height
 
-        Object oBand is a cFTWebHtmlBox
-            Set pbServerOnClick to True
-            Set piColumnSpan to 1
-            Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Theme and dialog buttons</div>'
+        // Row 0: the theme choice on the left, the dialog button at the right edge.
+        Object oThemeLabel is a cFTWebLabel
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set psCaption to "Theme"
+            Set psCSSClass to "FtCompact ftaccent"      // ftaccent: the amber caption (ftcontrols.css)
+        End_Object
 
-            Procedure End_Construct_Object
-                Forward Send End_Construct_Object
-                Set psHtml to (DemoBandHtml())
-            End_Procedure
+        Object oDarkBtn is a cDemoThemeButton
+            Set piRowIndex to 0
+            Set piColumnIndex to 1
+            Set psCaption to "Dark"
+            Set piThemeMode to CI_FTThemeDark
+        End_Object
 
-            // Records the click only; oClickTimer does the work, off the WebView2 pump.
-            Procedure OnClick String sId String sParam
-                Set psPendingId    of (oMain(Self)) to sId
-                Set psPendingParam of (oMain(Self)) to sParam
-                Set pbEnabled of (oClickTimer(oMain(Self))) to True
+        Object oLightBtn is a cDemoThemeButton
+            Set piRowIndex to 0
+            Set piColumnIndex to 2
+            Set psCaption to "Light"
+            Set piThemeMode to CI_FTThemeLight
+        End_Object
+
+        Object oSystemBtn is a cDemoThemeButton
+            Set piRowIndex to 0
+            Set piColumnIndex to 3
+            Set psCaption to "Follow Windows"
+            Set piThemeMode to CI_FTThemeSystem
+        End_Object
+
+        Object oDialogBtn is a cFTWebButton
+            Set piRowIndex to 0
+            Set piColumnIndex to 5     // the right edge: column 4 before it takes the extra width
+            Set psCaption to "Open the dialog"
+            Set pbBold to True
+            Set psGlyph to CS_GlyphInfo
+            Set pbPrimary to True
+            Set psToolTip to "A cFTModalPanel with a Close button of its own"
+
+            Procedure OnButtonClick
+                Send Popup of (oDemoDialog(Self))
             End_Procedure
         End_Object
-    End_Object
 
-    Object oPageHost is a cFTLocalWebControlHost
-        Set Location to 38 4
-        Set Size to 246 432
-        Set peAnchors to anNone         // placed by PlaceHosts
-
+        // Row 1: the page.
         Object oPage is a cFTHtmlPage
-            Set piColumnSpan to 1
+            Set piRowIndex to 1
+            Set piColumnIndex to 0
+            Set piColumnSpan to 6           // all six columns
+            Set pbFillHeight to True        // fills row 1, which takes the extra height; it scrolls itself
             Set psTitleIcon to "Images/RDC-Mark.svg"    // the RDC Tools mark, as the package manager shows it
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
             Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">RDCFlexTron demo page</div>'
@@ -152,76 +204,30 @@ Object oMain is a cFTPanel
                 Set psHtml to (DemoPageHtml(TitleIconHtml(Self)))
             End_Procedure
         End_Object
-    End_Object
 
-    Object oClickTimer is a cTimer
-        Set piTimeout to 1
-        Set pbEnabled to False
-        Procedure OnTimer
-            Set pbEnabled to False
-            Send RunClick of (oMain(Self))
+        // Row 2: Exit, bottom right - in the dialog button's column, so the two are the same width.
+        Object oExitBtn is a cFTWebButton
+            Set piRowIndex to 2
+            Set piColumnIndex to 5
+            Set psCaption to "Exit"
+            Set psGlyph to CS_GlyphExit
+            Set psToolTip to "Close the demo"
+
+            // Runs after the web click has returned, so the program can end here.
+            Procedure OnButtonClick
+                Send Exit_Application
+            End_Procedure
+        End_Object
+
+        // The demo's own sheet in the page head, so --ft-row (demo.css) is there from the first paint.
+        Procedure OnDefineScriptIncludes String[] ByRef aScriptHtml
+            Forward Send OnDefineScriptIncludes (&aScriptHtml)
+            Move (CssLink("demo")) to aScriptHtml[SizeOfArray(aScriptHtml)]
         End_Procedure
     End_Object
 
-    // The theme is read once, when the program starts: a new choice starts a new copy of this program
-    // and ends this one.
-    Procedure RestartDemo
-        String sExe sCommand
-        Get GetApplicationFileName of ghoApplication to sExe
-        Move ('"' + sExe + '"') to sCommand
-        Runprogram Background sCommand
-        Send Exit_Application
-    End_Procedure
-
-    Procedure RunClick
-        String sId sParam
-        Integer iMode
-        Get psPendingId    to sId
-        Get psPendingParam to sParam
-        If (sId = "dialog") ;
-            Send Popup of (oDemoDialog(Self))
-        Else If (sId = "theme") Begin
-            Move sParam to iMode
-            Send WriteInteger of ghoApplication CS_FTThemeSection CS_FTTheme iMode
-            Send Info_Box ((DemoThemeName(iMode)) + " is saved. The demo restarts when you close this message.") "Theme"
-            Send RestartDemo
-        End
-    End_Procedure
-
-    // The band keeps the height it was built with; it spans the width, the page takes the rest. All in
-    // pixels, from the client area Windows reports - the margin is the band's own left offset.
-    Procedure PlaceHosts
-        tWinRect rc
-        Handle hWnd
-        Integer iVoid iW iH iLoc iBand iGap iPageH
-        Get Window_Handle to hWnd
-        If (hWnd = 0) ;
-            Procedure_Return
-        Move (GetClientRect(hWnd, AddressOf(rc))) to iVoid
-        Move (rc.right - rc.left) to iW
-        Move (rc.bottom - rc.top) to iH
-        Get GuiLocation of (oBandHost(Self)) to iLoc
-        Move (Low(iLoc)) to iGap
-        Get GuiSize of (oBandHost(Self)) to iBand
-        Move (Hi(iBand)) to iBand
-        Move (iH - iBand - (3 * iGap)) to iPageH
-        If (iPageH < 20) ;
-            Move 20 to iPageH
-        Set GuiLocation of (oBandHost(Self)) to iGap iGap
-        Set GuiSize     of (oBandHost(Self)) to iBand (iW - (2 * iGap))
-        Set GuiLocation of (oPageHost(Self)) to (iBand + (2 * iGap)) iGap
-        Set GuiSize     of (oPageHost(Self)) to iPageH (iW - (2 * iGap))
-    End_Procedure
-
-    Procedure Page Integer iPageObject
-        Forward Send Page iPageObject
-        Send PlaceHosts
-    End_Procedure
-
-    Procedure OnResize
-        Forward Send OnResize
-        Send PlaceHosts
-    End_Procedure
+    // cFTPanel fits the host to the client area, when the window is shown and on every resize.
+    Set phoClientHost to (oHost(Self))
 End_Object
 
 Start_UI

@@ -2,14 +2,22 @@
 
 The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RDCFlexTronDemo.src`):
 
-- a themed `cFTLocalWebControlHost` whose page, a `cFTHtmlPage`, is built with the `FTMarkupBuilders`
-  functions and `DashIcon` glyphs, with the RDC Tools mark as its title picture (`psTitleIcon`);
-- a button band in a host of its own, with the click handed to a timer so nothing heavy runs inside
-  the web click;
+- ONE themed host for the whole window, `cDemoGridHost` (`AppSrc/cDemoGridHost.pkg`) - a PROTOTYPE of a
+  library class: a `cFTLocalWebControlHost` laid out on a grid the way a Windows dialog is - each column
+  as wide as its widest control, one empty column and the page's row taking the extra space - with the
+  buttons, the page and Exit in its three rows (`piRowIndex`);
+- the page, a `cFTHtmlPage`, built with the `FTMarkupBuilders` functions and `DashIcon` glyphs, with
+  the RDC Tools mark as its title picture (`psTitleIcon`);
+- `cFTWebButton` objects - real web buttons, so the Studio's Designer draws them - with `DashIcon`
+  glyphs; a click's work runs in `OnButtonClick`, after the web click has returned; they keep their
+  size when the window grows;
+- an Exit button at the bottom right, with the `CS_GlyphExit` glyph;
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with a content host and a
-  button band, placed from the panel's measured size;
+  Close button (a `cFTWebButton`), placed from the panel's measured size;
 - the Dark / Light / Follow Windows choice, saved under the program's registry key; the demo
-  restarts in the new theme.
+  restarts in the new theme;
+- `AppHtml/CssStyle/application.css`, which imports the library's style sheets, so the Studio's
+  Designer draws the buttons in the FT look too.
 
 > **Private until FlexTron is released.** The library is a separate repository,
 > **Library-RDCFlexTron** - a package, so it carries no programs; this is where they go.

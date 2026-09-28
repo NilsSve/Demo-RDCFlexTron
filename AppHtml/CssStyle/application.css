@@ -1,0 +1,10 @@
+﻿/* RDCFlexTron demo - the program's application.css.
+
+   The DataFlex web framework loads this sheet on every host page, after the theme - and so does the
+   Studio's Designer, which loads no other sheet of ours. At run time the hosts link the library's
+   sheets themselves (cFTThemeHost_mixin), but the Designer never runs that code, so these imports are
+   what give it the FT look: palette.css for the --dfr-* tokens, ftcontrols.css for cFTWebButton (the
+   Designer knows its "ftbtn" class from the class's OverrideProperty tag) and the ftaccent label.
+   At run time the two arrive a second time - the same rules, from the cache. */
+@import url("../RDCFlexTron/palette.css");
+@import url("../RDCFlexTron/ftcontrols.css");
