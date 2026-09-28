@@ -41,11 +41,17 @@ Object oDemoDialog is a cFTModalPanel
         // its psLabel, which cFTHtmlPage draws above it.
         Function BodyPage Returns String
             String s
-            Move (CS_DemoSheets + (CssLink("demo"))) to s
-            Move (s + (DivOpen("demo"))) to s
-            Move (s + (TagText("p", "", "One host, laid out as a grid: this page in a row that takes the extra height, a row of air, and the Close button in the row below that, after an empty column that takes the extra width. The panel fits the host to itself on every show and every resize (phoClientHost)."))) to s
-            Move (s + (TagText("p", "", "Close is a cFTWebButton: its OnButtonClick runs after the web click has returned, so it can end the panel."))) to s
-            Move (s + "</div>") to s
+            Move (CS_DemoSheets + (CssLink("demo")) + (DivOpen("demo"))) to s
+            Append s (TagText("p", "", """
+                One host, laid out as a grid: this page in a row that takes the extra height, a row of air,
+                and the Close button in the row below that, after an empty column that takes the extra
+                width. The panel fits the host to itself on every show and every resize (phoClientHost).
+                """))
+            Append s (TagText("p", "", """
+                Close is a cFTWebButton: its OnButtonClick runs after the web click has returned, so it can
+                end the panel.
+                """))
+            Append s "</div>"
             Function_Return s
         End_Function
 

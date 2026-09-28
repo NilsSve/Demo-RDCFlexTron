@@ -54,26 +54,71 @@ Function DemoGlyphNames Global Returns String[]
 End_Function
 
 // The main window's page: the library in a few lines, built with the builders it describes. Its title is the
-// page's psLabel, which cFTHtmlPage draws above it.
+// page's psLabel, which cFTHtmlPage draws above it. Each text is a """ string: DataFlex drops its first and
+// last line break and the common indentation, and the page shows a line break inside it as a space - so a
+// text wraps here as a paragraph. BulletItem does not escape: <code> marks a name, and a < or & in a bullet
+// would be written &lt; or &amp;.
 Function DemoPageHtml Global Returns String
     String s sItems
-    Move (CS_DemoSheets + (CssLink("demo"))) to s
-    Move (s + (DivOpen("demo"))) to s
-    Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
-    Move (s + (TagText("h2", "", "On this window"))) to s
-    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cFTGridHost")) + ": a grid of 8 px columns and five rows - the theme buttons, the glyph combo, the glyph list with this page, a row of air, and the message boxes with Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
-    Move (sItems + (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + ", built with " + (CodeText("FTMarkupBuilders")) + "."))) to sItems
-    Move (sItems + (BulletItem("The title above is the page's " + (CodeText("psLabel")) + ". The mark beside it is an image drawn by a class of the demo's own, " + (CodeText("ftg-rdcmark")) + " in demo.css, so the Studio's Designer shows it too, with Lorem ipsum for this text."))) to sItems
-    Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. A glyph is a class in " + (CodeText("psCSSClass")) + " - " + (CodeText("ftg-exit")) + " and the like, from ftglyphs.css - so the Designer draws it too. The font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
-    Move (sItems + (BulletItem("The combo is a " + (CodeText("cFTWebCombo")) + ", in the FT look (" + (CodeText("FtCompact")) + ", from ftcontrols.css), which the Studio's Designer draws too. Its " + (CodeText("OnChange")) + " sends the glyph to the Preview button's " + (CodeText("UpdateGlyph")) + ", which changes it while the program runs."))) to sItems
-    Move (sItems + (BulletItem("The list on the left is a " + (CodeText("cFTWebList")) + ": its rows come from code (" + (CodeText("OnManualLoadData")) + "), and it asks for them itself when the page first draws it. Choose a row, and " + (CodeText("OnChangeCurrentRow")) + " gives its glyph to the Preview button and the combo."))) to sItems
-    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: a " + (CodeText("cFTWebButton")) + " takes 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes the extra width - empty in the rows of buttons, part of this page in its own - and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
-    Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
-    Move (sItems + (BulletItem("The three buttons at the bottom left show " + (CodeText("FTInfoBox")) + ", " + (CodeText("FTStopBox")) + " and " + (CodeText("FTYesNoBox")) + ": " + (CodeText("Info_Box")) + ", " + (CodeText("Stop_Box")) + " and " + (CodeText("YesNo_Box")) + " in the FT look, with the same arguments and return values."))) to sItems
-    Move (s + (BulletList(sItems))) to s
-    Move (s + (TagText("h2", "", "Theme"))) to s
-    Move (s + (TagText("p", "", ("In use: " + (FTThemeName(giFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
-    Move (s + "</div>") to s
+    Move (CS_DemoSheets + (CssLink("demo")) + (DivOpen("demo"))) to s
+    Append s (TagText("p", "", """
+        Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML
+        builders and inline icons.
+        """))
+    Append s (TagText("h2", "", "On this window"))
+
+    Append sItems (BulletItem("""
+        The whole window is ONE host, a <code>cFTGridHost</code>: a grid of 8 px columns and five rows - the
+        theme buttons, the glyph combo, the glyph list with this page, a row of air, and the message boxes
+        with Exit. A control takes a row with <code>piRowIndex</code>, and this page fills its row with
+        <code>pbFillHeight</code>.
+        """))
+    Append sItems (BulletItem("""
+        This page is a <code>cFTHtmlPage</code>, built with <code>FTMarkupBuilders</code>.
+        """))
+    Append sItems (BulletItem("""
+        The title above is the page's <code>psLabel</code>. The mark beside it is an image drawn by a class
+        of the demo's own, <code>ftg-rdcmark</code> in demo.css, so the Studio's Designer shows it too, with
+        Lorem ipsum for this text.
+        """))
+    Append sItems (BulletItem("""
+        The buttons above are <code>cFTWebButton</code> objects: real web buttons, so the Studio's Designer
+        draws them. A glyph is a class in <code>psCSSClass</code> - <code>ftg-exit</code> and the like, from
+        ftglyphs.css - so the Designer draws it too. The font is <code>psFontFamily</code>,
+        <code>piFontSize</code> and <code>pbBold</code>.
+        """))
+    Append sItems (BulletItem("""
+        The combo is a <code>cFTWebCombo</code>, in the FT look (<code>FtCompact</code>, from
+        ftcontrols.css), which the Studio's Designer draws too. Its <code>OnChange</code> sends the glyph to
+        the Preview button's <code>UpdateGlyph</code>, which changes it while the program runs.
+        """))
+    Append sItems (BulletItem("""
+        The list on the left is a <code>cFTWebList</code>: its rows come from code
+        (<code>OnManualLoadData</code>), and it asks for them itself when the page first draws it. Choose a
+        row, and <code>OnChangeCurrentRow</code> gives its glyph to the Preview button and the combo.
+        """))
+    Append sItems (BulletItem("""
+        Each column is 8 px, so a button's span is its width in 8 px steps: a <code>cFTWebButton</code>
+        takes 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes
+        the extra width - empty in the rows of buttons, part of this page in its own - and this page's row
+        the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like
+        anchors in a Windows dialog.
+        """))
+    Append sItems (BulletItem("""
+        A click's work is the button's <code>OnButtonClick</code>, which runs after the web click has
+        returned - so it can open a dialog, or restart the program.
+        """))
+    Append sItems (BulletItem("""
+        The three buttons at the bottom left show <code>FTInfoBox</code>, <code>FTStopBox</code> and
+        <code>FTYesNoBox</code>: <code>Info_Box</code>, <code>Stop_Box</code> and <code>YesNo_Box</code> in
+        the FT look, with the same arguments and return values.
+        """))
+    Append s (BulletList(sItems))
+
+    Append s (TagText("h2", "", "Theme"))
+    Append s (TagText("p", "", ("In use: " + (FTThemeName(giFTThemeMode)) + ;
+        ". A new choice is saved, and the demo restarts in it.")))
+    Append s "</div>"
     Function_Return s
 End_Function
 
