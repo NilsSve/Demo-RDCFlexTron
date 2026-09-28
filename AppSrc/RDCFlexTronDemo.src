@@ -25,7 +25,6 @@ Use cThemeButton.pkg                // a cFTWebButton for one theme: Dark, Light
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
-Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
 Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
 
@@ -60,7 +59,7 @@ End_Function
 // would be written &lt; or &amp;.
 Function DemoPageHtml Global Returns String
     String s sItems
-    Move (CS_DemoSheets + (CssLink("demo")) + (DivOpen("demo"))) to s
+    Move (CS_PaletteCssLink + (CssLink("demo")) + (DivOpen("demo"))) to s
     Append s (TagText("p", "", """
         Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML
         builders and inline icons.

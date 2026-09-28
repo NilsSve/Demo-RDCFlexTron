@@ -18,7 +18,6 @@ Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
-Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
 
 Object oDemoDialog is a cFTModalPanel
     Set Label to "A cFTModalPanel"
@@ -41,7 +40,7 @@ Object oDemoDialog is a cFTModalPanel
         // its psLabel, which cFTHtmlPage draws above it.
         Function BodyPage Returns String
             String s
-            Move (CS_DemoSheets + (CssLink("demo")) + (DivOpen("demo"))) to s
+            Move (CS_PaletteCssLink + (CssLink("demo")) + (DivOpen("demo"))) to s
             Append s (TagText("p", "", """
                 One host, laid out as a grid: this page in a row that takes the extra height, a row of air,
                 and the Close button in the row below that, after an empty column that takes the extra
