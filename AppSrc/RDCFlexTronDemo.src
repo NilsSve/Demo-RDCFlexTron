@@ -61,7 +61,7 @@ Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cDemoGridHost.pkg               // PROTOTYPE: the host as a grid of 8 px columns, laid out like a Windows dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebLabel, cFTWebHtmlBox and the rest of the family
 Use cDemoButton.pkg                 // PROTOTYPE: a cFTWebButton taking 10 of those columns
-Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
+Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
@@ -71,20 +71,30 @@ Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open 
 // The pages - global functions, so they are defined before the objects that call them.
 // ---------------------------------------------------------------------------------------------------
 
-// The main window's page: the library in a few lines, built with the builders it describes.
-// sTitleIcon is the page's TitleIconHtml.
-Function DemoPageHtml Global String sTitleIcon Returns String
+// The glyphs the demo offers - some of the library's 75 (FTDashIcons.pkg), for the combo and the list. An
+// item's value, and a row's id, is the glyph's name.
+Function DemoGlyphNames Global Returns String[]
+    String sGlyphs
+    Move "home info settings folder file search save edit delete add check close refresh copy" to sGlyphs
+    Move (sGlyphs + " help warning star user lock mail calendar database code power login exit") to sGlyphs
+    Function_Return (StrSplitToArray(sGlyphs, " "))
+End_Function
+
+// The main window's page: the library in a few lines, built with the builders it describes. Its title is the
+// page's psLabel, which cFTHtmlPage draws above it.
+Function DemoPageHtml Global Returns String
     String s sItems
     Move (CS_DemoSheets + (CssLink("demo"))) to s
     Move (s + (DivOpen("demo"))) to s
-    Move (s + (TagHtml("h1", "", (sTitleIcon + "RDCFlexTron")))) to s
     Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
     Move (s + (TagText("h2", "", "On this window"))) to s
-    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of 8 px columns and three rows - the buttons, this page and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
+    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of 8 px columns and five rows - the theme buttons, the glyph combo, the glyph list with this page, a row of air, and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
     Move (sItems + (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + ", built with " + (CodeText("FTMarkupBuilders")) + "."))) to sItems
-    Move (sItems + (BulletItem("The mark beside the title is the page's " + (CodeText("psTitleIcon")) + ": an image file here, a " + (CodeText("DashIcon")) + " glyph in the dialog."))) to sItems
+    Move (sItems + (BulletItem("The title above is the page's " + (CodeText("psLabel")) + ". The mark beside it is an image drawn by a class of the demo's own, " + (CodeText("ftg-rdcmark")) + " in demo.css, so the Studio's Designer shows it too, with Lorem ipsum for this text."))) to sItems
     Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. A glyph is a class in " + (CodeText("psCSSClass")) + " - " + (CodeText("ftg-exit")) + " and the like, from ftglyphs.css - so the Designer draws it too. The font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
-    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One empty column takes the extra width and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
+    Move (sItems + (BulletItem("The combo is a " + (CodeText("cFTWebCombo")) + ", in the FT look (" + (CodeText("FtCompact")) + ", from ftcontrols.css), which the Studio's Designer draws too. Its " + (CodeText("OnChange")) + " sends the glyph to the Preview button's " + (CodeText("UpdateGlyph")) + ", which changes it while the program runs."))) to sItems
+    Move (sItems + (BulletItem("The list on the left is a " + (CodeText("cFTWebList")) + ": its rows come from code (" + (CodeText("OnManualLoadData")) + "), and it asks for them itself when the page first draws it. Choose a row, and " + (CodeText("OnChangeCurrentRow")) + " gives its glyph to the Preview button and the combo."))) to sItems
+    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes the extra width - empty in the rows of buttons, part of this page in its own - and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
     Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
@@ -126,14 +136,14 @@ End_Class
 // The main window
 // ---------------------------------------------------------------------------------------------------
 
-/* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and three rows -
-   the buttons at the top, the page in the middle taking the extra height, Exit at the bottom right. The
-   grid does the layout, in the browser, on every resize; cFTPanel fits the host itself to the window's
-   client area (phoClientHost). */
+/* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and five rows - the
+   theme buttons and the glyph combo at the top, the glyph list and the page in the middle taking the extra
+   height, a row of air, and Exit at the bottom right. The grid does the layout, in the browser, on every
+   resize; cFTPanel fits the host itself to the window's client area (phoClientHost). */
 Object oMain is a cFTPanel
     Set Label to "RDCFlexTron Demo"
     Set Location to 190 119
-    Set Size to 300 440
+    Set Size to 300 450
     Set piMinSize to 180 360  
 
     /* THE HOST: every control of the window, on one grid (cDemoGridHost). Each is an object of its own,
@@ -146,7 +156,7 @@ Object oMain is a cFTPanel
         // width (360 units, about 516 px for the host at 1.5 px a unit) still holds them.
         Set piColumnCount to 62
         Set psColumnWidths to "43/1fr"  // column 43 - empty - takes the extra width
-        Set psRowHeights to "1/1fr"     // row 1, the page, takes the extra height
+        Set psRowHeights to "2/1fr 3/8px"   // row 2, the list and the page, takes the extra height; row 3 is 8 px of air
 
         // Row 0: the theme choice on the left, the dialog button at the right edge.
         Object oThemeLabel is a cFTWebLabel
@@ -196,30 +206,125 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Row 1: the page.
-        Object oPage is a cFTHtmlPage
+        // Row 1: a glyph to try. Its 43 columns (8 + 20 + 15) end where the theme row's do. The Preview button
+        // comes before the combo in the source because the combo sends to it - an object is known only below
+        // its definition; the grid still places each by its piColumnIndex.
+        Object oGlyphLabel is a cFTWebLabel
             Set piRowIndex to 1
             Set piColumnIndex to 0
-            Set piColumnSpan to 62          // all the columns
-            Set pbFillHeight to True        // fills row 1, which takes the extra height; it scrolls itself
-            Set psTitleIcon to "Images/RDC-Mark.svg"    // the RDC Tools mark, as the package manager shows it
-            /* DESIGN-TIME PLACEHOLDER - the Studio's Designer models only a literal psHtml. It is the page's REAL
-               header, in the page's own classes (demo.css - application.css imports it for the Designer), with
-               Lorem ipsum for the body text: the Designer shows the page's shape, and no copied text can drift
-               from the real page. Keep the h1 in step with the title and psTitleIcon. The background is the
-               page's own token, so the text reads on whatever the Designer paints behind the host. */
-            Set psHtml to '<div class="demo" style="background:var(--dfr-bg-page);min-height:100%"><h1><img class="titleicon" src="Images/RDC-Mark.svg" alt="">RDCFlexTron</h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><h2>On this window</h2><ul><li>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li><li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</li><li>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li></ul><h2>Theme</h2><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p></div>'
+            Set piColumnSpan to 8
+            Set psCaption to "Glyph"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
 
-            // The runtime page - set here, so the Designer keeps the literal above.
-            Procedure End_Construct_Object
-                Forward Send End_Construct_Object
-                Set psHtml to (DemoPageHtml(TitleIconHtml(Self)))
+        Object oPreviewBtn is a cDemoButton
+            Set piRowIndex to 1
+            Set piColumnIndex to 28
+            Set piColumnSpan to 15
+            Set psCaption to "Preview"
+            Set psCSSClass to "ftbtn ftg-home"     // the combo's first glyph; the combo's OnChange sends UpdateGlyph
+            Set psToolTip to "The glyph chosen in the combo"
+        End_Object
+
+        Object oGlyphCombo is a cFTWebCombo
+            Set piRowIndex to 1
+            Set piColumnIndex to 8          // 20 columns wide - cFTWebCombo's own width
+            Set pbShowLabel to False        // the "Glyph" label on its left names it
+            Set pbAddEmptyItem to False     // no empty first item: a glyph is always chosen
+            Set psValue to CS_GlyphHome
+            Set psToolTip to "A DashIcon glyph - the Preview button shows it"
+
+            // The demo's glyphs (DemoGlyphNames); an item's value is the glyph's name.
+            Procedure OnFill
+                String[] asGlyphs
+                Integer i
+                Forward Send OnFill
+                Move (DemoGlyphNames()) to asGlyphs
+                For i from 0 to (SizeOfArray(asGlyphs) - 1)
+                    Send AddComboItem asGlyphs[i] asGlyphs[i]
+                Loop
+            End_Procedure
+
+            // A choice goes to the Preview button, while the program runs.
+            Procedure OnChange String sNewValue String sOldValue
+                Send UpdateGlyph of (oPreviewBtn(Self)) sNewValue
             End_Procedure
         End_Object
 
-        // Row 2: Exit, bottom right - its 10 columns end where the dialog button's 18 do.
-        Object oExitBtn is a cDemoButton
+        // Row 2: the glyph list on the left - its 43 columns end where the rows above end their left groups -
+        // and the page on the right. Both fill the row, which takes the extra height.
+        Object oGlyphList is a cFTWebList
             Set piRowIndex to 2
+            Set piColumnIndex to 0
+            Set piColumnSpan to 43
+            Set pbFillHeight to True
+            Set pbDataAware to False        // the rows come from OnManualLoadData
+
+            Object oGlyphCol is a cWebColumn
+                Set piWidth to 36
+                Set pbFixedWidth to True        // 36 px
+                Set pbAllowHtml to True         // the cell holds the glyph itself: DashIcon's inline svg
+                Set pbValueAsTooltip to False   // not the svg's markup as a tooltip
+                Set pbSortable to False
+            End_Object
+
+            Object oNameCol is a cWebColumn
+                Set psCaption to "Name"
+                Set piWidth to 110
+                Set pbFixedWidth to True        // 110 px
+            End_Object
+
+            Object oConstantCol is a cWebColumn
+                Set psCaption to "Constant"
+                Set piWidth to 1                // the rest of the list's width
+            End_Object
+
+            // One row per glyph: the glyph, its name and its constant. A row's id is the glyph's name.
+            Procedure OnManualLoadData tWebRow[] ByRef aTheRows String ByRef sCurrentRowID tWebGroupConfig[] ByRef aTheGroups tWebGroupHeader[] ByRef aTheGroupHeaders
+                String[] asGlyphs
+                String sName
+                Integer i
+                Move (DemoGlyphNames()) to asGlyphs
+                For i from 0 to (SizeOfArray(asGlyphs) - 1)
+                    Move asGlyphs[i] to sName
+                    Move sName to aTheRows[i].sRowId
+                    Move (DashIcon(sName)) to aTheRows[i].aCells[0].sValue
+                    Move sName to aTheRows[i].aCells[1].sValue
+                    Move ("CS_Glyph" + Uppercase(Left(sName, 1)) + Right(sName, (Length(sName) - 1))) to aTheRows[i].aCells[2].sValue
+                Loop
+                If (sCurrentRowID = "") ;
+                    Move CS_GlyphHome to sCurrentRowID      // the glyph the combo and the Preview button start with
+            End_Procedure
+
+            // A row chosen: its glyph on the Preview button, and in the combo.
+            Procedure OnChangeCurrentRow String sFromRowID String sToRowID
+                Forward Send OnChangeCurrentRow sFromRowID sToRowID
+                If (sToRowID <> "") Begin
+                    Send UpdateGlyph of (oPreviewBtn(Self)) sToRowID
+                    WebSet psValue of (oGlyphCombo(Self)) to sToRowID
+                End
+            End_Procedure
+        End_Object
+
+        Object oPage is a cFTHtmlPage
+            Set piRowIndex to 2
+            Set piColumnIndex to 43
+            Set piColumnSpan to 19          // column 43, which takes the extra width, and the 18 after it
+            Set pbFillHeight to True        // fills row 2, which takes the extra height; it scrolls itself
+            Set psLabel to "RDCFlexTron"    // the page's title - the Studio's Designer shows it too
+            Set psCSSClass to "ftpage ftg-rdcmark"  // the RDC Tools mark beside it: a class of the demo's own (demo.css), so the Designer shows it too
+
+            // The page, built when the program runs - the Designer shows cFTHtmlPage's Lorem ipsum instead.
+            Procedure End_Construct_Object
+                Forward Send End_Construct_Object
+                Set psHtml to (DemoPageHtml())
+            End_Procedure
+        End_Object
+
+        // Row 3 is empty: 8 px of air (psRowHeights), so Exit does not sit right under the page.
+        // Row 4: Exit, bottom right - its 10 columns end where the dialog button's 18 do.
+        Object oExitBtn is a cDemoButton
+            Set piRowIndex to 4
             Set piColumnIndex to 52
             Set psCaption to "Exit"
             Set psCSSClass to "ftbtn ftg-exit"     // the glyph as a class, so the Designer draws it too (ftglyphs.css)

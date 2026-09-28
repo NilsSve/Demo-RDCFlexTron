@@ -4,15 +4,23 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 
 - ONE themed host for the whole window, `cDemoGridHost` (`AppSrc/cDemoGridHost.pkg`) - a PROTOTYPE of a
   library class: a `cFTLocalWebControlHost` laid out on a grid of 8 px columns the way a Windows dialog
-  is - one empty column and the page's row take the extra space - with the buttons, the page and Exit in
-  its three rows (`piRowIndex`);
-- the page, a `cFTHtmlPage`, built with the `FTMarkupBuilders` functions and `DashIcon` glyphs, with
-  the RDC Tools mark as its title picture (`psTitleIcon`);
+  is - one column and the page's row take the extra space - with the buttons, the glyph combo, the glyph
+  list beside the page, a row of air and Exit in its five rows (`piRowIndex`);
+- the page, a `cFTHtmlPage`: its title is `psLabel`, and its body is built with the `FTMarkupBuilders`
+  functions. The RDC Tools mark beside the title is a class of the demo's own, `ftg-rdcmark` in
+  `AppHtml/CssStyle/demo.css`, so the Studio's Designer shows it too - an image file in `psTitleIcon`
+  shows only when the program runs. The Designer shows Lorem ipsum for the body - nothing in the demo
+  asks for it, the class does it;
 - `cFTWebButton` objects - real web buttons, so the Studio's Designer draws them - with `DashIcon`
   glyphs; a click's work runs in `OnButtonClick`, after the web click has returned. A button's span is
   its width in 8 px steps - 10 unless it says otherwise (`cDemoButton`, `AppSrc/cDemoButton.pkg`) - so it
   keeps its size when the window grows;
 - an Exit button at the bottom right, with the `CS_GlyphExit` glyph;
+- a `cFTWebCombo` of glyph names, in the FT look (`FtCompact`, from the library's `ftcontrols.css`): its
+  `OnChange` sends the glyph to the Preview button's `UpdateGlyph`, which changes it while the program
+  runs;
+- a `cFTWebList` of the same glyphs, beside the page: its rows come from code (`OnManualLoadData`), and
+  choosing one gives its glyph to the Preview button and the combo (`OnChangeCurrentRow`);
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with one grid host - the
   page, and a Close button (a `cFTWebButton`) under it at the right - placed from the panel's measured
   size;

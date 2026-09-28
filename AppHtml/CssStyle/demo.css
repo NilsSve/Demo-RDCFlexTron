@@ -1,27 +1,9 @@
 ﻿/* RDCFlexTron demo pages - layout only. Every colour is a palette token (RDCFlexTron/palette.css),
    so the pages follow the Dark / Light theme without a rule of their own. */
 .demo {
-    padding: 14px 18px;
+    padding: 0 18px 14px;       /* the title sits above it now: cFTHtmlPage's label (ftcontrols.css) */
     font: 13px "Segoe UI", sans-serif;
     color: var(--dfr-ink);
-}
-.demo h1 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 6px;
-    font-size: 20px;
-    font-weight: 600;
-}
-.demo h1 svg {
-    width: 26px;
-    height: 26px;
-}
-/* An image file beside a page title (cFTHtmlPage's psTitleIcon) - here the RDC Tools mark. It brings its
-   own gold ground, so the light theme needs no rule for it. A glyph there is an svg, sized above. */
-.demo h1 img.titleicon {
-    width: 32px;
-    height: 32px;
 }
 .demo h2 {
     margin: 16px 0 6px;
@@ -44,6 +26,17 @@
 .demo code {
     font-family: Consolas, monospace;
     color: var(--dfr-code-ink);
+}
+
+/* The RDC Tools mark beside the main page's title (oPage: psCSSClass "ftpage ftg-rdcmark"). An image file
+   in psTitleIcon shows only when the program runs; as a class it shows in the Studio's Designer too, which
+   applies classes and runs none of our code. ftglyphs.css gives every ftg- title picture its place; this
+   rule makes it the image, 32 px, in its own colours. The .ftpage lifts it over ftglyphs.css's shared
+   rule, which the program links again after this sheet. */
+.WebControl.WebHtmlBox.ftpage.ftg-rdcmark > .WebCon_Inner > label::before {
+    width: 32px;
+    height: 32px;
+    background: url("../Images/RDC-Mark.svg") center / contain no-repeat;
 }
 
 /* PROTOTYPE (2026-09-27): ONE FT ROW - the least height of a row on a grid host (cDemoGridHost's

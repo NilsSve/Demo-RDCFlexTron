@@ -17,7 +17,7 @@ Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cDemoGridHost.pkg               // the host as a grid of 8 px columns, laid out like a Windows dialog
 Use cDemoButton.pkg                 // a cFTWebButton taking 10 of those columns
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
-Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
+Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
@@ -34,24 +34,23 @@ Object oDemoDialog is a cFTModalPanel
     Set piMinSize to 143 340
 
     /* THE HOST: the page, and the Close button under it at the right - one grid host, laid out like the
-       main window. Row 0, the page, takes the extra height; column 0, empty in row 1, takes the extra
-       width, so Close keeps its size at the bottom right. */
+       main window. Row 0, the page, takes the extra height; row 1 is 8 px of air; column 0, empty in
+       row 2, takes the extra width, so Close keeps its size at the bottom right. */
     Object oDlgHost is a cDemoGridHost
         Set Location to 4 4
         Set Size to 134 332
         Set peAnchors to anTopLeftRight
         Set piColumnCount to 11         // column 0, then the Close button's 10
         Set psColumnWidths to "0/1fr"   // column 0 takes the extra width
-        Set psRowHeights to "0/1fr"     // row 0, the page, takes the extra height
+        Set psRowHeights to "0/1fr 1/8px"   // row 0, the page, takes the extra height; row 1 is 8 px of air
 
-        // Above the html box that calls it: a function must be defined before the call. sTitleIcon is
-        // the page's TitleIconHtml.
-        Function BodyPage String sTitleIcon Returns String
+        // Above the html box that calls it: a function must be defined before the call. The page's title is
+        // its psLabel, which cFTHtmlPage draws above it.
+        Function BodyPage Returns String
             String s
             Move (CS_DemoSheets + (CssLink("demo"))) to s
             Move (s + (DivOpen("demo"))) to s
-            Move (s + (TagHtml("h1", "", (sTitleIcon + "A cFTModalPanel")))) to s
-            Move (s + (TagText("p", "", "One host, laid out as a grid: this page in a row that takes the extra height, and the Close button in the row below it, after an empty column that takes the extra width. The host is placed from the panel's measured size on every show and every resize."))) to s
+            Move (s + (TagText("p", "", "One host, laid out as a grid: this page in a row that takes the extra height, a row of air, and the Close button in the row below that, after an empty column that takes the extra width. The host is placed from the panel's measured size on every show and every resize."))) to s
             Move (s + (TagText("p", "", "Close is a cFTWebButton: its OnButtonClick runs after the web click has returned, so it can end the panel."))) to s
             Move (s + "</div>") to s
             Function_Return s
@@ -63,24 +62,20 @@ Object oDemoDialog is a cFTModalPanel
             Set piColumnIndex to 0
             Set piColumnSpan to 11
             Set pbFillHeight to True        // fills row 0, which takes the extra height; it scrolls itself
-            Set psTitleIcon to CS_GlyphListcheck
-            /* DESIGN-TIME PLACEHOLDER - the Studio's Designer models only a literal psHtml. It is the page's REAL
-               header, in the page's own classes (demo.css - application.css imports it for the Designer), with
-               Lorem ipsum for the body text: the Designer shows the page's shape, and no copied text can drift
-               from the real page. Keep the h1 in step with the title and psTitleIcon. The background is the
-               page's own token, so the text reads on whatever the Designer paints behind the host. */
-            Set psHtml to '<div class="demo" style="background:var(--dfr-bg-page);min-height:100%"><h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5l1.5 1.5l2.5 -2.5 M3.5 11.5l1.5 1.5l2.5 -2.5 M3.5 17.5l1.5 1.5l2.5 -2.5 M11 6l9 0 M11 12l9 0 M11 18l9 0"/></svg>A cFTModalPanel</h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p></div>'
+            Set psLabel to "A cFTModalPanel"            // the page's title - the Studio's Designer shows it too
+            Set psCSSClass to "ftpage ftg-listcheck"    // its glyph as a class, so the Designer draws it too
 
-            // The runtime page - set here, so the Designer keeps the literal above.
+            // The page, built when the program runs - the Designer shows cFTHtmlPage's Lorem ipsum instead.
             Procedure End_Construct_Object
                 Forward Send End_Construct_Object
-                Set psHtml to (BodyPage(Self, (TitleIconHtml(Self))))
+                Set psHtml to (BodyPage(Self))
             End_Procedure
         End_Object
 
-        // Row 1: Close, bottom right.
+        // Row 1 is empty: 8 px of air (psRowHeights), so Close does not sit right under the page.
+        // Row 2: Close, bottom right.
         Object oCloseBtn is a cDemoButton
-            Set piRowIndex to 1
+            Set piRowIndex to 2
             Set piColumnIndex to 1
             Set psCaption to "Close"
             Set psCSSClass to "ftbtn ftg-close"    // the glyph as a class, so the Designer draws it too (ftglyphs.css)
