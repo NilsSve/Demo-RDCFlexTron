@@ -13,7 +13,7 @@
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTWebButton.pkg
 
-/* THE BUTTON DEFAULT that goes with cDemoGridHost's 8 px columns: 10 of them, an 80 px cell - the
+/* THE BUTTON DEFAULT that goes with cFTGridHost's 8 px columns: 10 of them, an 80 px cell - the
    button inside is 70 px after its own 5 px margins. A longer caption says more (Follow Windows 15,
    Open the dialog 18). The OverrideProperty tag tells the Studio, the Set makes it so at run time.
 
