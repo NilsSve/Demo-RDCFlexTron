@@ -5,8 +5,8 @@
 // Web-site    : http://www.rdctools.com
 // Created     : 2026-09-24
 //
-// Description : The demo's modal panel: a cFTModalPanel with a content host on top and a band with
-//               a cFTWebButton below it, both placed from the panel's measured size on every show and
+// Description : The demo's modal panel: a cFTModalPanel with ONE grid host - the page, and the Close
+//               button under it at the right - placed from the panel's measured size on every show and
 //               every resize.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -14,6 +14,7 @@
 //****************************************************************************
 Use cFTModalPanel.pkg
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cDemoGridHost.pkg               // the host as a grid, laid out like a Windows dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
@@ -21,21 +22,26 @@ Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
 
 // RDCToolsLib's modal panel grows by this many units after construction, for the status bar it
-// builds, so the panel places its hosts from its measured size instead of trusting an anchor that
+// builds, so the panel places its host from its measured size instead of trusting an anchor that
 // was bound before that growth.
 Define CI_DemoStatusBarUnits for 8
 
 Object oDemoDialog is a cFTModalPanel
     Set Label to "A cFTModalPanel"
     Set Location to 20 20
-    Set Size to 148 340                 // 140, plus the CI_DemoStatusBarUnits the base adds
-    Set piMinSize to 148 340
+    Set Size to 143 340
+    Set piMinSize to 143 340
 
-    // THE CONTENT, in a host of its own.
-    Object oDlgHost is a cFTLocalWebControlHost
+    /* THE HOST: the page, and the Close button under it at the right - one grid host, laid out like the
+       main window. Row 0, the page, takes the extra height; column 0, empty in row 1, takes the extra
+       width, so Close keeps its size at the bottom right. */
+    Object oDlgHost is a cDemoGridHost
         Set Location to 4 4
-        Set Size to 100 332
+        Set Size to 134 332
         Set peAnchors to anTopLeftRight
+        Set piColumnCount to 2
+        Set psColumnWidths to "0/1fr"   // column 0 takes the extra width
+        Set psRowHeights to "0/1fr"     // row 0, the page, takes the extra height
 
         // Above the html box that calls it: a function must be defined before the call. sTitleIcon is
         // the page's TitleIconHtml.
@@ -44,14 +50,18 @@ Object oDemoDialog is a cFTModalPanel
             Move (CS_DemoSheets + (CssLink("demo"))) to s
             Move (s + (DivOpen("demo"))) to s
             Move (s + (TagHtml("h1", "", (sTitleIcon + "A cFTModalPanel")))) to s
-            Move (s + (TagText("p", "", "A content host on top and a button band below, each placed from the panel's measured size on every show and every resize."))) to s
+            Move (s + (TagText("p", "", "One host, laid out as a grid: this page in a row that takes the extra height, and the Close button in the row below it, after an empty column that takes the extra width. The host is placed from the panel's measured size on every show and every resize."))) to s
             Move (s + (TagText("p", "", "Close is a cFTWebButton: its OnButtonClick runs after the web click has returned, so it can end the panel."))) to s
             Move (s + "</div>") to s
             Function_Return s
         End_Function
 
+        // Row 0: the page, across both columns.
         Object oDlgBody is a cFTHtmlPage
-            Set piColumnSpan to 1
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 2
+            Set pbFillHeight to True        // fills row 0, which takes the extra height; it scrolls itself
             Set psTitleIcon to CS_GlyphListcheck
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
             Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Dialog body</div>'
@@ -62,18 +72,11 @@ Object oDemoDialog is a cFTModalPanel
                 Set psHtml to (BodyPage(Self, (TitleIconHtml(Self))))
             End_Procedure
         End_Object
-    End_Object
 
-    // THE BAND: the Close button - a cFTWebButton, on a host of its own, in the last of twelve columns.
-    Object oDlgBand is a cFTLocalWebControlHost
-        Set Location to 116 4
-        Set Size to 30 332
-        Set peAnchors to anLeftRight
-        Set piColumnCount to 12
-
+        // Row 1: Close, bottom right.
         Object oCloseBtn is a cFTWebButton
-            Set piColumnIndex to 10
-            Set piColumnSpan to 2
+            Set piRowIndex to 1
+            Set piColumnIndex to 1
             Set psCaption to "Close"
             Set psGlyph to CS_GlyphClose
             Set psToolTip to "Close this dialog"
@@ -86,27 +89,25 @@ Object oDemoDialog is a cFTModalPanel
     End_Object
 
     // Placed from the measured panel on every show and every resize: the base grows the panel after
-    // construction, so a bottom anchor would land short.
-    Procedure PlaceHosts
-        Integer iSize iH iW iBandTop
+    // construction, so a bottom anchor would land short. The host ends where the band used to end.
+    Procedure PlaceHost
+        Integer iSize iH iW iHostH
         Get Size to iSize
         Move (Hi(iSize)) to iH
         Move (Low(iSize)) to iW
-        Move (iH - CI_DemoStatusBarUnits - 12 - 30) to iBandTop
-        If (iBandTop < 40) ;
-            Move 40 to iBandTop
-        Set Location of (oDlgBand(Self)) to iBandTop 4
-        Set Size     of (oDlgBand(Self)) to 30 (iW - 8)
-        Set Size     of (oDlgHost(Self)) to (iBandTop - 4) (iW - 8)
+        Move (iH - CI_DemoStatusBarUnits - 16) to iHostH
+        If (iHostH < 60) ;
+            Move 60 to iHostH
+        Set Size of (oDlgHost(Self)) to iHostH (iW - 8)
     End_Procedure
 
     Procedure OnResize
         Forward Send OnResize
-        Send PlaceHosts
+        Send PlaceHost
     End_Procedure
 
     Procedure Activating
         Forward Send Activating
-        Send PlaceHosts
+        Send PlaceHost
     End_Procedure
 End_Object

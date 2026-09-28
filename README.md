@@ -12,8 +12,9 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   glyphs; a click's work runs in `OnButtonClick`, after the web click has returned; they keep their
   size when the window grows;
 - an Exit button at the bottom right, with the `CS_GlyphExit` glyph;
-- a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with a content host and a
-  Close button (a `cFTWebButton`), placed from the panel's measured size;
+- a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with one grid host - the
+  page, and a Close button (a `cFTWebButton`) under it at the right - placed from the panel's measured
+  size;
 - the Dark / Light / Follow Windows choice, saved under the program's registry key; the demo
   restarts in the new theme;
 - `AppHtml/CssStyle/application.css`, which imports the library's style sheets, so the Studio's
