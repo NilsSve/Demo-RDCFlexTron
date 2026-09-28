@@ -43,15 +43,6 @@ End_Object
 // The pages - global functions, so they are defined before the objects that call them.
 // ---------------------------------------------------------------------------------------------------
 
-// The glyphs the demo offers - some of the library's 76 (FTDashIcons.pkg), for the combo and the list. An
-// item's value, and a row's id, is the glyph's name.
-Function DemoGlyphNames Global Returns String[]
-    String sGlyphs
-    Move "home info settings folder file search save edit delete add check close refresh copy" to sGlyphs
-    Move (sGlyphs + " help warning star user lock mail calendar database code power login exit") to sGlyphs
-    Function_Return (StrSplitToArray(sGlyphs, " "))
-End_Function
-
 // The main window's page: the library in a few lines, built with the builders it describes. Its title is the
 // page's psLabel, which cFTHtmlPage draws above it. Each text is a """ string: DataFlex drops its first and
 // last line break and the common indentation, and the page shows a line break inside it as a space - so a
@@ -90,9 +81,9 @@ Function DemoPageHtml Global Returns String
         changes it while the program runs.
         """)))
     Append sItems (BulletItem(MarkedText("""
-        The list on the left is a `cFTWebList`: its rows come from code (`OnManualLoadData`), and it asks
-        for them itself when the page first draws it. Choose a row, and `OnChangeCurrentRow` gives its glyph
-        to the Preview button and the combo.
+        The list on the left is a `cFTWebList` with every glyph the library has (`FTGlyphNames`): its rows
+        come from code (`OnManualLoadData`), and it asks for them itself when the page first draws it.
+        Choose a row, and `OnChangeCurrentRow` gives its glyph to the Preview button and the combo.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
@@ -137,11 +128,11 @@ Object oMain is a cFTPanel
     Object oHost is a cFTGridHost
         Set Location to 4 4
         Set Size to 275 432
-        Set peAnchors to anNone         // placed by cFTPanel (phoClientHost)
+        Set peAnchors to anNone             // placed by cFTPanel (phoClientHost)
         // 62 columns: 61 of 8 px (488 px) and column 43, which takes the extra width. The window's minimum
         // width (360 units, about 516 px for the host at 1.5 px a unit) still holds them.
         Set piColumnCount to 62
-        Set psColumnWidths to "43/1fr"  // column 43 - empty - takes the extra width
+        Set psColumnWidths to "43/1fr"      // column 43 - empty - takes the extra width
         Set psRowHeights to "2/1fr 3/8px"   // row 2, the list and the page, takes the extra height; row 3 is 8 px of air
 
         // Row 0: the theme choice on the left, the dialog button at the right edge.
@@ -220,12 +211,12 @@ Object oMain is a cFTPanel
             Set psValue to CS_GlyphHome
             Set psToolTip to "A DashIcon glyph - the Preview button shows it"
 
-            // The demo's glyphs (DemoGlyphNames); an item's value is the glyph's name.
+            // Every glyph the library has (FTGlyphNames); an item's value is the glyph's name.
             Procedure OnFill
                 String[] asGlyphs
                 Integer i
                 Forward Send OnFill
-                Move (DemoGlyphNames()) to asGlyphs
+                Move (FTGlyphNames()) to asGlyphs
                 For i from 0 to (SizeOfArray(asGlyphs) - 1)
                     Send AddComboItem asGlyphs[i] asGlyphs[i]
                 Loop
@@ -260,23 +251,24 @@ Object oMain is a cFTPanel
                 Set pbFixedWidth to True        // 110 px
             End_Object
 
-            Object oConstantCol is a cWebColumn
-                Set psCaption to "Constant"
+            Object oClassCol is a cWebColumn
+                Set psCaption to "Class"
                 Set piWidth to 1                // the rest of the list's width
             End_Object
 
-            // One row per glyph: the glyph, its name and its constant. A row's id is the glyph's name.
+            // One row per glyph: the glyph, its name and its class - what a cFTWebButton's psCSSClass takes to show
+            // it (ftglyphs.css). A row's id is the glyph's name.
             Procedure OnManualLoadData tWebRow[] ByRef aTheRows String ByRef sCurrentRowID tWebGroupConfig[] ByRef aTheGroups tWebGroupHeader[] ByRef aTheGroupHeaders
                 String[] asGlyphs
                 String sName
                 Integer i
-                Move (DemoGlyphNames()) to asGlyphs
+                Move (FTGlyphNames()) to asGlyphs
                 For i from 0 to (SizeOfArray(asGlyphs) - 1)
                     Move asGlyphs[i] to sName
                     Move sName to aTheRows[i].sRowId
                     Move (DashIcon(sName)) to aTheRows[i].aCells[0].sValue
                     Move sName to aTheRows[i].aCells[1].sValue
-                    Move ("CS_Glyph" + Uppercase(Left(sName, 1)) + Right(sName, (Length(sName) - 1))) to aTheRows[i].aCells[2].sValue
+                    Move ("ftg-" + sName) to aTheRows[i].aCells[2].sValue
                 Loop
                 If (sCurrentRowID = "") ;
                     Move CS_GlyphHome to sCurrentRowID      // the glyph the combo and the Preview button start with
