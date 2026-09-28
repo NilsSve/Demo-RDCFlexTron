@@ -16,7 +16,7 @@ Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the host as a grid of 8 px columns, laid out like a Windows dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
-Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
+Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, MarkedText, CssLink
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 
 Object oDemoDialog is a cFTModalPanel
@@ -41,16 +41,16 @@ Object oDemoDialog is a cFTModalPanel
         Function BodyPage Returns String
             String s
             Move (CS_PaletteCssLink + (CssLink("demo")) + (DivOpen("demo"))) to s
-            Append s (TagText("p", "", """
+            Append s (TagHtml("p", "", MarkedText("""
                 One host, laid out as a grid: this page in a row that takes the extra height, a row of air,
                 and the Close button in the row below that, after an empty column that takes the extra
-                width. The panel fits the host to itself on every show and every resize (phoClientHost).
-                """))
-            Append s (TagText("p", "", """
-                Close is a cFTWebButton: its OnButtonClick runs after the web click has returned, so it can
-                end the panel.
-                """))
-            Append s "</div>"
+                width. The panel fits the host to itself on every show and every resize (`phoClientHost`).
+                """)))
+            Append s (TagHtml("p", "", MarkedText("""
+                Close is a `cFTWebButton`: its `OnButtonClick` runs after the web click has returned, so it
+                can end the panel.
+                """)))
+            Append s CS_DivEnd
             Function_Return s
         End_Function
 
