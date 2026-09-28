@@ -14,7 +14,8 @@
 //****************************************************************************
 Use cFTModalPanel.pkg
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
-Use cDemoGridHost.pkg               // the host as a grid, laid out like a Windows dialog
+Use cDemoGridHost.pkg               // the host as a grid of 8 px columns, laid out like a Windows dialog
+Use cDemoButton.pkg                 // a cFTWebButton taking 10 of those columns
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
@@ -39,7 +40,7 @@ Object oDemoDialog is a cFTModalPanel
         Set Location to 4 4
         Set Size to 134 332
         Set peAnchors to anTopLeftRight
-        Set piColumnCount to 2
+        Set piColumnCount to 11         // column 0, then the Close button's 10
         Set psColumnWidths to "0/1fr"   // column 0 takes the extra width
         Set psRowHeights to "0/1fr"     // row 0, the page, takes the extra height
 
@@ -56,11 +57,11 @@ Object oDemoDialog is a cFTModalPanel
             Function_Return s
         End_Function
 
-        // Row 0: the page, across both columns.
+        // Row 0: the page, across all the columns.
         Object oDlgBody is a cFTHtmlPage
             Set piRowIndex to 0
             Set piColumnIndex to 0
-            Set piColumnSpan to 2
+            Set piColumnSpan to 11
             Set pbFillHeight to True        // fills row 0, which takes the extra height; it scrolls itself
             Set psTitleIcon to CS_GlyphListcheck
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
@@ -74,7 +75,7 @@ Object oDemoDialog is a cFTModalPanel
         End_Object
 
         // Row 1: Close, bottom right.
-        Object oCloseBtn is a cFTWebButton
+        Object oCloseBtn is a cDemoButton
             Set piRowIndex to 1
             Set piColumnIndex to 1
             Set psCaption to "Close"

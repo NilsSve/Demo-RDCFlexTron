@@ -3,14 +3,15 @@
 The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RDCFlexTronDemo.src`):
 
 - ONE themed host for the whole window, `cDemoGridHost` (`AppSrc/cDemoGridHost.pkg`) - a PROTOTYPE of a
-  library class: a `cFTLocalWebControlHost` laid out on a grid the way a Windows dialog is - each column
-  as wide as its widest control, one empty column and the page's row taking the extra space - with the
-  buttons, the page and Exit in its three rows (`piRowIndex`);
+  library class: a `cFTLocalWebControlHost` laid out on a grid of 8 px columns the way a Windows dialog
+  is - one empty column and the page's row take the extra space - with the buttons, the page and Exit in
+  its three rows (`piRowIndex`);
 - the page, a `cFTHtmlPage`, built with the `FTMarkupBuilders` functions and `DashIcon` glyphs, with
   the RDC Tools mark as its title picture (`psTitleIcon`);
 - `cFTWebButton` objects - real web buttons, so the Studio's Designer draws them - with `DashIcon`
-  glyphs; a click's work runs in `OnButtonClick`, after the web click has returned; they keep their
-  size when the window grows;
+  glyphs; a click's work runs in `OnButtonClick`, after the web click has returned. A button's span is
+  its width in 8 px steps - 10 unless it says otherwise (`cDemoButton`, `AppSrc/cDemoButton.pkg`) - so it
+  keeps its size when the window grows;
 - an Exit button at the bottom right, with the `CS_GlyphExit` glyph;
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with one grid host - the
   page, and a Close button (a `cFTWebButton`) under it at the right - placed from the panel's measured

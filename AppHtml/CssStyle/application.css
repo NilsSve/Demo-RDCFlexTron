@@ -8,3 +8,4 @@
    At run time the two arrive a second time - the same rules, from the cache. */
 @import url("../RDCFlexTron/palette.css");
 @import url("../RDCFlexTron/ftcontrols.css");
+@import url("demo.css");    /* the grid prototype's rules (--ft-row, the button width) - the Designer too */

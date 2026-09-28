@@ -1,0 +1,29 @@
+﻿//****************************************************************************
+// $Module type: Class Package
+// $Module name: cDemoButton
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-09-28
+//
+// Description : PROTOTYPE of a cFTWebButton default for a grid host of 8 px columns: 10 of them.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTWebButton.pkg
+
+/* THE BUTTON DEFAULT that goes with cDemoGridHost's 8 px columns: 10 of them, an 80 px cell - the
+   button inside is 70 px after its own 5 px margins. A longer caption says more (Follow Windows 15,
+   Open the dialog 18). The OverrideProperty tag tells the Studio, the Set makes it so at run time.
+
+   Only for grid hosts of 8 px columns: in a flow host of 12 columns, 10 of them is most of the width.
+   Moves into cFTWebButton, or onto the grid host, when the class goes to the library. */
+{ OverrideProperty=piColumnSpan InitialValue=10 }
+Class cDemoButton is a cFTWebButton
+    Procedure Construct_Object
+        Forward Send Construct_Object
+
+        Set piColumnSpan to 10
+    End_Procedure
+End_Class

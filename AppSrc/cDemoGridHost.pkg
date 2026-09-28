@@ -5,8 +5,9 @@
 // Web-site    : http://www.rdctools.com
 // Created     : 2026-09-26
 //
-// Description : PROTOTYPE of a library host class: a cFTLocalWebControlHost laid out on a grid the way
-//               a Windows dialog is - controls at their natural size, the extra space where it stretches.
+// Description : PROTOTYPE of a library host class: a cFTLocalWebControlHost laid out on a grid of 8 px
+//               columns the way a Windows dialog is - controls at their size, the extra space where it
+//               stretches.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -16,28 +17,25 @@ Use cFTLocalWebControlHost.pkg
 /* THE GRID HOST - a prototype, to move into the library once it holds up.
 
    Laid out the way a Windows dialog is (Nils 2026-09-27: "we are really building a Windows
-   application"): every control keeps its natural size, and the extra space goes where the window
-   should stretch - not the framework's resize-for-every-device model, where a width is a share of
-   the window.
+   application"), with his fine-grained width knob kept (2026-09-28): the columns are a FIXED 8 px, so a
+   control's piColumnSpan is its width in 8 px steps and piColumnIndex its place, much like dialog units
+   - the same at any window size.
 
    - peLayoutType ltGrid: a control sits in a column AND a row - piColumnIndex and piRowIndex (both
      count from 0), piColumnSpan and piRowSpan.
-   - psDefaultColumnWidth "max-content": a column is as wide as its widest control. piColumnCount is
-     the number of columns the layout uses, in order.
+   - psDefaultColumnWidth "8px": every column is 8 px unless psColumnWidths says otherwise.
    - psDefaultRowHeight: a row is as tall as its tallest control, and never less than one FT row
      (--ft-row), so an empty row keeps the height of a row of buttons.
 
-   The object says where the window stretches: psColumnWidths "4/1fr" gives column 4 the extra width
-   (an empty column before right-hand buttons, or a field that grows); psRowHeights "1/1fr" gives row 1
-   the extra height (a page or a list, with pbFillHeight). Pixels ("3/16") only for a deliberate gap.
-   Never percentages: they are a share of the WHOLE height and ignore the other rows. A width entry
-   past piColumnCount is ignored.
+   The object says where the window stretches: psColumnWidths "43/1fr" gives column 43 the extra width
+   (an empty column between the left and right groups, or under a field that grows); psRowHeights
+   "1/1fr" gives row 1 the extra height (a page or a list, with pbFillHeight). Never percentages: they
+   are a share of the WHOLE height and ignore the other rows. A width entry past piColumnCount is
+   ignored.
 
-   Anchors, translated:
-     a button that keeps its size        its own max-content column
-     buttons anchored bottom-right       a 1fr column before them, in a row below the 1fr row
-     a field anchored left and right     its column is 1fr
-     a page anchored on all sides        in the 1fr column and the 1fr row, with pbFillHeight
+   The host must be at least as wide as its fixed columns add up to, at the window's MINIMUM size - so
+   piColumnCount follows each host's width: (its narrowest width in px) / 8, plus the stretching column.
+   A caption longer than its span is cut off, as in a Windows dialog: size the control to its caption.
 
    The grid trap: piColumnSpan 0 means ONE column here, not "the rest of the row" as in the flow
    layout - a control that spans the width says how many columns.
@@ -45,13 +43,13 @@ Use cFTLocalWebControlHost.pkg
    The OverrideProperty tags tell the Studio these are the class's own defaults, so its Designer and
    property panel show them; the Sets make them so at run time. */
 { OverrideProperty=peLayoutType InitialValue=ltGrid }
-{ OverrideProperty=psDefaultColumnWidth InitialValue="max-content" }
+{ OverrideProperty=psDefaultColumnWidth InitialValue="8px" }
 Class cDemoGridHost is a cFTLocalWebControlHost
     Procedure Construct_Object
         Forward Send Construct_Object
 
         Set peLayoutType to ltGrid
-        Set psDefaultColumnWidth to "max-content"
+        Set psDefaultColumnWidth to "8px"
         Set psDefaultRowHeight to "minmax(var(--ft-row, 33px), max-content)"
     End_Procedure
 End_Class

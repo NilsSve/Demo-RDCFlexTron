@@ -52,3 +52,10 @@
 :root {
     --ft-row: 33px;
 }
+
+/* PROTOTYPE (2026-09-28): on a grid host of 8 px columns (cDemoGridHost) the SPAN is a button's width, so
+   the FT button's 76 px minimum (ftcontrols.css) steps aside there - it would push a 10-column button
+   into its neighbour. */
+.WebCon_Content.WebCon_GridLayout > .WebControl.WebButton.ftbtn button {
+    min-width: 0;
+}

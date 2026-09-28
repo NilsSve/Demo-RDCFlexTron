@@ -58,13 +58,14 @@ Send SeedFTTheme
 
 Use cFTPanel.pkg                    // the main window: a Panel with the FT ground colour
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
-Use cDemoGridHost.pkg               // PROTOTYPE: the host as a grid, laid out like a Windows dialog
+Use cDemoGridHost.pkg               // PROTOTYPE: the host as a grid of 8 px columns, laid out like a Windows dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebLabel, cFTWebHtmlBox and the rest of the family
+Use cDemoButton.pkg                 // PROTOTYPE: a cFTWebButton taking 10 of those columns
 Use cFTHtmlPage.pkg                 // a whole page, with the picture beside its title (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
-Use DemoDialog.dg                   // oDemoDialog - the modal panel the band's last button opens
+Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
 
 // ---------------------------------------------------------------------------------------------------
 // The pages - global functions, so they are defined before the objects that call them.
@@ -79,11 +80,11 @@ Function DemoPageHtml Global String sTitleIcon Returns String
     Move (s + (TagHtml("h1", "", (sTitleIcon + "RDCFlexTron")))) to s
     Move (s + (TagText("p", "", "Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML builders and inline icons."))) to s
     Move (s + (TagText("h2", "", "On this window"))) to s
-    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of six columns and three rows - the buttons, this page and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
+    Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of 8 px columns and three rows - the buttons, this page and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
     Move (sItems + (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + ", built with " + (CodeText("FTMarkupBuilders")) + "."))) to sItems
     Move (sItems + (BulletItem("The mark beside the title is the page's " + (CodeText("psTitleIcon")) + ": an image file here, a " + (CodeText("DashIcon")) + " glyph in the dialog."))) to sItems
     Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. The icon is " + (CodeText("psGlyph")) + " - a " + (CodeText("DashIcon")) + " glyph, inline SVG - and the font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
-    Move (sItems + (BulletItem("Each column is as wide as its widest control. The empty column 4 takes the extra width and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
+    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One empty column takes the extra width and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
     Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
@@ -96,10 +97,10 @@ End_Function
 // The buttons
 // ---------------------------------------------------------------------------------------------------
 
-/* A theme button: a cFTWebButton that knows which theme it stands for. The theme in use is shown
+/* A theme button: a cDemoButton that knows which theme it stands for. The theme in use is shown
    disabled - choosing it again would change nothing. The click goes to the application object's
    SwitchTheme. */
-Class cDemoThemeButton is a cFTWebButton
+Class cDemoThemeButton is a cDemoButton
     Procedure Construct_Object
         Forward Send Construct_Object
         { Category="Behavior" }
@@ -125,7 +126,7 @@ End_Class
 // The main window
 // ---------------------------------------------------------------------------------------------------
 
-/* The main window: ONE host, laid out like a Windows dialog on a grid of six columns and three rows -
+/* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and three rows -
    the buttons at the top, the page in the middle taking the extra height, Exit at the bottom right. The
    grid does the layout, in the browser, on every resize; cFTPanel fits the host itself to the window's
    client area (phoClientHost). */
@@ -141,42 +142,47 @@ Object oMain is a cFTPanel
         Set Location to 4 4
         Set Size to 275 432
         Set peAnchors to anNone         // placed by cFTPanel (phoClientHost)
-        Set piColumnCount to 6
-        Set psColumnWidths to "4/1fr"   // column 4 - empty - takes the extra width
+        // 62 columns: 61 of 8 px (488 px) and column 43, which takes the extra width. The window's minimum
+        // width (360 units, about 516 px for the host at 1.5 px a unit) still holds them.
+        Set piColumnCount to 62
+        Set psColumnWidths to "43/1fr"  // column 43 - empty - takes the extra width
         Set psRowHeights to "1/1fr"     // row 1, the page, takes the extra height
 
         // Row 0: the theme choice on the left, the dialog button at the right edge.
         Object oThemeLabel is a cFTWebLabel
             Set piRowIndex to 0
             Set piColumnIndex to 0
+            Set piColumnSpan to 8
             Set psCaption to "Theme"
             Set psCSSClass to "FtCompact ftaccent"      // ftaccent: the amber caption (ftcontrols.css)
         End_Object
 
         Object oDarkBtn is a cDemoThemeButton
             Set piRowIndex to 0
-            Set piColumnIndex to 1
+            Set piColumnIndex to 8
             Set psCaption to "Dark"
             Set piThemeMode to CI_FTThemeDark
         End_Object
 
         Object oLightBtn is a cDemoThemeButton
             Set piRowIndex to 0
-            Set piColumnIndex to 2
+            Set piColumnIndex to 18
             Set psCaption to "Light"
             Set piThemeMode to CI_FTThemeLight
         End_Object
 
         Object oSystemBtn is a cDemoThemeButton
             Set piRowIndex to 0
-            Set piColumnIndex to 3
+            Set piColumnIndex to 28
+            Set piColumnSpan to 15
             Set psCaption to "Follow Windows"
             Set piThemeMode to CI_FTThemeSystem
         End_Object
 
-        Object oDialogBtn is a cFTWebButton
+        Object oDialogBtn is a cDemoButton
             Set piRowIndex to 0
-            Set piColumnIndex to 5     // the right edge: column 4 before it takes the extra width
+            Set piColumnIndex to 44    // the right edge: column 43 before it takes the extra width
+            Set piColumnSpan to 18
             Set psCaption to "Open the dialog"
             Set pbBold to True
             Set psGlyph to CS_GlyphInfo
@@ -192,7 +198,7 @@ Object oMain is a cFTPanel
         Object oPage is a cFTHtmlPage
             Set piRowIndex to 1
             Set piColumnIndex to 0
-            Set piColumnSpan to 6           // all six columns
+            Set piColumnSpan to 62          // all the columns
             Set pbFillHeight to True        // fills row 1, which takes the extra height; it scrolls itself
             Set psTitleIcon to "Images/RDC-Mark.svg"    // the RDC Tools mark, as the package manager shows it
             // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
@@ -205,10 +211,10 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Row 2: Exit, bottom right - in the dialog button's column, so the two are the same width.
-        Object oExitBtn is a cFTWebButton
+        // Row 2: Exit, bottom right - its 10 columns end where the dialog button's 18 do.
+        Object oExitBtn is a cDemoButton
             Set piRowIndex to 2
-            Set piColumnIndex to 5
+            Set piColumnIndex to 52
             Set psCaption to "Exit"
             Set psGlyph to CS_GlyphExit
             Set psToolTip to "Close the demo"
@@ -219,7 +225,7 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // The demo's own sheet in the page head, so --ft-row (demo.css) is there from the first paint.
+        // The demo's own sheet in the page head, so its grid rules (demo.css) are there from the first paint.
         Procedure OnDefineScriptIncludes String[] ByRef aScriptHtml
             Forward Send OnDefineScriptIncludes (&aScriptHtml)
             Move (CssLink("demo")) to aScriptHtml[SizeOfArray(aScriptHtml)]
