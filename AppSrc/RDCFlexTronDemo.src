@@ -83,7 +83,7 @@ Function DemoPageHtml Global String sTitleIcon Returns String
     Move (BulletItem("The whole window is ONE host, a " + (CodeText("cDemoGridHost")) + ": a grid of 8 px columns and three rows - the buttons, this page and Exit. A control takes a row with " + (CodeText("piRowIndex")) + ", and this page fills its row with " + (CodeText("pbFillHeight")) + ".")) to sItems
     Move (sItems + (BulletItem("This page is a " + (CodeText("cFTHtmlPage")) + ", built with " + (CodeText("FTMarkupBuilders")) + "."))) to sItems
     Move (sItems + (BulletItem("The mark beside the title is the page's " + (CodeText("psTitleIcon")) + ": an image file here, a " + (CodeText("DashIcon")) + " glyph in the dialog."))) to sItems
-    Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. The icon is " + (CodeText("psGlyph")) + " - a " + (CodeText("DashIcon")) + " glyph, inline SVG - and the font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
+    Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. A glyph is a class in " + (CodeText("psCSSClass")) + " - " + (CodeText("ftg-exit")) + " and the like, from ftglyphs.css - so the Designer draws it too. The font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
     Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One empty column takes the extra width and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
     Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
     Move (s + (BulletList(sItems))) to s
@@ -185,7 +185,9 @@ Object oMain is a cFTPanel
             Set piColumnSpan to 18
             Set psCaption to "Open the dialog"
             Set pbBold to True
-            Set psGlyph to CS_GlyphInfo
+            // The glyph as a class (ftglyphs.css), with the primary look: a literal class list is what the
+            // Studio's Designer draws - it never runs the code that turns psGlyph / pbPrimary into classes.
+            Set psCSSClass to "ftbtn ftbtn-primary ftg-info"
             Set pbPrimary to True
             Set psToolTip to "A cFTModalPanel with a Close button of its own"
 
@@ -220,7 +222,7 @@ Object oMain is a cFTPanel
             Set piRowIndex to 2
             Set piColumnIndex to 52
             Set psCaption to "Exit"
-            Set psGlyph to CS_GlyphExit
+            Set psCSSClass to "ftbtn ftg-exit"     // the glyph as a class, so the Designer draws it too (ftglyphs.css)
             Set psToolTip to "Close the demo"
 
             // Runs after the web click has returned, so the program can end here.

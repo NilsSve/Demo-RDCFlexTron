@@ -83,7 +83,7 @@ Object oDemoDialog is a cFTModalPanel
             Set piRowIndex to 1
             Set piColumnIndex to 1
             Set psCaption to "Close"
-            Set psGlyph to CS_GlyphClose
+            Set psCSSClass to "ftbtn ftg-close"    // the glyph as a class, so the Designer draws it too (ftglyphs.css)
             Set psToolTip to "Close this dialog"
 
             // Runs after the web click has returned - ending a panel inside it would fault (4410).
