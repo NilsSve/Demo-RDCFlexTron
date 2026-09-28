@@ -365,7 +365,7 @@ Object oMain is a cFTPanel
         // The demo's own sheet in the page head, so its grid rules (demo.css) are there from the first paint.
         Procedure OnDefineScriptIncludes String[] ByRef aScriptHtml
             Forward Send OnDefineScriptIncludes (&aScriptHtml)
-            Move (CssLink("demo")) to aScriptHtml[SizeOfArray(aScriptHtml)]
+            Move (CssLink("demo")) to aScriptHtml[-1]
         End_Procedure
     End_Object
 
