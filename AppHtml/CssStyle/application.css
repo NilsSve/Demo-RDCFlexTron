@@ -8,5 +8,5 @@
    At run time the two arrive a second time - the same rules, from the cache. */
 @import url("../RDCFlexTron/palette.css");
 @import url("../RDCFlexTron/ftcontrols.css");
+@import url("../RDCFlexTron/ftglyphs.css");     /* the DashIcon glyphs as button classes (ftg-exit ...) */
 @import url("demo.css");    /* the grid prototype's rules (--ft-row, the button width) - the Designer too */
-@import url("ftglyphs.css"); /* PROTOTYPE: the DashIcon glyphs as button classes (ftg-exit ...), generated */

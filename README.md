@@ -18,10 +18,10 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   size;
 - the Dark / Light / Follow Windows choice, saved under the program's registry key; the demo
   restarts in the new theme;
-- `AppHtml/CssStyle/application.css`, which imports the library's style sheets and `ftglyphs.css` -
-  the DashIcon glyphs as classes (`ftg-exit`, `ftg-info` ...), generated from DashIcon's output - so the
-  Studio's Designer draws the buttons in the FT look, glyphs included. A button names its glyph in
-  `psCSSClass` (`"ftbtn ftg-exit"`): the Designer runs none of our code, so `psGlyph` shows only when the
+- `AppHtml/CssStyle/application.css`, which imports the library's style sheets - `ftglyphs.css`, the
+  DashIcon glyphs as classes (`ftg-exit`, `ftg-info` ...), among them - so the Studio's Designer draws
+  the buttons in the FT look, glyphs included. A button names its glyph in `psCSSClass`
+  (`"ftbtn ftg-exit"`): the Designer runs none of the library's code, so `psGlyph` shows only when the
   program runs.
 
 > **Private until FlexTron is released.** The library is a separate repository,
