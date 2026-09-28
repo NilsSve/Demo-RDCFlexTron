@@ -1,0 +1,40 @@
+﻿//****************************************************************************
+// $Module type: Class Package
+// $Module name: cThemeButton
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-09-28
+//
+// Description : A cFTWebButton for one theme: Dark, Light or Follow Windows.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use FTConstants.h.pkg               // the CI_FTTheme* modes, and giFTThemeMode - the theme in use
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTWebButton.pkg
+
+/* A theme button: a cFTWebButton that knows which theme it stands for. The theme in use is shown
+   disabled - choosing it again would change nothing. The click goes to the application object's
+   SwitchTheme, in RDCFlexTronDemo.src: a program that has none does not compile (error 4306). */
+Class cThemeButton is a cFTWebButton
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        { Category="Behavior" }
+        Property Integer piThemeMode CI_FTThemeDark
+    End_Procedure
+
+    Procedure End_Construct_Object
+        Forward Send End_Construct_Object
+        If (piThemeMode(Self) = giFTThemeMode) Begin
+            Set pbEnabled to False
+            Set psToolTip to "The theme in use"
+        End
+        Else ;
+            Set psToolTip to ("Switch to " + psCaption(Self) + " and restart the demo")
+    End_Procedure
+
+    Procedure OnButtonClick
+        Send SwitchTheme of ghoApplication (piThemeMode(Self))
+    End_Procedure
+End_Class

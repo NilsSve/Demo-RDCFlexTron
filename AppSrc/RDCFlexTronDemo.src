@@ -42,7 +42,7 @@ Object oApplication is a cApplication
         Send Exit_Application
     End_Procedure
 
-    // A theme button's click (cDemoThemeButton): save the choice, and start again in it.
+    // A theme button's click (cThemeButton): save the choice, and start again in it.
     Procedure SwitchTheme Integer iMode
         Send WriteInteger CS_FTThemeSection CS_FTTheme iMode
         Send Info_Box ((DemoThemeName(iMode)) + " is saved. The demo restarts when you close this message.") "Theme"
@@ -60,7 +60,7 @@ Use cFTPanel.pkg                    // the main window: a Panel with the FT grou
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the host as a grid of 8 px columns, laid out like a Windows dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebLabel, cFTWebHtmlBox and the rest of the family
-Use cDemoButton.pkg                 // PROTOTYPE: a cFTWebButton taking 10 of those columns
+Use cThemeButton.pkg                // a cFTWebButton for one theme: Dark, Light or Follow Windows
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
@@ -95,7 +95,7 @@ Function DemoPageHtml Global Returns String
     Move (sItems + (BulletItem("The buttons above are " + (CodeText("cFTWebButton")) + " objects: real web buttons, so the Studio's Designer draws them. A glyph is a class in " + (CodeText("psCSSClass")) + " - " + (CodeText("ftg-exit")) + " and the like, from ftglyphs.css - so the Designer draws it too. The font is " + (CodeText("psFontFamily")) + ", " + (CodeText("piFontSize")) + " and " + (CodeText("pbBold")) + "."))) to sItems
     Move (sItems + (BulletItem("The combo is a " + (CodeText("cFTWebCombo")) + ", in the FT look (" + (CodeText("FtCompact")) + ", from ftcontrols.css), which the Studio's Designer draws too. Its " + (CodeText("OnChange")) + " sends the glyph to the Preview button's " + (CodeText("UpdateGlyph")) + ", which changes it while the program runs."))) to sItems
     Move (sItems + (BulletItem("The list on the left is a " + (CodeText("cFTWebList")) + ": its rows come from code (" + (CodeText("OnManualLoadData")) + "), and it asks for them itself when the page first draws it. Choose a row, and " + (CodeText("OnChangeCurrentRow")) + " gives its glyph to the Preview button and the combo."))) to sItems
-    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes the extra width - empty in the rows of buttons, part of this page in its own - and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
+    Move (sItems + (BulletItem("Each column is 8 px, so a button's span is its width in 8 px steps: a " + (CodeText("cFTWebButton")) + " takes 10 unless it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes the extra width - empty in the rows of buttons, part of this page in its own - and this page's row the extra height, so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows dialog."))) to sItems
     Move (sItems + (BulletItem("A click's work is the button's " + (CodeText("OnButtonClick")) + ", which runs after the web click has returned - so it can open a dialog, or restart the program."))) to sItems
     Move (sItems + (BulletItem("The three buttons at the bottom left show " + (CodeText("FTInfoBox")) + ", " + (CodeText("FTStopBox")) + " and " + (CodeText("FTYesNoBox")) + ": " + (CodeText("Info_Box")) + ", " + (CodeText("Stop_Box")) + " and " + (CodeText("YesNo_Box")) + " in the FT look, with the same arguments and return values."))) to sItems
     Move (s + (BulletList(sItems))) to s
@@ -104,35 +104,6 @@ Function DemoPageHtml Global Returns String
     Move (s + "</div>") to s
     Function_Return s
 End_Function
-
-// ---------------------------------------------------------------------------------------------------
-// The buttons
-// ---------------------------------------------------------------------------------------------------
-
-/* A theme button: a cDemoButton that knows which theme it stands for. The theme in use is shown
-   disabled - choosing it again would change nothing. The click goes to the application object's
-   SwitchTheme. */
-Class cDemoThemeButton is a cDemoButton
-    Procedure Construct_Object
-        Forward Send Construct_Object
-        { Category="Behavior" }
-        Property Integer piThemeMode CI_FTThemeDark
-    End_Procedure
-
-    Procedure End_Construct_Object
-        Forward Send End_Construct_Object
-        If (piThemeMode(Self) = giFTThemeMode) Begin
-            Set pbEnabled to False
-            Set psToolTip to "The theme in use"
-        End
-        Else ;
-            Set psToolTip to ("Switch to " + psCaption(Self) + " and restart the demo")
-    End_Procedure
-
-    Procedure OnButtonClick
-        Send SwitchTheme of ghoApplication (piThemeMode(Self))
-    End_Procedure
-End_Class
 
 // ---------------------------------------------------------------------------------------------------
 // The main window
@@ -169,21 +140,21 @@ Object oMain is a cFTPanel
             Set psCSSClass to "FtCompact ftaccent"      // ftaccent: the amber caption (ftcontrols.css)
         End_Object
 
-        Object oDarkBtn is a cDemoThemeButton
+        Object oDarkBtn is a cThemeButton
             Set piRowIndex to 0
             Set piColumnIndex to 8
             Set psCaption to "Dark"
             Set piThemeMode to CI_FTThemeDark
         End_Object
 
-        Object oLightBtn is a cDemoThemeButton
+        Object oLightBtn is a cThemeButton
             Set piRowIndex to 0
             Set piColumnIndex to 18
             Set psCaption to "Light"
             Set piThemeMode to CI_FTThemeLight
         End_Object
 
-        Object oSystemBtn is a cDemoThemeButton
+        Object oSystemBtn is a cThemeButton
             Set piRowIndex to 0
             Set piColumnIndex to 28
             Set piColumnSpan to 15
@@ -191,7 +162,7 @@ Object oMain is a cFTPanel
             Set piThemeMode to CI_FTThemeSystem
         End_Object
 
-        Object oDialogBtn is a cDemoButton
+        Object oDialogBtn is a cFTWebButton
             Set piRowIndex to 0
             Set piColumnIndex to 44    // the right edge: column 43 before it takes the extra width
             Set piColumnSpan to 18
@@ -219,7 +190,7 @@ Object oMain is a cFTPanel
             Set psCSSClass to "FtCompact ftaccent"
         End_Object
 
-        Object oPreviewBtn is a cDemoButton
+        Object oPreviewBtn is a cFTWebButton
             Set piRowIndex to 1
             Set piColumnIndex to 28
             Set piColumnSpan to 15
@@ -325,7 +296,7 @@ Object oMain is a cFTPanel
 
         // Row 3 is empty: 8 px of air (psRowHeights), so Exit does not sit right under the page.
         // Row 4: the message boxes on the left - FTMessageBox.dg's three - and Exit at the bottom right.
-        Object oInfoBoxBtn is a cDemoButton
+        Object oInfoBoxBtn is a cFTWebButton
             Set piRowIndex to 4
             Set piColumnIndex to 0
             Set piColumnSpan to 14
@@ -341,7 +312,7 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        Object oStopBoxBtn is a cDemoButton
+        Object oStopBoxBtn is a cFTWebButton
             Set piRowIndex to 4
             Set piColumnIndex to 14
             Set psCaption to "Stop"
@@ -353,7 +324,7 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        Object oQuestionBoxBtn is a cDemoButton
+        Object oQuestionBoxBtn is a cFTWebButton
             Set piRowIndex to 4
             Set piColumnIndex to 24
             Set piColumnSpan to 12
@@ -373,7 +344,7 @@ Object oMain is a cFTPanel
         End_Object
 
         // Exit: its 10 columns end where the dialog button's 18 do.
-        Object oExitBtn is a cDemoButton
+        Object oExitBtn is a cFTWebButton
             Set piRowIndex to 4
             Set piColumnIndex to 52
             Set psCaption to "Exit"

@@ -13,8 +13,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   asks for it, the class does it;
 - `cFTWebButton` objects - real web buttons, so the Studio's Designer draws them - with `DashIcon`
   glyphs; a click's work runs in `OnButtonClick`, after the web click has returned. A button's span is
-  its width in 8 px steps - 10 unless it says otherwise (`cDemoButton`, `AppSrc/cDemoButton.pkg`) - so it
-  keeps its size when the window grows;
+  its width in 8 px steps - `cFTWebButton` takes 10 unless it says otherwise - so it keeps its size when
+  the window grows;
 - an Exit button at the bottom right, with the `CS_GlyphExit` glyph;
 - a `cFTWebCombo` of glyph names, in the FT look (`FtCompact`, from the library's `ftcontrols.css`): its
   `OnChange` sends the glyph to the Preview button's `UpdateGlyph`, which changes it while the program
@@ -26,8 +26,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with one grid host - the
   page, and a Close button (a `cFTWebButton`) under it at the right - which the panel fits to itself
   (`phoClientHost`);
-- the Dark / Light / Follow Windows choice, saved under the program's registry key; the demo
-  restarts in the new theme;
+- the Dark / Light / Follow Windows choice (`cThemeButton`, `AppSrc/cThemeButton.pkg`), saved under the
+  program's registry key; the demo restarts in the new theme;
 - `AppHtml/CssStyle/application.css`, which imports the library's style sheets - `ftglyphs.css`, the
   DashIcon glyphs as classes (`ftg-exit`, `ftg-info` ...), among them - so the Studio's Designer draws
   the buttons in the FT look, glyphs included. A button names its glyph in `psCSSClass`

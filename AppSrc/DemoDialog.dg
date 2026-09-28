@@ -14,7 +14,6 @@
 Use cFTModalPanel.pkg
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the host as a grid of 8 px columns, laid out like a Windows dialog
-Use cDemoButton.pkg                 // a cFTWebButton taking 10 of those columns
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, TagText, CssLink
@@ -68,7 +67,7 @@ Object oDemoDialog is a cFTModalPanel
 
         // Row 1 is empty: 8 px of air (psRowHeights), so Close does not sit right under the page.
         // Row 2: Close, bottom right.
-        Object oCloseBtn is a cDemoButton
+        Object oCloseBtn is a cFTWebButton
             Set piRowIndex to 2
             Set piColumnIndex to 1
             Set psCaption to "Close"
