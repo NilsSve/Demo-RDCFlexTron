@@ -201,8 +201,12 @@ Object oMain is a cFTPanel
             Set piColumnSpan to 62          // all the columns
             Set pbFillHeight to True        // fills row 1, which takes the extra height; it scrolls itself
             Set psTitleIcon to "Images/RDC-Mark.svg"    // the RDC Tools mark, as the package manager shows it
-            // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
-            Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">RDCFlexTron demo page</div>'
+            /* DESIGN-TIME PLACEHOLDER - the Studio's Designer models only a literal psHtml. It is the page's REAL
+               header, in the page's own classes (demo.css - application.css imports it for the Designer), with
+               Lorem ipsum for the body text: the Designer shows the page's shape, and no copied text can drift
+               from the real page. Keep the h1 in step with the title and psTitleIcon. The background is the
+               page's own token, so the text reads on whatever the Designer paints behind the host. */
+            Set psHtml to '<div class="demo" style="background:var(--dfr-bg-page);min-height:100%"><h1><img class="titleicon" src="Images/RDC-Mark.svg" alt="">RDCFlexTron</h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><h2>On this window</h2><ul><li>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li><li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</li><li>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li></ul><h2>Theme</h2><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p></div>'
 
             // The runtime page - set here, so the Designer keeps the literal above.
             Procedure End_Construct_Object

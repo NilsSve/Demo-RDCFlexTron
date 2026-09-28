@@ -64,8 +64,12 @@ Object oDemoDialog is a cFTModalPanel
             Set piColumnSpan to 11
             Set pbFillHeight to True        // fills row 0, which takes the extra height; it scrolls itself
             Set psTitleIcon to CS_GlyphListcheck
-            // DESIGN-TIME PLACEHOLDER: the Studio's Designer models only a literal psHtml.
-            Set psHtml to '<div style="padding:8px;color:#888;font:13px Segoe UI">Dialog body</div>'
+            /* DESIGN-TIME PLACEHOLDER - the Studio's Designer models only a literal psHtml. It is the page's REAL
+               header, in the page's own classes (demo.css - application.css imports it for the Designer), with
+               Lorem ipsum for the body text: the Designer shows the page's shape, and no copied text can drift
+               from the real page. Keep the h1 in step with the title and psTitleIcon. The background is the
+               page's own token, so the text reads on whatever the Designer paints behind the host. */
+            Set psHtml to '<div class="demo" style="background:var(--dfr-bg-page);min-height:100%"><h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5l1.5 1.5l2.5 -2.5 M3.5 11.5l1.5 1.5l2.5 -2.5 M3.5 17.5l1.5 1.5l2.5 -2.5 M11 6l9 0 M11 12l9 0 M11 18l9 0"/></svg>A cFTModalPanel</h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p></div>'
 
             // The runtime page - set here, so the Designer keeps the literal above.
             Procedure End_Construct_Object
