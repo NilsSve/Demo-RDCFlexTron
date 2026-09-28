@@ -16,46 +16,7 @@
 //****************************************************************************
 Use DFAllEnt.pkg
 Use FTConstants.h.pkg               // the CI_FTTheme* modes, and where the theme choice is saved
-
-// The name of a theme mode, for the page and for SwitchTheme's message.
-Function DemoThemeName Global Integer iMode Returns String
-    If (iMode = CI_FTThemeLight) ;
-        Function_Return "Light"
-    If (iMode = CI_FTThemeSystem) ;
-        Function_Return "Follow Windows"
-    Function_Return "Dark"
-End_Function
-
-Object oApplication is a cApplication
-    Set psCompany to "RDC Tools International"
-    Set psProduct to "RDCFlexTron Demo"
-    Set psVersion to "26.0"
-    Set peHelpType to htNoHelp
-
-    // The theme is read once, when the program starts: a new choice starts a new copy of this program
-    // and ends this one.
-    Procedure RestartDemo
-        String sExe sCommand
-        Get GetApplicationFileName to sExe
-        Move ('"' + sExe + '"') to sCommand
-        Runprogram Background sCommand
-        Send Exit_Application
-    End_Procedure
-
-    // A theme button's click (cThemeButton): save the choice, and start again in it.
-    Procedure SwitchTheme Integer iMode
-        Send WriteInteger CS_FTThemeSection CS_FTTheme iMode
-        Send Info_Box ((DemoThemeName(iMode)) + " is saved. The demo restarts when you close this message.") "Theme"
-        Send RestartDemo
-    End_Procedure
-End_Object
-
-// The theme is read from the saved choice (Settings\FTTheme under this program's registry key) as
-// soon as the application object exists - and before any panel colours itself while it is
-// constructed, which every panel below does.
-Use FTThemeSeed.pkg
-Send SeedFTTheme
-
+Use cFTApplication.pkg              // the application object: it reads the theme choice, and switches it
 Use cFTPanel.pkg                    // the main window: a Panel with the FT ground colour
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the host as a grid of 8 px columns, laid out like a Windows dialog
@@ -67,6 +28,17 @@ Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoConstants.h.pkg             // CS_DemoSheets - the library's style sheet links
 Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
+
+// The application object: a cFTApplication reads the theme choice (Settings\FTTheme under this program's
+// registry key) as soon as it is built, and the two dialogs above - built before it - take it there and
+// then, before they are shown. Its SwitchTheme - the theme buttons' click - saves a new choice and starts
+// the demo again in it.
+Object oApplication is a cFTApplication
+    Set psCompany to "RDC Tools International"
+    Set psProduct to "RDCFlexTron Demo"
+    Set psVersion to "26.0"
+    Set peHelpType to htNoHelp
+End_Object
 
 // ---------------------------------------------------------------------------------------------------
 // The pages - global functions, so they are defined before the objects that call them.
@@ -100,7 +72,7 @@ Function DemoPageHtml Global Returns String
     Move (sItems + (BulletItem("The three buttons at the bottom left show " + (CodeText("FTInfoBox")) + ", " + (CodeText("FTStopBox")) + " and " + (CodeText("FTYesNoBox")) + ": " + (CodeText("Info_Box")) + ", " + (CodeText("Stop_Box")) + " and " + (CodeText("YesNo_Box")) + " in the FT look, with the same arguments and return values."))) to sItems
     Move (s + (BulletList(sItems))) to s
     Move (s + (TagText("h2", "", "Theme"))) to s
-    Move (s + (TagText("p", "", ("In use: " + (DemoThemeName(giFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
+    Move (s + (TagText("p", "", ("In use: " + (FTThemeName(giFTThemeMode)) + ". A new choice is saved, and the demo restarts in it.")))) to s
     Move (s + "</div>") to s
     Function_Return s
 End_Function

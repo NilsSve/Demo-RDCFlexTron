@@ -25,9 +25,11 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   `Info_Box`, `Stop_Box` and `YesNo_Box` in the FT look, with the same arguments and return values;
 - a `cFTModalPanel` in a dialog file of its own (`AppSrc/DemoDialog.dg`), with one grid host - the
   page, and a Close button (a `cFTWebButton`) under it at the right - which the panel fits to itself
-  (`phoClientHost`);
-- the Dark / Light / Follow Windows choice (`cThemeButton`, `AppSrc/cThemeButton.pkg`), saved under the
-  program's registry key; the demo restarts in the new theme;
+  (`phoClientHost`). The program Uses it at its top, above the application object, as it does the
+  library's `FTMessageBox.dg`: both take the theme as soon as the application object reads it;
+- the Dark / Light / Follow Windows choice (`cThemeButton`, `AppSrc/cThemeButton.pkg`): the library's
+  `cFTApplication` - the demo's application object - reads it when the program starts, and saves a new
+  one under the program's registry key and restarts the demo in it;
 - `AppHtml/CssStyle/application.css`, which imports the library's style sheets - `ftglyphs.css`, the
   DashIcon glyphs as classes (`ftg-exit`, `ftg-info` ...), among them - so the Studio's Designer draws
   the buttons in the FT look, glyphs included. A button names its glyph in `psCSSClass`

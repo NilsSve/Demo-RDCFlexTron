@@ -11,12 +11,13 @@
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //****************************************************************************
 Use FTConstants.h.pkg               // the CI_FTTheme* modes, and giFTThemeMode - the theme in use
+Use cFTApplication.pkg              // SwitchTheme: the program's application object is a cFTApplication
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTWebButton.pkg
 
 /* A theme button: a cFTWebButton that knows which theme it stands for. The theme in use is shown
    disabled - choosing it again would change nothing. The click goes to the application object's
-   SwitchTheme, in RDCFlexTronDemo.src: a program that has none does not compile (error 4306). */
+   SwitchTheme: the program's application object is a cFTApplication. */
 Class cThemeButton is a cFTWebButton
     Procedure Construct_Object
         Forward Send Construct_Object
