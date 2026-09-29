@@ -31,9 +31,9 @@ Object oDemoDialog is a cFTModalPanel
     Object oDlgHost is a cFTGridHost
         Set Location to 4 4
         Set Size to 134 332
-        Set peAnchors to anNone         // placed by cFTModalPanel (phoClientHost)
-        Set piColumnCount to 11         // column 0, then the Close button's 10
-        Set psColumnWidths to "0/1fr"   // column 0 takes the extra width
+        Set peAnchors to anNone             // placed by cFTModalPanel (phoClientHost)
+        Set piColumnCount to 11             // column 0, then the Close button's 10
+        Set psColumnWidths to "0/1fr"       // column 0 takes the extra width
         Set psRowHeights to "0/1fr 1/8px"   // row 0, the page, takes the extra height; row 1 is 8 px of air
 
         // Above the html box that calls it: a function must be defined before the call. The page's title is
