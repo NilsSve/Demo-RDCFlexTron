@@ -22,15 +22,15 @@ Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Object oDemoDialog is a cFTModalPanel
     Set Label to "A cFTModalPanel"
     Set Location to 20 20
-    Set Size to 143 340
-    Set piMinSize to 143 340
+    Set Size to 136 340
+    Set piMinSize to 136 340
 
     /* THE HOST: the page, and the Close button under it at the right - one grid host, laid out like the
        main window. Row 0, the page, takes the extra height; row 1 is 8 px of air; column 0, empty in
        row 2, takes the extra width, so Close keeps its size at the bottom right. */
     Object oDlgHost is a cFTGridHost
         Set Location to 4 4
-        Set Size to 134 332
+        Set Size to 132 332
         Set peAnchors to anNone             // placed by cFTModalPanel (phoClientHost)
         Set piColumnCount to 11             // column 0, then the Close button's 10
         Set psColumnWidths to "0/1fr"       // column 0 takes the extra width

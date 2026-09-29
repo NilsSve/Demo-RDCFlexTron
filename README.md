@@ -7,10 +7,10 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   the glyph combo, the glyph list beside the page, a row of air, and the message boxes with Exit in its
   five rows (`piRowIndex`);
 - the page, a `cFTHtmlPage`: its title is `psLabel`, and its body is built with the `FTMarkupBuilders`
-  functions. The RDC Tools mark beside the title is a class of the demo's own, `ftg-rdcmark` in
-  `AppHtml/CssStyle/demo.css`, so the Studio's Designer shows it too - an image file in `psTitleIcon`
-  shows only when the program runs. The Designer shows Lorem ipsum for the body - nothing in the demo
-  asks for it, the class does it;
+  functions. The RDC Tools mark beside the title is a glyph of the demo's own: `rdcmark.svg` in
+  `AppHtml/FTGlyphs`. The program writes the folder's classes into `AppHtml/FTGlyphs/ftglyphs-app.css`
+  when it starts, and `application.css` imports that sheet, so the Studio's Designer shows the mark too.
+  The Designer shows Lorem ipsum for the body - nothing in the demo asks for it, the class does it;
 - `cFTWebButton` objects - real web buttons, so the Studio's Designer draws them - with `DashIcon`
   glyphs; a click's work runs in `OnButtonClick`, after the web click has returned. A button's span is
   its width in 8 px steps - `cFTWebButton` takes 10 unless it says otherwise - so it keeps its size when

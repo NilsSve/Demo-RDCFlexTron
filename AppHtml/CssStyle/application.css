@@ -9,4 +9,5 @@
 @import url("../RDCFlexTron/palette.css");
 @import url("../RDCFlexTron/ftcontrols.css");
 @import url("../RDCFlexTron/ftglyphs.css");     /* the DashIcon glyphs as button classes (ftg-exit ...) */
-@import url("demo.css");    /* the pages' layout, and the RDC Tools mark (ftg-rdcmark) - the Designer too */
+@import url("../FTGlyphs/ftglyphs-app.css");      /* the demo's own glyphs (AppHtml\FTGlyphs) - the program writes it */
+@import url("demo.css");    /* the pages' layout */

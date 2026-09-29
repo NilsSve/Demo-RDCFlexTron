@@ -66,9 +66,10 @@ Function DemoPageHtml Global Returns String
         This page is a `cFTHtmlPage`, built with `FTMarkupBuilders`.
         """)))
     Append sItems (BulletItem(MarkedText("""
-        The title above is the page's `psLabel`. The mark beside it is an image drawn by a class of the
-        demo's own, `ftg-rdcmark` in demo.css, so the Studio's Designer shows it too, with Lorem ipsum for
-        this text.
+        The title above is the page's `psLabel`. The mark beside it is a glyph of the demo's own, an SVG
+        file in `AppHtml\FTGlyphs`: rdcmark.svg is the glyph `rdcmark`. When the program starts, it writes
+        the folder's classes into a sheet there, so the Studio's Designer shows the mark too, with Lorem
+        ipsum for this text.
         """)))
     Append sItems (BulletItem(MarkedText("""
         The buttons above are `cFTWebButton` objects: real web buttons, so the Studio's Designer draws them.
@@ -81,9 +82,10 @@ Function DemoPageHtml Global Returns String
         changes it while the program runs.
         """)))
     Append sItems (BulletItem(MarkedText("""
-        The list on the left is a `cFTWebList` with every glyph the library has (`FTGlyphNames`): its rows
-        come from code (`OnManualLoadData`), and it asks for them itself when the page first draws it.
-        Choose a row, and `OnChangeCurrentRow` gives its glyph to the Preview button and the combo.
+        The list on the left is a `cFTWebList` with every glyph there is (`FTGlyphNames`) - the library's,
+        and the demo's own `rdcmark`. Its rows come from code (`OnManualLoadData`), and it asks for them
+        itself when the page first draws it. Choose a row, and `OnChangeCurrentRow` gives its glyph to the
+        Preview button and the combo.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
@@ -211,7 +213,7 @@ Object oMain is a cFTPanel
             Set psValue to CS_GlyphHome
             Set psToolTip to "A DashIcon glyph - the Preview button shows it"
 
-            // Every glyph the library has (FTGlyphNames); an item's value is the glyph's name.
+            // Every glyph - the library's, and the demo's own (FTGlyphNames); an item's value is the glyph's name.
             Procedure OnFill
                 String[] asGlyphs
                 Integer i
@@ -290,7 +292,9 @@ Object oMain is a cFTPanel
             Set piColumnSpan to 19          // column 43, which takes the extra width, and the 18 after it
             Set pbFillHeight to True        // fills row 2, which takes the extra height; it scrolls itself
             Set psLabel to "RDCFlexTron"    // the page's title - the Studio's Designer shows it too
-            Set psCSSClass to "ftpage ftg-rdcmark"  // the RDC Tools mark beside it: a class of the demo's own (demo.css), so the Designer shows it too
+            // The picture beside it, the RDC Tools mark: the demo's own glyph rdcmark (AppHtml\FTGlyphs\rdcmark.svg).
+            // Named by its class, not by psTitleIcon "rdcmark": the Designer runs no code and shows only a class.
+            Set psCSSClass to "ftpage ftg-rdcmark"
 
             // The page, built when the program runs - the Designer shows cFTHtmlPage's Lorem ipsum instead.
             Procedure End_Construct_Object

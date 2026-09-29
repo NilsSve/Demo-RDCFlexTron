@@ -27,14 +27,3 @@
     font-family: Consolas, monospace;
     color: var(--dfr-code-ink);
 }
-
-/* The RDC Tools mark beside the main page's title (oPage: psCSSClass "ftpage ftg-rdcmark"). An image file
-   in psTitleIcon shows only when the program runs; as a class it shows in the Studio's Designer too, which
-   applies classes and runs none of our code. ftglyphs.css gives every ftg- title picture its place; this
-   rule makes it the image, 32 px, in its own colours. The .ftpage lifts it over ftglyphs.css's shared
-   rule, which the program links again after this sheet. */
-.WebControl.WebHtmlBox.ftpage.ftg-rdcmark > .WebCon_Inner > label::before {
-    width: 32px;
-    height: 32px;
-    background: url("../Images/RDC-Mark.svg") center / contain no-repeat;
-}
