@@ -8,7 +8,8 @@
 // Description : The RDCFlexTron library at work in a Windows program: ONE themed FlexTron host laid out
 //               as a grid (cFTGridHost) holding a page built with the markup builders and icons,
 //               cFTWebButton objects - real web buttons the Studio's Designer draws - a combo, a list and
-//               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); and the
+//               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); the stand-ins
+//               the Studio's Designer draws for content built at run time (DemoStandIns.dg); and the
 //               Dark / Light / Follow Windows choice.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -26,6 +27,7 @@ Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, MarkedText, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
+Use DemoStandIns.dg                 // oDemoStandIns - the Designer's stand-ins, which "Stand-ins" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
 
 // The application object: a cFTApplication reads the theme choice (Settings\FTTheme under this program's
@@ -59,8 +61,9 @@ Function DemoPageHtml Global Returns String
 
     Append sItems (BulletItem(MarkedText("""
         The whole window is ONE host, a `cFTGridHost`: a grid of 8 px columns and five rows - the theme
-        buttons, the glyph combo, the glyph list with this page, a row of air, and the message boxes with
-        Exit. A control takes a row with `piRowIndex`, and this page fills its row with `pbFillHeight`.
+        buttons with Open the dialog, the glyph combo with Stand-ins, the glyph list with this page, a row of
+        air, and the message boxes with Exit. A control takes a row with `piRowIndex`, and this page fills its
+        row with `pbFillHeight`.
         """)))
     Append sItems (BulletItem(MarkedText("""
         This page is a `cFTHtmlPage`, built with `FTMarkupBuilders`.
@@ -86,6 +89,12 @@ Function DemoPageHtml Global Returns String
         and the demo's own `rdcmark`. Its rows come from code (`OnManualLoadData`), and it asks for them
         itself when the page first draws it. Choose a row, and `OnChangeCurrentRow` gives its glyph to the
         Preview button and the combo.
+        """)))
+    Append sItems (BulletItem(MarkedText("""
+        Stand-ins opens the shapes the library's ftcontrols.css draws for the Studio's Designer. The Designer
+        runs no code, so a page whose content is built when the program runs shows nothing there; one short
+        literal `psHtml` draws the shape instead - a grid, a list, a tree, a log, a chart or cards - and the
+        program sets the real content before the page is shown.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
@@ -227,6 +236,20 @@ Object oMain is a cFTPanel
             // A choice goes to the Preview button, while the program runs.
             Procedure OnChange String sNewValue String sOldValue
                 Send UpdateGlyph of (oPreviewBtn(Self)) sNewValue
+            End_Procedure
+        End_Object
+
+        // Row 1, at the right edge under the dialog button, as wide as it: the Designer's stand-ins.
+        Object oStandInsBtn is a cFTWebButton
+            Set piRowIndex to 1
+            Set piColumnIndex to 44
+            Set piColumnSpan to 18
+            Set psCaption to "Stand-ins"
+            Set psCSSClass to "ftbtn ftg-eye"
+            Set psToolTip to "The shapes the Studio's Designer draws for a page built when the program runs"
+
+            Procedure OnButtonClick
+                Send Popup of (oDemoStandIns(Self))
             End_Procedure
         End_Object
 

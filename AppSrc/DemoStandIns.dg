@@ -1,0 +1,129 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoStandIns
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-09-30
+//
+// Description : The stand-ins the library's style sheet draws for the Studio's Designer - a grid, a list, a
+//               tree, a log, a chart and cards - each in a page of its own, from one short literal psHtml.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use cFTModalPanel.pkg
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the host as a grid, laid out like a Windows dialog
+Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
+Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it
+
+/* THE STAND-INS (RDCFlexTron 0.9.7). The Studio's Designer runs none of a program's code, so a page whose content
+   is built when the program runs shows nothing there. One short literal psHtml draws the SHAPE of the content
+   instead - the library's ftcontrols.css does the drawing - and the program sets the real content before the page
+   is shown (in End_Construct_Object, or when the dialog opens). Here nothing replaces the literals, so the running
+   demo shows each stand-in just as the Designer draws it. Captions are <b> elements; numbers are custom
+   properties in the element's style. */
+Object oDemoStandIns is a cFTModalPanel
+    Set Label to "Designer stand-ins"
+    Set Location to 10 10
+    Set Size to 320 600
+    Set piMinSize to 320 600
+
+    /* THE HOST: six pages in two rows of three, and Close under them at the right. Columns 0 to 2 share the
+       width; column 3, 88 px, holds Close, and the right-hand pages span it too. Rows 0 and 1 share the height;
+       row 2 is 8 px of air. */
+    Object oStandInsHost is a cFTGridHost
+        Set Location to 4 4
+        Set Size to 296 592
+        Set peAnchors to anNone             // placed by cFTModalPanel (phoClientHost)
+        Set piColumnCount to 4
+        Set psColumnWidths to "0/1fr 1/1fr 2/1fr 3/88px"
+        Set psRowHeights to "0/1fr 1/1fr 2/8px"
+
+        // A grid: one column per caption, --rows rows. Without captions, --cols gives the columns and there is
+        // no header: '<div class="ftph-grid" style="--cols:6"></div>'.
+        Object oGridPage is a cFTHtmlPage
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 1
+            Set pbFillHeight to True
+            Set psLabel to "Grid"
+            Set psCSSClass to "ftpage ftg-database"
+            Set psHtml to '<div class="ftph-grid" style="--rows:4"><b>Customer</b><b>City</b><b>Balance</b></div>'
+        End_Object
+
+        // A list: rows of an icon and a line.
+        Object oListPage is a cFTHtmlPage
+            Set piRowIndex to 0
+            Set piColumnIndex to 1
+            Set piColumnSpan to 1
+            Set pbFillHeight to True
+            Set psLabel to "List"
+            Set psCSSClass to "ftpage ftg-listcheck"
+            Set psHtml to '<div class="ftph-list" style="--rows:5"></div>'
+        End_Object
+
+        // A tree: folders open and shut, with their files.
+        Object oTreePage is a cFTHtmlPage
+            Set piRowIndex to 0
+            Set piColumnIndex to 2
+            Set piColumnSpan to 2
+            Set pbFillHeight to True
+            Set psLabel to "Tree"
+            Set psCSSClass to "ftpage ftg-hierarchy"
+            Set psHtml to '<div class="ftph-tree" style="--rows:5"></div>'
+        End_Object
+
+        // A log: lines of output in a sunken box.
+        Object oLogPage is a cFTHtmlPage
+            Set piRowIndex to 1
+            Set piColumnIndex to 0
+            Set piColumnSpan to 1
+            Set pbFillHeight to True
+            Set psLabel to "Log"
+            Set psCSSClass to "ftpage ftg-code"
+            Set psHtml to '<div class="ftph-log" style="--rows:7"></div>'
+        End_Object
+
+        // A chart: bars in a card, --height tall.
+        Object oChartPage is a cFTHtmlPage
+            Set piRowIndex to 1
+            Set piColumnIndex to 1
+            Set piColumnSpan to 1
+            Set pbFillHeight to True
+            Set psLabel to "Chart"
+            Set psCSSClass to "ftpage ftg-trend"
+            Set psHtml to '<div class="ftph-chart" style="--height:120px"></div>'
+        End_Object
+
+        // Cards: one for each caption.
+        Object oCardsPage is a cFTHtmlPage
+            Set piRowIndex to 1
+            Set piColumnIndex to 2
+            Set piColumnSpan to 2
+            Set pbFillHeight to True
+            Set psLabel to "Cards"
+            Set psCSSClass to "ftpage ftg-home"
+            Set psHtml to '<div class="ftph-cards"><b>Workspace</b><b>Libraries</b></div>'
+        End_Object
+
+        // Row 2 is empty: 8 px of air (psRowHeights), so Close does not sit right under the pages.
+        // Row 3: Close, bottom right.
+        Object oCloseBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 3
+            Set piColumnSpan to 1
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"    // the glyph as a class, so the Designer draws it too (ftglyphs.css)
+            Set psToolTip to "Close this dialog"
+
+            // Runs after the web click has returned - ending a panel inside it would fault (4410).
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoStandIns(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    // cFTModalPanel fits the host to the panel, when it is shown and on every resize.
+    Set phoClientHost to (oStandInsHost(Self))
+End_Object
