@@ -1,11 +1,11 @@
 ﻿//****************************************************************************
 // $Module type: Dialog
-// $Module name: DemoStandIns
+// $Module name: DemoMockups
 // $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
 // Web-site    : http://www.rdctools.com
 // Created     : 2026-09-30
 //
-// Description : The stand-ins the library's style sheet draws for the Studio's Designer - a grid, a list, a
+// Description : The mockups the library's style sheet draws for the Studio's Designer - a grid, a list, a
 //               tree, a log, a chart and cards - each in a page of its own, from one short literal psHtml.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -17,22 +17,22 @@ Use cFTGridHost.pkg                 // the host as a grid, laid out like a Windo
 Use FTAllWebControlClasses.pkg      // cFTWebButton, cFTWebHtmlBox
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it
 
-/* THE STAND-INS (RDCFlexTron 0.9.7). The Studio's Designer runs none of a program's code, so a page whose content
+/* THE MOCKUPS (RDCFlexTron 0.9.7). The Studio's Designer runs none of a program's code, so a page whose content
    is built when the program runs shows nothing there. One short literal psHtml draws the SHAPE of the content
    instead - the library's ftcontrols.css does the drawing - and the program sets the real content before the page
    is shown (in End_Construct_Object, or when the dialog opens). Here nothing replaces the literals, so the running
-   demo shows each stand-in just as the Designer draws it. Captions are <b> elements; numbers are custom
+   demo shows each mockup just as the Designer draws it. Captions are <b> elements; numbers are custom
    properties in the element's style. */
-Object oDemoStandIns is a cFTModalPanel
-    Set Label to "Designer stand-ins"
+Object oDemoMockups is a cFTModalPanel
+    Set Label to "Mockups for the Studio's Designer"
     Set Location to 10 10
-    Set Size to 320 600
-    Set piMinSize to 320 600
+    Set Size to 304 600
+    Set piMinSize to 304 600
 
     /* THE HOST: six pages in two rows of three, and Close under them at the right. Columns 0 to 2 share the
        width; column 3, 88 px, holds Close, and the right-hand pages span it too. Rows 0 and 1 share the height;
        row 2 is 8 px of air. */
-    Object oStandInsHost is a cFTGridHost
+    Object oMockupsHost is a cFTGridHost
         Set Location to 4 4
         Set Size to 296 592
         Set peAnchors to anNone             // placed by cFTModalPanel (phoClientHost)
@@ -119,11 +119,11 @@ Object oDemoStandIns is a cFTModalPanel
 
             // Runs after the web click has returned - ending a panel inside it would fault (4410).
             Procedure OnButtonClick
-                Send Close_Panel of (oDemoStandIns(Self))
+                Send Close_Panel of (oDemoMockups(Self))
             End_Procedure
         End_Object
     End_Object
 
     // cFTModalPanel fits the host to the panel, when it is shown and on every resize.
-    Set phoClientHost to (oStandInsHost(Self))
+    Set phoClientHost to (oMockupsHost(Self))
 End_Object

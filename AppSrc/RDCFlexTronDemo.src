@@ -8,8 +8,8 @@
 // Description : The RDCFlexTron library at work in a Windows program: ONE themed FlexTron host laid out
 //               as a grid (cFTGridHost) holding a page built with the markup builders and icons,
 //               cFTWebButton objects - real web buttons the Studio's Designer draws - a combo, a list and
-//               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); the stand-ins
-//               the Studio's Designer draws for content built at run time (DemoStandIns.dg); and the
+//               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); the mockups
+//               the Studio's Designer draws for content built at run time (DemoMockups.dg); and the
 //               Dark / Light / Follow Windows choice.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -27,7 +27,7 @@ Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, MarkedText, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
-Use DemoStandIns.dg                 // oDemoStandIns - the Designer's stand-ins, which "Stand-ins" opens
+Use DemoMockups.dg                  // oDemoMockups - the Designer's mockups, which "Designer mockups" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
 
 // The application object: a cFTApplication reads the theme choice (Settings\FTTheme under this program's
@@ -51,7 +51,7 @@ End_Object
 // text wraps here as a paragraph. A name is marked with backticks, as in a README: MarkedText puts it in
 // <code> and escapes the rest, and BulletItem takes the markup it returns.
 Function DemoPageHtml Global Returns String
-    String s sItems
+    String s sItems sSteps
     Move (CS_PaletteCssLink + (CssLink("demo")) + (DivOpen("demo"))) to s
     Append s (TagText("p", "", """
         Themed FlexTron hosts, web controls and modal panels for DataFlex Windows programs, with HTML
@@ -61,7 +61,7 @@ Function DemoPageHtml Global Returns String
 
     Append sItems (BulletItem(MarkedText("""
         The whole window is ONE host, a `cFTGridHost`: a grid of 8 px columns and five rows - the theme
-        buttons with Open the dialog, the glyph combo with Stand-ins, the glyph list with this page, a row of
+        buttons with Open the dialog, the glyph combo with Designer mockups, the glyph list with this page, a row of
         air, and the message boxes with Exit. A control takes a row with `piRowIndex`, and this page fills its
         row with `pbFillHeight`.
         """)))
@@ -91,14 +91,12 @@ Function DemoPageHtml Global Returns String
         Preview button and the combo.
         """)))
     Append sItems (BulletItem(MarkedText("""
-        Stand-ins opens the shapes the library's ftcontrols.css draws for the Studio's Designer. The Designer
-        runs no code, so a page whose content is built when the program runs shows nothing there; one short
-        literal `psHtml` draws the shape instead - a grid, a list, a tree, a log, a chart or cards - and the
-        program sets the real content before the page is shown.
+        Designer mockups opens the mockups the library's ftcontrols.css draws for the Studio's Designer - a
+        grid, a list, a tree, a log, a chart and cards. How to use them is below.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
-        it says otherwise - Follow Windows takes 15, Open the dialog 18. One column takes the extra width -
+        it says otherwise - Follow Windows takes 15, Open the dialog 20. One column takes the extra width -
         empty in the rows of buttons, part of this page in its own - and this page's row the extra height,
         so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows
         dialog.
@@ -116,6 +114,32 @@ Function DemoPageHtml Global Returns String
     Append s (TagText("h2", "", "Theme"))
     Append s (TagText("p", "", ("In use: " + (FTThemeName(giFTThemeMode)) + ;
         ". A new choice is saved, and the demo restarts in it.")))
+
+    Append s (TagText("h2", "", "Using the Designer mockups"))
+    Append s (TagHtml("p", "", (MarkedText("""
+        When using a `cFTHtmlPage` object to display a "grid" type object, in the Studio's Designer, a page or
+        an HTML box whose content is built when the program runs is shown as blank in designer mode. A mockup
+        draws the shape of that content instead:
+        """))))
+    Append sSteps (BulletItem(MarkedText("""
+        In the object's body, set `psHtml` to one short literal:
+        `Set psHtml to '<div class="ftph-grid"><b>Name</b><b>Version</b></div>'` is a grid with those two
+        columns. The Designer draws the last literal `psHtml` it finds in the body.
+        """)))
+    Append sSteps (BulletItem(MarkedText("""
+        Set the real content when the program runs - in `End_Construct_Object`, or when the dialog opens -
+        and never in the body: the Designer cannot read an expression there, and leaves the box blank.
+        """)))
+    Append sSteps (BulletItem(MarkedText("""
+        The shapes are `ftph-grid`, `ftph-list`, `ftph-tree`, `ftph-log`, `ftph-chart` and `ftph-cards`, and
+        `ftph` alone is Lorem ipsum. Captions are `<b>` elements, and numbers are custom properties in the
+        style: `style="--rows:5"`.
+        """)))
+    Append sSteps (BulletItem(MarkedText("""
+        A mockup is drawn in the palette's colours, so it follows the theme. Designer mockups, at the top
+        right, shows each one.
+        """)))
+    Append s (BulletList(sSteps))
     Append s CS_DivEnd
     Function_Return s
 End_Function
@@ -140,9 +164,9 @@ Object oMain is a cFTPanel
         Set Location to 4 4
         Set Size to 275 432
         Set peAnchors to anNone             // placed by cFTPanel (phoClientHost)
-        // 62 columns: 61 of 8 px (488 px) and column 43, which takes the extra width. The window's minimum
+        // 64 columns: 63 of 8 px (504 px) and column 43, which takes the extra width. The window's minimum
         // width (360 units, about 516 px for the host at 1.5 px a unit) still holds them.
-        Set piColumnCount to 62
+        Set piColumnCount to 64
         Set psColumnWidths to "43/1fr"      // column 43 - empty - takes the extra width
         Set psRowHeights to "2/1fr 3/8px"   // row 2, the list and the page, takes the extra height; row 3 is 8 px of air
 
@@ -180,7 +204,7 @@ Object oMain is a cFTPanel
         Object oDialogBtn is a cFTWebButton
             Set piRowIndex to 0
             Set piColumnIndex to 44    // the right edge: column 43 before it takes the extra width
-            Set piColumnSpan to 18
+            Set piColumnSpan to 20
             Set psCaption to "Open the dialog"
             Set pbBold to True
             // The glyph as a class (ftglyphs.css), with the primary look: a literal class list is what the
@@ -239,17 +263,17 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Row 1, at the right edge under the dialog button, as wide as it: the Designer's stand-ins.
-        Object oStandInsBtn is a cFTWebButton
+        // Row 1, at the right edge under the dialog button, as wide as it: the Designer's mockups.
+        Object oMockupsBtn is a cFTWebButton
             Set piRowIndex to 1
             Set piColumnIndex to 44
-            Set piColumnSpan to 18
-            Set psCaption to "Stand-ins"
+            Set piColumnSpan to 20
+            Set psCaption to "Designer mockups"
             Set psCSSClass to "ftbtn ftg-eye"
             Set psToolTip to "The shapes the Studio's Designer draws for a page built when the program runs"
 
             Procedure OnButtonClick
-                Send Popup of (oDemoStandIns(Self))
+                Send Popup of (oDemoMockups(Self))
             End_Procedure
         End_Object
 
@@ -312,7 +336,7 @@ Object oMain is a cFTPanel
         Object oPage is a cFTHtmlPage
             Set piRowIndex to 2
             Set piColumnIndex to 43
-            Set piColumnSpan to 19          // column 43, which takes the extra width, and the 18 after it
+            Set piColumnSpan to 21          // column 43, which takes the extra width, and the 20 after it
             Set pbFillHeight to True        // fills row 2, which takes the extra height; it scrolls itself
             Set psLabel to "RDCFlexTron"    // the page's title - the Studio's Designer shows it too
             // The picture beside it, the RDC Tools mark: the demo's own glyph rdcmark (AppHtml\FTGlyphs\rdcmark.svg).
@@ -375,10 +399,10 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Exit: its 10 columns end where the dialog button's 18 do.
+        // Exit: its 10 columns end where the dialog button's 20 do.
         Object oExitBtn is a cFTWebButton
             Set piRowIndex to 4
-            Set piColumnIndex to 52
+            Set piColumnIndex to 54
             Set psCaption to "Exit"
             Set psCSSClass to "ftbtn ftg-exit"     // the glyph as a class, so the Designer draws it too (ftglyphs.css)
             Set psToolTip to "Close the demo"

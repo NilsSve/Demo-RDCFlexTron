@@ -27,8 +27,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   page, and a Close button (a `cFTWebButton`) under it at the right - which the panel fits to itself
   (`phoClientHost`). The program Uses it at its top, above the application object, as it does the
   library's `FTMessageBox.dg`: both take the theme as soon as the application object reads it;
-- the stand-ins the Studio's Designer draws for content built at run time (`AppSrc/DemoStandIns.dg`, the
-  Stand-ins button): six pages, each a `cFTHtmlPage` whose `psHtml` is one short literal - a grid, a list, a
+- the mockups the Studio's Designer draws for content built at run time (`AppSrc/DemoMockups.dg`, the
+  Designer mockups button): six pages, each a `cFTHtmlPage` whose `psHtml` is one short literal - a grid, a list, a
   tree, a log, a chart and cards, drawn by the library's `ftcontrols.css`. Nothing replaces the literals
   there, so the running demo shows each shape just as the Designer does;
 - the Dark / Light / Follow Windows choice (`cThemeButton`, `AppSrc/cThemeButton.pkg`): the library's
