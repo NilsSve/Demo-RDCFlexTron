@@ -4,8 +4,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 
 - ONE themed host for the whole window, the library's `cFTGridHost`: laid out on a grid of 8 px columns
   the way a Windows dialog is - one column and the page's row take the extra space - with the buttons,
-  the glyph combo, the glyph list beside the page, a row of air, and the message boxes with Exit in its
-  five rows (`piRowIndex`);
+  the glyph combo, the glyph list beside the page, a row of air, and the message boxes with About and Exit
+  in its five rows (`piRowIndex`);
 - the page, a `cFTHtmlPage`: its title is `psLabel`, and its body is built with the `FTMarkupBuilders`
   functions. The RDC Tools mark beside the title is a glyph of the demo's own: `rdcmark.svg` in
   `AppHtml/FTGlyphs`. The program writes the folder's classes into `AppHtml/FTGlyphs/ftglyphs-app.css`
@@ -31,6 +31,14 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   Designer mockups button): six pages, each a `cFTHtmlPage` whose `psHtml` is one short literal - a grid, a list, a
   tree, a log, a chart and cards, drawn by the library's `ftcontrols.css`. Nothing replaces the literals
   there, so the running demo shows each shape just as the Designer does;
+- the About dialog (the About button): the library's `FTStdAbout.pkg`, Used in the main window as
+  `StdAbout.pkg` is in a client area, and wired the standard way - the button sends `Activate_About`, as a
+  menu's About item does, and the window's own `Activate_About` sends `DoAbout` with plain strings. The name
+  and the version come from the application object and the program's version resource; the demo adds its
+  author, its mark and a line, and the dialog shows them over the build facts, then its About file -
+  `Help/About.html`, which `FTStdAbout.pkg` compiles in as the DFAbout library's resource, shown while
+  `pbShowAboutFile` is True in `Activate_About` - and the Powered by DataFlex mark, with System information,
+  Copy and Close. The lines are plain strings; the file is where markup goes;
 - the Dark / Light / Follow Windows choice (`cThemeButton`, `AppSrc/cThemeButton.pkg`): the library's
   `cFTApplication` - the demo's application object - reads it when the program starts, and saves a new
   one under the program's registry key and restarts the demo in it;

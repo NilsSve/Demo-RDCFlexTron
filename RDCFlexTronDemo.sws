@@ -5,7 +5,7 @@
         {
             "source": "https://github.com/NilsSve/Library-RDCFlexTron.git",
             "sws": "RDC-FlexTron-Library.sws",
-            "version": "6f3128c99d154ec3b898ebb83ad0b35c3ba4c3b0"
+            "version": "c6f5faf9b59b0cffe9ae9ef27097f06af60ec08f"
         }
     ],
     "description": "The RDCFlexTron library at work: a themed FlexTron host, the markup builders and icons, a modal panel and the Dark / Light / Follow Windows choice.",

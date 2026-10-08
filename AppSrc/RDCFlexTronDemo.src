@@ -9,8 +9,9 @@
 //               as a grid (cFTGridHost) holding a page built with the markup builders and icons,
 //               cFTWebButton objects - real web buttons the Studio's Designer draws - a combo, a list and
 //               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); the mockups
-//               the Studio's Designer draws for content built at run time (DemoMockups.dg); and the
-//               Dark / Light / Follow Windows choice.
+//               the Studio's Designer draws for content built at run time (DemoMockups.dg); the library's
+//               About dialog, the way StdAbout.pkg works (FTStdAbout.pkg); and the Dark / Light / Follow
+//               Windows choice.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -62,8 +63,8 @@ Function DemoPageHtml Global Returns String
     Append sItems (BulletItem(MarkedText("""
         The whole window is ONE host, a `cFTGridHost`: a grid of 8 px columns and five rows - the theme
         buttons with Open the dialog, the glyph combo with Designer mockups, the glyph list with this page, a row of
-        air, and the message boxes with Exit. A control takes a row with `piRowIndex`, and this page fills its
-        row with `pbFillHeight`.
+        air, and the message boxes with About and Exit. A control takes a row with `piRowIndex`, and this page
+        fills its row with `pbFillHeight`.
         """)))
     Append sItems (BulletItem(MarkedText("""
         This page is a `cFTHtmlPage`, built with `FTMarkupBuilders`.
@@ -109,6 +110,15 @@ Function DemoPageHtml Global Returns String
         The three buttons at the bottom left show `FTInfoBox`, `FTStopBox` and `FTYesNoBox`: `Info_Box`,
         `Stop_Box` and `YesNo_Box` in the FT look, with the same arguments and return values.
         """)))
+    Append sItems (BulletItem(MarkedText("""
+        About opens the library's About dialog the way a standard program does with `StdAbout.pkg`: the button
+        sends `Activate_About` to this window, as a menu's About item sends it to the client area, and the
+        window's own `Activate_About` sends `DoAbout` with plain strings. The name and the version come from the
+        application object and the program; the demo adds its author, its mark and a line, and the dialog shows
+        them over the build facts, then its About file - `Help\About.html`, a resource, shown while
+        `pbShowAboutFile` is True in `Activate_About` - and the Powered by DataFlex mark. System information
+        opens a `cFTSystemInfoDialog`.
+        """)))
     Append s (BulletList(sItems))
 
     Append s (TagText("h2", "", "Theme"))
@@ -150,13 +160,32 @@ End_Function
 
 /* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and five rows - the
    theme buttons and the glyph combo at the top, the glyph list and the page in the middle taking the extra
-   height, a row of air, and the message boxes with Exit at the bottom. The grid does the layout, in the
+   height, a row of air, and the message boxes with About and Exit at the bottom. The grid does the layout, in the
    browser, on every resize; cFTPanel fits the host itself to the window's client area (phoClientHost). */
 Object oMain is a cFTPanel
     Set Label to "RDCFlexTron Demo"
     Set Location to 190 119
     Set Size to 300 450
     Set piMinSize to 180 360  
+
+    /* THE ABOUT DIALOG, wired as a standard program wires it: FTStdAbout.pkg Used in the object that answers
+       Activate_About - the client area in a program with a menu, this window here - and that object's own
+       Activate_About sending DoAbout with plain strings. The About button below sends Activate_About, as a
+       menu's About item does. (A program with no Activate_About of its own gets the package's default.)
+
+       THE ABOUT FILE, Help\About.html: FTStdAbout.pkg compiles it in as the DFAbout library's resource, as
+       DfAbout.pkg compiles in Help\About.rtf - every program that Uses the package ships one, or binds a file of
+       its own first, or says FTNoAboutFile. pbShowAboutFile of the dialog is True when a file was bound;
+       Activate_About below shows where to change it. */
+    Use FTStdAbout.pkg
+
+    // StdAbout.pkg's DoAbout, with the same arguments: the name and the version blank - the application object's
+    // psProduct and the program's version resource - then the author, the mark, and a line of the demo's own.
+    Procedure Activate_About
+        // The About file after the lines: True, as it is for a program that binds one; False leaves it out.
+        Set pbShowAboutFile of ghoFTAboutDialog to True // False
+        Send DoAbout "" "" "" "Author: Nils Svedmyr" "FTGlyphs/rdcmark.svg" "Internet: https://www.github.com/nilssve"
+    End_Procedure
 
     /* THE HOST: every control of the window, on one grid (cFTGridHost). Each is an object of its own,
        so the Studio's Designer draws it where it sits. */
@@ -351,7 +380,7 @@ Object oMain is a cFTPanel
         End_Object
 
         // Row 3 is empty: 8 px of air (psRowHeights), so Exit does not sit right under the page.
-        // Row 4: the message boxes on the left - FTMessageBox.dg's three - and Exit at the bottom right.
+        // Row 4: the message boxes on the left - FTMessageBox.dg's three - and About with Exit at the bottom right.
         Object oInfoBoxBtn is a cFTWebButton
             Set piRowIndex to 4
             Set piColumnIndex to 0
@@ -396,6 +425,20 @@ Object oMain is a cFTPanel
                     Send FTInfoBox "You answered Yes: FTYesNoBox returned MBR_Yes, as YesNo_Box would." "Your answer"
                 Else ;
                     Send FTInfoBox "You answered No: FTYesNoBox returned MBR_No, as YesNo_Box would." "Your answer"
+            End_Procedure
+        End_Object
+
+        // About, beside Exit: the two together are as wide as the dialog button above them.
+        Object oAboutBtn is a cFTWebButton
+            Set piRowIndex to 4
+            Set piColumnIndex to 44
+            Set psCaption to "About"
+            Set psCSSClass to "ftbtn ftg-info"
+            Set psToolTip to "The library's About dialog - Activate_About, the one message a standard program's menu sends"
+
+            // As a menu's About item: Activate_About to the window, whose own sends DoAbout (above).
+            Procedure OnButtonClick
+                Send Activate_About of (phoMainPanel(ghoApplication))
             End_Procedure
         End_Object
 
