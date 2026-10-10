@@ -4,8 +4,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 
 - ONE themed host for the whole window, the library's `cFTGridHost`: laid out on a grid of 8 px columns
   the way a Windows dialog is - one column and the page's row take the extra space - with the buttons,
-  the glyph combo, the glyph list beside the page, a row of air, and the message boxes with About and Exit
-  in its five rows (`piRowIndex`);
+  the glyph combo, the dialogs of controls, the two boxes, the glyph list beside the page, a row of air,
+  and the message boxes with About and Exit in its seven rows (`piRowIndex`);
 - the page, a `cFTHtmlPage`: its title is `psLabel`, and its body is built with the `FTMarkupBuilders`
   functions. The RDC Tools mark beside the title is a glyph of the demo's own: `rdcmark.svg` in
   `AppHtml/FTGlyphs`. The program writes the folder's classes into `AppHtml/FTGlyphs/ftglyphs-app.css`
@@ -31,6 +31,41 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   Designer mockups button): six pages, each a `cFTHtmlPage` whose `psHtml` is one short literal - a grid, a list, a
   tree, a log, a chart and cards, drawn by the library's `ftcontrols.css`. Nothing replaces the literals
   there, so the running demo shows each shape just as the Designer does;
+- what the library does to the framework's own web controls, as a before and after
+  (`AppSrc/DemoWebControls.dg`, the Web controls button): the same objects, line for line - a `cWebForm`, a
+  `cWebCombo`, a `cWebCheckbox`, a `cWebLabel`, a `cWebDateForm`, radio buttons, a `cWebEdit`, a `cWebGroup`
+  and tab pages - on an FT host on the left and on the framework's own `cLocalWebControlHost` on the right.
+  An FT host takes the theme and marks its page with the class `FtHost`, and the library's `ftcontrols.css`
+  gives the framework's form controls there the FT look - the FT text size, the palette's colours, a label
+  on the left right-justified; the right-hand host has none of it, and does not
+  follow the Dark / Light choice. So a control needs a cFT class for what it does, not for how it looks -
+  and what still looks the theme's own on the left shows what is left to do. A bar at the bottom, a third
+  host, says what a control reported: a `cFTWebHtmlBox` whose `UpdateHtml` takes new markup from another
+  host's event, a `cFTWebCheckbox` that switches it off, and a markup button in a box of its own, whose
+  click reaches `OnHtmlClick` after the web click has returned;
+- native Windows controls on a `cFTModalPanel` (`AppSrc/DemoWindowsControls.dg`, the Windows controls
+  button): a `Form`, a `cFTComboForm`, a check box with a `cFTCheckBoxCaption`, a `cFTRadioGroup` whose
+  radios have a `cFTRadioCaption` each, a `cFTCJSelectionGrid` with rows from code, and a `cFTDeferTimer`
+  behind the line that says what changed; the buttons at the bottom are web buttons on a small grid host.
+  The program Uses this dialog below the application object: the grid's library, RDCToolsLib, asks the
+  application object for the program's name and folder as it is Used;
+- the data-aware classes (`AppSrc/DemoData.dg`, the Data-aware button) on CodeType and CodeMast, the two
+  code tables DataFlex gives every workspace: a `cFTDbModalPanel` with two `cFTDbCJGrid` grids on the left -
+  the code types, and the chosen type's codes - and a `cFTDbGridHost` on the right, whose web fields are
+  bound to the chosen type with `Entry_Item`, the comment in the framework's own `cWebEdit`, and whose
+  data-aware `cFTWebList` shows the same codes as the grid beside it: its columns are bound with
+  `Entry_Item` and it reads its rows from the data dictionary, where the main window's glyph list gets
+  them from code. The grid and the list share one data dictionary. A new type is added on either side:
+  the down arrow on the types grid's last row appends one, and Clear, beside Save, empties the fields for
+  one - the types grid gets an empty row for it, and Save saves it. A type's key is typed for a new type
+  only: the data dictionary says so (`DD_COMMIT`, with `Field_CommitNoEnterOnIndex`), and the grid's column
+  and the web field both follow it. The two data dictionaries are the
+  demo's (`cCodeTypeDataDictionary.dd`, `cCodeMastDataDictionary.dd`). A repository carries no tables, so
+  the program copies the two empty ones DataFlex ships (`Usr\New\Data` in the DataFlex folder) into `Data`
+  the first time it runs, and adds a few rows (`AppSrc/DemoCodeTables.pkg`). This dialog is Used below the
+  application object too: its data dictionaries open their tables as the program starts;
+- `FTInputBox`, the message box with one field to type in, and `FTHtmlMessage`, a message written in HTML
+  with button captions of its own (the Input box and HTML message buttons);
 - the About dialog (the About button): the library's `FTStdAbout.pkg`, Used in the main window as
   `StdAbout.pkg` is in a client area, and wired the standard way - the button sends `Activate_About`, as a
   menu's About item does, and the window's own `Activate_About` sends `DoAbout` with plain strings. The name

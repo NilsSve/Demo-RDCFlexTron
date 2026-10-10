@@ -1,0 +1,401 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoData
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-10
+//
+// Description : The data-aware classes on DataFlex's own two code tables: a cFTDbModalPanel with two
+//               cFTDbCJGrid grids on the left - the code types, and the chosen type's codes - and a
+//               cFTDbGridHost on the right, whose web fields are bound to the chosen type and whose
+//               cFTWebList shows the same codes.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use Windows.pkg
+Use cFTDbModalPanel.pkg
+Use cFTDbCJGrid.pkg                 // RDCToolsLib's data-aware grid in the FT look
+Use cRDCDbCJGridColumn.pkg          // its column
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the button bar's host
+Use cFTDbGridHost.pkg               // the data-aware host, on the same grid of 8 px columns
+Use FTAllWebControlClasses.pkg      // cFTWebForm, cFTWebList, cFTWebButton - and the framework's cWebEdit
+Use cCodeTypeDataDictionary.dd      // CodeType - it makes sure the two tables are there
+Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
+
+/* TWO DATA DICTIONARIES, NATIVE CONTROLS ON THE LEFT AND WEB CONTROLS ON THE RIGHT (the data-aware classes at
+   work). CodeType and CodeMast are the two code tables DataFlex gives every workspace: a type with a
+   description and a comment, and the codes of a type. The demo copies the empty tables into its Data folder
+   the first time it runs and adds a few rows (DemoCodeTables.pkg).
+
+   The left column is native - CodeJock grids:
+   - oTypes_grd, a cFTDbCJGrid on the CodeType DD: the types. A row chosen there is the DD's record. A
+     description is changed in place, and the down arrow on the last row adds a type.
+   - oCodes_grd, a cFTDbCJGrid on the CodeMast DD, which the CodeType DD constrains: the chosen type's codes.
+     Type in a cell to change one; the down arrow on the last row adds one; Delete removes one; the row is
+     saved when it is left.
+
+   The right column is ONE web host, oTypeHost, a cFTDbGridHost:
+   - web fields bound to the CodeType DD with Entry_Item, as a dbForm is - so they show the chosen type and
+     follow the grid. The comment is text of several lines, in the framework's own cWebEdit: the library has
+     no class for it, and it takes the FT look from the host. Save reads the fields and saves the DD.
+   - Clear, beside Save, adds a NEW type from the web side (Nils 2026-10-10), as the grid's own new row does
+     from the native side: the DD lets go of its record, the fields empty, the grid on the left gets an empty
+     row - the CodeJock grid does that itself when its DD is cleared by another control - and the Type field,
+     shut for a type that exists, can be typed in. Save then saves the new type, and the grid's row takes it.
+     That the key is typed for a new type only is the DD's rule (DD_COMMIT), so the grid's Type column and
+     the web field agree.
+   - oCodes_lst, a data-aware cFTWebList on the CodeMast DD: the same codes as the grid beside it, as a web
+     list. Its columns are bound with Entry_Item, and it fills itself from the DD - no OnManualLoadData. It
+     shares the DD with the grid, so the two follow each other: a row chosen in one is the DD's record, and
+     the other shows it; a code added or changed in the grid is in the list once it is saved.
+
+   The DDs belong to the panel, a cFTDbModalPanel, so the grids and the host share them. */
+Object oDemoData is a cFTDbModalPanel
+    Set Label to "Data-aware: code types and their codes"
+    Set Location to 10 10
+    Set Size to 282 430
+    Set piMinSize to 282 430
+
+    Object oCodeType_DD is a cCodeTypeDataDictionary
+    End_Object
+
+    Object oCodeMast_DD is a cCodeMastDataDictionary
+        Set DDO_Server to oCodeType_DD
+        Set Constrain_File to CodeType.File_Number
+    End_Object
+
+    Set Main_DD to oCodeType_DD
+    Set Server to oCodeType_DD
+
+    // ------------------------------------------------------------------------------- the left column: native
+    Object oTypes_tb is a TextBox
+        Set Location to 6 10
+        Set Size to 9 196
+        Set Label to "Code types - a cFTDbCJGrid you can type in."
+    End_Object
+
+    /* The types: a row chosen here is the DD's record, and the rest of the dialog follows it.
+
+       A NEW TYPE CAN BE ADDED HERE (Nils 2026-10-10): the down arrow on the last row appends an empty row - the
+       grid clears its DD for it - and the row is saved when it is left. pbAllowEdit and pbAllowAppendRow say
+       so; the library's class has both off. A description can be changed in place; the Type column takes
+       typing in a new row only, because the DD says its key is committed once saved (DD_COMMIT,
+       cCodeTypeDataDictionary.dd), and the grid asks the DD before it lets a cell be edited. Rows are not
+       deleted here: a type has codes under it.
+
+       NO CHECK BOX COLUMN, and that is the class's own default: phoCheckbox_Col and phoData_Col are -1, which
+       its footer routine reads as "none". Leave them alone - 0 is not "none" there, and the routine then asks
+       object 0 for a column (error 98 as the dialog opens, Nils 2026-10-10). The footer is this grid's own:
+       how many types there are. */
+    Object oTypes_grd is a cFTDbCJGrid
+        Set Server to oCodeType_DD
+        Set Location to 18 10
+        Set Size to 110 196
+        Set peAnchors to anTopLeftRight
+        Set pbAllowEdit to True
+        Set pbAllowAppendRow to True
+        Set pbAllowInsertRow to False
+        Set pbAllowDeleteRow to False
+        Set pbAutoAppend to False
+        Set Status_Help to "Choose a type. The down arrow on the last row adds one; a new type's name is typed in its first cell."
+
+        Object oCodeType_Type is a cRDCDbCJGridColumn
+            Entry_Item CodeType.Type
+            Set piWidth to 110
+            Set psCaption to "Type"
+        End_Object
+
+        Object oCodeType_Description is a cRDCDbCJGridColumn
+            Entry_Item CodeType.Description
+            Set piWidth to 220
+            Set psCaption to "Description"
+        End_Object
+
+        // The class sends this whenever the row or the data changes; it writes the footer.
+        Procedure DoSetCheckboxFooterText
+            Integer iTypes
+            Get_Attribute DF_FILE_RECORDS_USED of CodeType.File_Number to iTypes
+            Set psFooterText of (oCodeType_Type(Self)) to ("Types:" * String(iTypes))
+        End_Procedure
+    End_Object
+
+    Object oCodes_tb is a TextBox
+        Set Location to 134 10
+        Set Size to 9 196
+        Set Label to "The type's codes - a cFTDbCJGrid you can type in."
+    End_Object
+
+    // No check box column here either (the class's default), and no footer: the grid has nothing to count.
+    Object oCodes_grd is a cFTDbCJGrid
+        Set Server to oCodeMast_DD
+        Set Location to 146 10
+        Set Size to 100 196
+        Set peAnchors to anAll
+        Set pbAllowEdit to True
+        Set pbAllowAppendRow to True
+        Set pbAutoAppend to True
+        Set pbAllowDeleteRow to True
+        Set pbShowFooter to False
+        Set Status_Help to "Type in a cell. The down arrow on the last row adds a code, Delete removes one."
+
+        Object oCodeMast_Code is a cRDCDbCJGridColumn
+            Entry_Item CodeMast.Code
+            Set piWidth to 110
+            Set psCaption to "Code"
+        End_Object
+
+        Object oCodeMast_Description is a cRDCDbCJGridColumn
+            Entry_Item CodeMast.Description
+            Set piWidth to 220
+            Set psCaption to "Description"
+        End_Object
+    End_Object
+
+    // -------------------------------------------------------------------------------- the right column: web
+    Object oType_tb is a TextBox
+        Set Location to 6 212
+        Set Size to 9 208
+        Set peAnchors to anTopRight
+        Set Label to "The same data as web controls - a cFTDbGridHost"
+    End_Object
+
+    /* THE DATA-AWARE HOST: 8 px columns, as a cFTGridHost has. Column 16 takes the extra width, so the fields
+       fill the host; Clear and Save, 11 columns each, end at its right edge. Row 8, the list, takes the extra
+       height, so it grows with the dialog. The host's own Server is the CodeType DD - the fields' - and the
+       list names the CodeMast DD as its own: a host holds controls of more than one DD, as a view does.
+
+       AIR UNDER THE COMMENT (Nils 2026-10-10: the buttons sat too close to it). The Comment field spans rows 2
+       to 4, and row 4 is 25 px where a row is 33, so the field is 8 px shorter; row 5 is those 8 px, empty.
+       Clear and Save, in row 6, are where they were. */
+    Object oTypeHost is a cFTDbGridHost
+        Set Location to 18 212
+        Set Size to 228 208
+        Set peAnchors to anTopBottomRight
+        Set piColumnCount to 39
+        Set psColumnWidths to "16/1fr"
+        Set psRowHeights to "4/25px 5/8px 8/1fr"
+        Set Server to oCodeType_DD
+
+        /* THE TYPE'S KEY: shown for a type that exists - it is chosen in the grid, and a key is not changed -
+           and typed in for a new one, after Clear. The field opens and shuts itself: a DD tells its controls
+           whenever its record changes - a row chosen in the grid, Clear, Save - and this one asks the panel
+           then (SyncTypeField). It starts shut: the dialog opens on the first type. */
+        Object oType_wf is a cFTWebForm
+            Entry_Item CodeType.Type
+            Set Server to oCodeType_DD
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 39
+            Set piLabelOffset to 80
+            Set psLabel to "Type:"
+            Set pbEnabled to False
+
+            Procedure Refresh Integer eMode
+                Forward Send Refresh eMode
+                Send SyncTypeField
+            End_Procedure
+        End_Object
+
+        Object oDescription_wf is a cFTWebForm
+            Entry_Item CodeType.Description
+            Set Server to oCodeType_DD
+            Set piRowIndex to 1
+            Set piColumnIndex to 0
+            Set piColumnSpan to 39
+            Set piLabelOffset to 80
+            Set psLabel to "Description:"
+        End_Object
+
+        // Text of several lines: the framework's own cWebEdit, bound like the fields above. No cFT class - the
+        // host gives it the FT look, its label's right justification too: it names no peLabelAlign.
+        Object oComment_we is a cWebEdit
+            Entry_Item CodeType.Comment
+            Set Server to oCodeType_DD
+            Set piRowIndex to 2
+            Set piRowSpan to 3
+            Set piColumnIndex to 0
+            Set piColumnSpan to 39
+            Set piLabelOffset to 80
+            Set psLabel to "Comment:"
+            Set pbFillHeight to True
+        End_Object
+
+        // Clear, to the left of Save: the fields emptied for a new type.
+        Object oClearBtn is a cFTWebButton
+            Set piRowIndex to 6
+            Set piColumnIndex to 17
+            Set piColumnSpan to 11
+            Set psCaption to "Clear"
+            Set psCSSClass to "ftbtn ftg-eraser"
+            Set psToolTip to "Empty the fields for a new code type"
+
+            // After the web click has returned.
+            Procedure OnButtonClick
+                Send DoClearType of (oDemoData(Self))
+            End_Procedure
+        End_Object
+
+        Object oSaveBtn is a cFTWebButton
+            Set piRowIndex to 6
+            Set piColumnIndex to 28
+            Set piColumnSpan to 11
+            Set psCaption to "Save"
+            Set psCSSClass to "ftbtn ftg-check"
+            Set psToolTip to "Save the type - a new one, after Clear, or the description and the comment of the chosen one"
+
+            // After the web click has returned.
+            Procedure OnButtonClick
+                Send DoSaveType of (oDemoData(Self))
+            End_Procedure
+        End_Object
+
+        Object oCodesLabel is a cFTWebLabel
+            Set piRowIndex to 7
+            Set piColumnIndex to 0
+            Set piColumnSpan to 39
+            Set psCaption to "The type's codes - a data-aware cFTWebList"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        /* THE DATA-AWARE LIST (Nils 2026-10-10: a data-aware cFTWebList beside the CodeJock grids). The main
+           window's glyph list gets its rows from code; this one is bound: its Server is the CodeMast DD and
+           its columns name their fields with Entry_Item, so the framework reads the rows from the DD - the
+           chosen type's codes, since the CodeType DD constrains it - and reads them again when the type
+           changes. pbDataAware is True by default; there is no OnManualLoadData here. A list shows; it does
+           not edit - the grid on the left does that, on the same DD. */
+        Object oCodes_lst is a cFTWebList
+            Set Server to oCodeMast_DD
+            Set piRowIndex to 8
+            Set piColumnIndex to 0
+            Set piColumnSpan to 39
+            Set pbFillHeight to True
+            Set piOrdering to 1             // index 1: the type, then the code
+            Set psPlaceHolder to "No codes yet"
+
+            Object oCode_col is a cWebColumn
+                Entry_Item CodeMast.Code
+                Set psCaption to "Code"
+                Set piWidth to 90               // 90 px
+                Set pbFixedWidth to True
+            End_Object
+
+            Object oCodeDescription_col is a cWebColumn
+                Entry_Item CodeMast.Description
+                Set psCaption to "Description"
+                Set piWidth to 1                // the rest of the list's width
+            End_Object
+        End_Object
+    End_Object
+
+    /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Close at the right edge.
+
+       ITS HEIGHT: one row of buttons is 33 px, and the Web UI theme pads a host's content by 4 px above and
+       below - 41 px in all. A host shorter than its content scrolls, so at 20 units, about 33 px, this bar had
+       a scroll bar (Nils 2026-10-10). 26 units hold the row at 100 % and above. */
+    Object oButtonBar is a cFTGridHost
+        Set Location to 250 320
+        Set Size to 26 100
+        Set peAnchors to anBottomRight
+        Set piColumnCount to 12         // column 0, then Close's 11
+        Set psColumnWidths to "0/1fr"
+
+        Object oCloseBtn is a cFTWebButton
+            Set piColumnIndex to 1
+            Set piColumnSpan to 11
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"
+            Set psToolTip to "Close this dialog"
+
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoData(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    /* The Type field is typed in for a NEW type only. The value is stored for a page that loads (Set) and
+       pushed to a page that is up (WebSet): the host's pbInitWebApp is True until its page has called home,
+       and a WebSet before then has nowhere to go - the dialog finds its first type before that. */
+    Procedure SyncTypeField
+        Boolean bHasRecord bInitializing
+
+        Get HasRecord of oCodeType_DD to bHasRecord
+        Set pbEnabled of oType_wf to (not(bHasRecord))
+        Get pbInitWebApp of oTypeHost to bInitializing
+        If (not(bInitializing)) ;
+            WebSet pbEnabled of oType_wf to (not(bHasRecord))
+    End_Procedure
+
+    // Clear, from the web button: the DD lets go of its record, and its controls follow - the fields empty,
+    // the Type field opens (its Refresh), the grid on the left gets an empty row, the codes go.
+    Procedure DoClearType
+        Send Clear of oCodeType_DD
+        Send Focus of oType_wf
+        Set StatusText to "A new type: enter it, and press Save."        // the panel's own status bar
+    End_Procedure
+
+    /* Save, from the web button: the fields' values go into the DD, and the DD saves its record - a save
+       aimed at the DD, never a broadcast to every control. A NEW type needs its key first, in capitals as
+       the DD keeps it; a key that exists is found and shown instead, the way a key field finds as it is
+       left (the read is done on the table itself, so the buffer is emptied again before the values go in). */
+    Procedure DoSaveType
+        String sType sDescription sComment
+        Boolean bHasRecord bNew
+
+        Get HasRecord of oCodeType_DD to bHasRecord
+        Move (not(bHasRecord)) to bNew
+        WebGet psValue of oType_wf to sType
+        WebGet psValue of oDescription_wf to sDescription
+        WebGet psValue of oComment_we to sComment
+        If (bNew) Begin
+            Move (Uppercase(Trim(sType))) to sType
+            If (sType = "") Begin
+                Set StatusText to "A new type needs its name: enter the type first."
+                Send Focus of oType_wf
+                Procedure_Return
+            End
+            Clear CodeType
+            Move sType to CodeType.Type
+            Find EQ CodeType by Index.1
+            If (Found) Begin
+                Send FindByRowId of oCodeType_DD CodeType.File_Number (GetRowId(CodeType.File_Number))
+                Set StatusText to ("The type " + sType + " exists already - here it is.")
+                Procedure_Return
+            End
+            Clear CodeType
+            Set Field_Changed_Value of oCodeType_DD Field CodeType.Type to sType
+        End
+        Set Field_Changed_Value of oCodeType_DD Field CodeType.Description to sDescription
+        Set Field_Changed_Value of oCodeType_DD Field CodeType.Comment to sComment
+        Send Request_Save of oCodeType_DD
+        Get HasRecord of oCodeType_DD to bHasRecord
+        If (not(bHasRecord)) Begin
+            Set StatusText to "The type was not saved."
+            Procedure_Return
+        End
+        If (bNew) Begin
+            Set StatusText to ("The new type " + sType + " is saved. Its codes go in the grid below the types.")
+        End
+        Else Begin
+            Set StatusText to "The type is saved."
+        End
+    End_Procedure
+
+    // The first type, when none is chosen yet - so the fields and the codes have something to show.
+    Procedure Activating
+        Boolean bHasRecord
+        Forward Send Activating
+        Get HasRecord of oCodeType_DD to bHasRecord
+        If (not(bHasRecord)) ;
+            Send Find of oCodeType_DD FIRST_RECORD 1
+    End_Procedure
+
+    // The panel's own Clear would empty the fields of a type that is still chosen in the grid.
+    Procedure Request_Clear
+    End_Procedure
+
+    On_Key Key_Ctrl+Key_S Send DoSaveType
+    On_Key Key_Alt+Key_C  Send Close_Panel
+    On_Key kCancel        Send Close_Panel
+End_Object

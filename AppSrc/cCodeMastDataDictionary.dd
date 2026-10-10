@@ -1,0 +1,43 @@
+﻿//****************************************************************************
+// $Module type: Data Dictionary
+// $Module name: cCodeMastDataDictionary
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-10
+//
+// Description : The data dictionary of CodeMast, DataFlex's own table of codes: a code and its description,
+//               under a type of CodeType (cCodeTypeDataDictionary.dd).
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use DataDict.pkg
+Use cCodeTypeDataDictionary.dd      // the parent: it makes sure the two tables are there, and opens them
+
+Class cCodeMastDataDictionary is a DataDictionary
+
+    Procedure Construct_Object
+        Forward Send Construct_Object
+
+        Set Main_File to CodeMast.File_Number
+
+        Set Add_Server_File to CodeType.File_Number
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Label_Long Field CodeMast.Code to "Code"
+        Set Field_Label_Short Field CodeMast.Code to "Code"
+        Set Key_Field_State Field CodeMast.Code to True
+        Set Field_Option Field CodeMast.Code DD_REQUIRED to True
+        Set Field_Option Field CodeMast.Code DD_CAPSLOCK to True
+        Set Status_Help Field CodeMast.Code to "The code, in capitals"
+
+        Set Field_Label_Long Field CodeMast.Description to "Description"
+        Set Field_Label_Short Field CodeMast.Description to "Description"
+        Set Status_Help Field CodeMast.Description to "What the code stands for"
+    End_Procedure
+
+End_Class

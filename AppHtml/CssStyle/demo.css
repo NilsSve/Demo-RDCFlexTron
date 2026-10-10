@@ -27,3 +27,24 @@
     font-family: Consolas, monospace;
     color: var(--dfr-code-ink);
 }
+
+/* The bar of the Web controls dialog (DemoWebControls.dg): the line that says what a control reported, and -
+   in a box of its own, .right - a markup button. The button is .rpbtn (the library's buttons.css). */
+.demostatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 4px;
+    font: 12px "Segoe UI", sans-serif;
+    color: var(--dfr-ink-2);
+}
+.demostatus .said {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.demostatus.right {
+    justify-content: flex-end;
+}

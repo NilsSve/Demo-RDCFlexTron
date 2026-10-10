@@ -1,0 +1,266 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoWindowsControls
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-10
+//
+// Description : Native Windows controls on an FT panel: a form, a combo, a check box and a radio group with
+//               captions that can be read on the FT ground, a selection grid, and a bar of web buttons.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use Windows.pkg
+Use cFTModalPanel.pkg
+Use cFTComboForm.pkg                // a combo form that keeps Windows' own colours
+Use cFTCheckBoxCaption.pkg          // a check box's caption, as a TextBox beside it
+Use cFTRadioCaption.pkg             // a radio's caption, the same way
+Use cFTRadioGroup.pkg               // a radio group whose caption the FT colours reach
+Use cFTCJSelectionGrid.pkg          // the selection grid: a check box column to tick rows with
+Use cFTDeferTimer.pkg               // work that waits one tick
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the button bar's host
+Use FTAllWebControlClasses.pkg      // cFTWebButton
+Use FTMessageBox.dg                 // FTInfoBox
+
+/* A WINDOWS DIALOG IN THE FT COLOURS. A cFTModalPanel gives itself and its native children the FT ground and
+   ink (pbFTColorChildren), which a TextBox and a Form take. Three kinds of control do not, and each has a class
+   here for it:
+
+   - a CheckBox and a Radio draw their own captions in the Windows theme's colour, so the control gets no
+     caption of its own and a cFTCheckBoxCaption / cFTRadioCaption beside it carries it - a click on the
+     caption does what a click on the control does;
+   - a group box draws its caption the same way, so a cFTRadioGroup moves its Label into a TextBox laid over
+     the frame's top line;
+   - a combo's drop-down list is a window Windows paints itself, so a cFTComboForm keeps Windows' own colours
+     altogether - a light combo among dark controls, with a list that can be read.
+
+   The grid is a cFTCJSelectionGrid: RDCToolsLib's selection grid in the FT look, its rows from code (LoadData).
+   The buttons at the bottom are web buttons on a small grid host of their own, as in every FT dialog. */
+Object oDemoWindowsControls is a cFTModalPanel
+    Set Label to "Windows controls on an FT panel"
+    Set Location to 10 10
+    Set Size to 238 360
+    Set piMinSize to 238 360
+
+    // How many rows are ticked: read inside the button's web click, shown after it (see oTickedBtn).
+    Property Integer piTickedRows 0
+
+    Object oIntro_tb is a TextBox
+        Set Location to 6 10
+        Set Size to 9 300
+        Set Label to "Native controls. The panel gives them the FT colours; three kinds need a class for it."
+    End_Object
+
+    Object oName_fm is a Form
+        Set Location to 22 76
+        Set Size to 13 100
+        Set Label to "A Form:"
+        Set Label_Col_Offset to 2
+        Set Label_Justification_Mode to JMode_Right
+        Set Value to "Some text"
+
+        Procedure OnChange
+            Send Heard ("The Form: " + Value(Self))
+        End_Procedure
+    End_Object
+
+    // 13 by 100, not typed in, its label to the right of its left edge: the class's own defaults.
+    Object oColour_cf is a cFTComboForm
+        Set Location to 39 76
+        Set Label to "cFTComboForm:"
+
+        Procedure Combo_Fill_List
+            Send Combo_Add_Item "Amber"
+            Send Combo_Add_Item "Mint"
+            Send Combo_Add_Item "Coral"
+            Set Value to "Amber"
+        End_Procedure
+
+        Procedure OnChange
+            Send Heard ("The combo: " + Value(Self))
+        End_Procedure
+    End_Object
+
+    // The check box has no caption of its own; the TextBox beside it carries it.
+    Object oKeep_cb is a CheckBox
+        Set Size to 10 10
+        Set Location to 57 76
+
+        Procedure OnChange
+            Send Heard ("The check box: " + If(Checked_State(Self), "ticked", "not ticked"))
+        End_Procedure
+    End_Object
+
+    Object oKeep_tb is a cFTCheckBoxCaption
+        Set Location to 58 88
+        Set Label to "cFTCheckBoxCaption: click me too"
+        Set phoCheckBox to (oKeep_cb(Self))
+    End_Object
+
+    // The group's Label moves into a TextBox over its frame; each radio's caption is a TextBox beside it.
+    Object oDirection_rg is a cFTRadioGroup
+        Set Location to 20 210
+        Set Size to 46 140
+        Set Label to "cFTRadioGroup"
+
+        Object oUp_rd is a Radio
+            Set Size to 10 10
+            Set Location to 14 10
+        End_Object
+
+        Object oUp_tb is a cFTRadioCaption
+            Set Location to 15 22
+            Set Label to "cFTRadioCaption: up"
+            Set phoRadio to (oUp_rd(Self))
+        End_Object
+
+        Object oDown_rd is a Radio
+            Set Size to 10 10
+            Set Location to 28 10
+        End_Object
+
+        Object oDown_tb is a cFTRadioCaption
+            Set Location to 29 22
+            Set Label to "cFTRadioCaption: down"
+            Set phoRadio to (oDown_rd(Self))
+        End_Object
+
+        Procedure Notify_Select_State Integer iToItem Integer iFromItem
+            Forward Send Notify_Select_State iToItem iFromItem
+            // Only a choice that moved: the group also sends this as it is set up.
+            If (iToItem <> iFromItem) ;
+                Send Heard ("The radio group: " + If(iToItem = 0, "up", "down"))
+        End_Procedure
+    End_Object
+
+    // What a control said last. A TextBox: it takes the FT ink.
+    Object oHeard_tb is a TextBox
+        Set Location to 74 10
+        Set Size to 9 340
+        Set Auto_Size_State to False
+        Set Label to "Change a control, and this line says what it heard."
+    End_Object
+
+    /* ONE TICK LATER (cFTDeferTimer). A control's change is parked here and written to the line above on the
+       next tick, the caller's own work finished - the pattern for anything that must not run inside a
+       broadcast, a DD's update or a web event, or that a burst of changes should cause only once: the last
+       one parked is the one that runs. */
+    Object oDefer is a cFTDeferTimer
+        Procedure OnDeferredAction Integer iAction String sParam
+            Set Label of (oHeard_tb(Self)) to sParam
+        End_Procedure
+    End_Object
+
+    Procedure Heard String sText
+        Send ArmAction of (oDefer(Self)) 1 sText
+    End_Procedure
+
+    /* The rows come from code (LoadData, which the class sends when the dialog opens). Tick a row with a click
+       on its box or with the space bar; a right click has Select All, Select None and Invert, and the footer
+       counts the ticks.
+
+       THE CLASS'S OWN EDIT SETTINGS STAY (pbAllowEdit and pbEditOnClick, both True): a click can only tick a
+       box in a grid that can be edited, and the class keeps every other column from being typed in
+       (CanEditColumn). Switched off - as a list that is only read may have them - the mouse ticks nothing
+       (Nils 2026-10-10). */
+    Object oClasses_grd is a cFTCJSelectionGrid
+        Set Location to 88 10
+        Set Size to 112 340
+        Set peAnchors to anAll
+        Set pbShowFooter to True
+
+        Object oClass_col is a cCJGridColumn
+            // The grid's data column - set here, inside the column.
+            Set phoData_Col to Self
+            Set piWidth to 170
+            Set psCaption to "Class"
+        End_Object
+
+        Object oWhat_col is a cCJGridColumn
+            Set piWidth to 420
+            Set psCaption to "What it is for"
+        End_Object
+
+        Procedure AddRow tDataSourceRow[] ByRef TheData String sClass String sWhat
+            Integer iRow iClassCol iWhatCol iCheckCol
+            Get piColumnId of (oClass_col(Self)) to iClassCol
+            Get piColumnId of (oWhat_col(Self)) to iWhatCol
+            Get piColumnId of (phoCheckbox_Col(Self)) to iCheckCol
+            Move (SizeOfArray(TheData)) to iRow
+            Move sClass to TheData[iRow].sValue[iClassCol]
+            Move sWhat to TheData[iRow].sValue[iWhatCol]
+            Move False to TheData[iRow].sValue[iCheckCol]
+        End_Procedure
+
+        Procedure LoadData
+            tDataSourceRow[] TheData
+
+            If (not(IsComObjectCreated(Self))) ;
+                Procedure_Return
+            Send AddRow (&TheData) "cFTModalPanel" "A modal panel in the FT colours, its native children too"
+            Send AddRow (&TheData) "cFTCheckBoxCaption" "A check box's caption, readable on the FT ground"
+            Send AddRow (&TheData) "cFTRadioCaption" "A radio's caption, the same way"
+            Send AddRow (&TheData) "cFTRadioGroup" "A radio group whose caption the FT colours reach"
+            Send AddRow (&TheData) "cFTComboForm" "A combo form that keeps Windows' own colours"
+            Send AddRow (&TheData) "cFTCJSelectionGrid" "This grid: a check box column to tick rows with"
+            Send AddRow (&TheData) "cFTDbCJGrid" "The data-aware grid - in the Data-aware dialog"
+            Send AddRow (&TheData) "cFTDeferTimer" "Work that waits one tick - the line above this grid"
+            Send ReInitializeData TheData False
+            Send MoveToFirstRow
+        End_Procedure
+    End_Object
+
+    /* THE BUTTON BAR: a small grid host of 8 px columns with two web buttons. Column 0 takes the extra width,
+       so the buttons keep to the right edge. A button's work runs in OnButtonClick, after the web click has
+       returned, so a message box can open and the panel can close there. */
+    Object oButtonBar is a cFTGridHost
+        // 26 units high: a row of buttons, 33 px, and the 4 px the theme pads a host's content by, above and
+        // below. A host shorter than its content scrolls - at 20 units this bar would.
+        Set Location to 204 190
+        Set Size to 26 164
+        Set peAnchors to anBottomRight
+        Set piColumnCount to 26         // column 0, then Ticked rows' 14 and Close's 11
+        Set psColumnWidths to "0/1fr"
+
+        Object oTickedBtn is a cFTWebButton
+            Set piColumnIndex to 1
+            Set piColumnSpan to 14
+            Set psCaption to "Ticked rows"
+            Set psCSSClass to "ftbtn ftg-listcheck"
+            Set psToolTip to "How many rows are ticked"
+
+            // The grid is read here, inside the click; the box opens in OnButtonClick, after it.
+            Procedure OnClick
+                Set piTickedRows of (oDemoWindowsControls(Self)) to (CheckedItems(oClasses_grd(Self)))
+                Forward Send OnClick
+            End_Procedure
+
+            Procedure OnButtonClick
+                Send ShowTicked of (oDemoWindowsControls(Self))
+            End_Procedure
+        End_Object
+
+        Object oCloseBtn is a cFTWebButton
+            Set piColumnIndex to 15
+            Set piColumnSpan to 11
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"
+            Set psToolTip to "Close this dialog"
+
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoWindowsControls(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    Procedure ShowTicked
+        Integer iRows
+        Get piTickedRows to iRows
+        Send FTInfoBox ("Rows ticked: " + String(iRows) + ".\nTick a row with a click on its box, or with the space bar.") "Ticked rows"
+    End_Procedure
+
+    On_Key Key_Alt+Key_C Send Close_Panel
+    On_Key kCancel       Send Close_Panel
+End_Object

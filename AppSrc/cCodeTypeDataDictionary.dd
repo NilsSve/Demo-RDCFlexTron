@@ -1,0 +1,67 @@
+﻿//****************************************************************************
+// $Module type: Data Dictionary
+// $Module name: cCodeTypeDataDictionary
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-10
+//
+// Description : The data dictionary of CodeType, DataFlex's own table of code types: a type, its
+//               description and a comment. CodeMast holds each type's codes (cCodeMastDataDictionary.dd).
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use DataDict.pkg
+Use DemoCodeTables.pkg      // EnsureCodeTables
+
+// The two tables are copied into the Data folder the first time the program runs - before the Opens below.
+Send EnsureCodeTables
+
+Open CodeType
+Open CodeMast
+
+Class cCodeTypeDataDictionary is a DataDictionary
+
+    Procedure Construct_Object
+        Forward Send Construct_Object
+
+        Set Main_File to CodeType.File_Number
+
+        Set Add_Client_File to CodeMast.File_Number
+
+        Set Foreign_Field_Option DD_KEYFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_KEYFIELD DD_FINDREQ to True
+        Set Foreign_Field_Option DD_INDEXFIELD DD_NOPUT to True
+        Set Foreign_Field_Option DD_DEFAULT DD_DISPLAYONLY to True
+
+        Set Field_Label_Long Field CodeType.Type to "Type"
+        Set Field_Label_Short Field CodeType.Type to "Type"
+        Set Key_Field_State Field CodeType.Type to True
+        Set Field_Option Field CodeType.Type DD_AUTOFIND to True
+        Set Field_Option Field CodeType.Type DD_REQUIRED to True
+        Set Field_Option Field CodeType.Type DD_CAPSLOCK to True
+        // The key is entered for a NEW type only: once the type is saved it is shown, not typed in. A grid's
+        // column and a web field both ask the DD for this (File_Field_DynamicEntryOptions), so it is said
+        // once, here. See Field_CommitNoEnterOnIndex below.
+        Set Field_Option Field CodeType.Type DD_COMMIT to True
+        Set Status_Help Field CodeType.Type to "The type's name, in capitals - typed in for a new type only"
+
+        Set Field_Label_Long Field CodeType.Description to "Description"
+        Set Field_Label_Short Field CodeType.Description to "Description"
+        Set Status_Help Field CodeType.Description to "What the type's codes are"
+
+        Set Field_Label_Long Field CodeType.Comment to "Comment"
+        Set Field_Label_Short Field CodeType.Comment to "Comment"
+        Set Status_Help Field CodeType.Comment to "More about the type - text of several lines"
+    End_Procedure
+
+    // A committed field (DD_COMMIT) of a saved record is not saved again; one that is in an index can still be
+    // typed in, to find by - unless this function says no. The type's key says no: a row in the grid is what
+    // chooses a type, so a saved type's key is shown and nothing more.
+    Function Field_CommitNoEnterOnIndex Integer iField Returns Boolean
+        Integer iType
+        Get_FieldNumber CodeType.Type to iType
+        Function_Return (iField = iType)
+    End_Function
+
+End_Class

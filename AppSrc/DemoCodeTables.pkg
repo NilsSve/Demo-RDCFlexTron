@@ -1,0 +1,140 @@
+﻿//****************************************************************************
+// $Module type: Package
+// $Module name: DemoCodeTables
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-10
+//
+// Description : CodeType and CodeMast for the data-aware dialog (DemoData.dg): DataFlex's own two code
+//               tables, which the demo's filelist names. When their data files are not in the Data folder,
+//               the program copies the empty ones DataFlex ships, and adds a few rows.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use cApplication.pkg        // ghoApplication, and the workspace's data path
+
+/* THE TWO TABLES every DataFlex workspace knows: CodeType (253) - a type, its description and a comment - and
+   CodeMast (254) - a type's codes, each with a description. Data\Filelist.cfg names both, and their field
+   definitions (CodeType.FD, CodeMast.FD) come with DataFlex.
+
+   A repository carries no tables, so a fresh clone has the filelist and no data files. The Studio gives a new
+   workspace its two code tables by copying the empty ones from the DataFlex folder, Usr\New\Data; the demo
+   does the same the first time it runs. EnsureCodeTables is sent before the tables are opened
+   (cCodeTypeDataDictionary.dd): a table whose data file is not on the data path is copied from there, and
+   when both were copied they get a few rows to show. Tables that are there are left as they are. */
+Declare_Datafile CodeType
+Declare_Datafile CodeMast
+
+// The folder the tables go to: the workspace's data folder - the first one, if it names several.
+Function DemoDataFolder Global Returns String
+    String sPath
+    Integer iPos
+
+    If (ghoApplication <> 0) ;
+        Get psDataPath of (phoWorkspace(ghoApplication)) to sPath
+    If (sPath = "") ;
+        Get_Attribute DF_OPEN_PATH to sPath
+    Move (Pos(";", sPath)) to iPos
+    If (iPos > 0) ;
+        Move (Left(sPath, (iPos - 1))) to sPath
+    Move (Trim(sPath)) to sPath
+    If (Right(sPath, 1) = "\") ;
+        Move (Left(sPath, (Length(sPath) - 1))) to sPath
+    Function_Return sPath
+End_Function
+
+// The folder DataFlex keeps a new workspace's empty tables in, with its last backslash.
+Function DemoNewDataFolder Global Returns String
+    String sRoot
+    Get_Profile_String "Defaults" "VDFRootDir" to sRoot
+    Move (Trim(sRoot)) to sRoot
+    If (sRoot = "") ;
+        Function_Return ""
+    If (Right(sRoot, 1) <> "\") ;
+        Move (sRoot + "\") to sRoot
+    Function_Return (sRoot + "Usr\New\Data\")
+End_Function
+
+// True when a file is on the data path.
+Function DemoFileOnDataPath Global String sFile Returns Boolean
+    String sPath
+    Get_File_Path sFile to sPath
+    Function_Return (sPath <> "")
+End_Function
+
+// Copies one table's files from DataFlex's folder into the data folder. True when its data file arrived.
+Function DemoCopyCodeTable Global String sTable Returns Boolean
+    String sFrom sTo
+    Boolean bThere
+
+    Move (DemoNewDataFolder()) to sFrom
+    Move (DemoDataFolder() + "\") to sTo
+    If (sFrom = "") ;
+        Function_Return False
+    File_Exist (sFrom + sTable + ".dat") bThere
+    If (not(bThere)) ;
+        Function_Return False
+    CopyFile (sFrom + sTable + ".dat") to (sTo + sTable + ".dat")
+    CopyFile (sFrom + sTable + ".hdr") to (sTo + sTable + ".hdr")
+    CopyFile (sFrom + sTable + ".tag") to (sTo + sTable + ".tag")
+    CopyFile (sFrom + sTable + ".k1")  to (sTo + sTable + ".k1")
+    File_Exist (sTo + sTable + ".dat") bThere
+    Function_Return bThere
+End_Function
+
+// One type, with its codes: "code=description" pairs.
+Procedure DemoAddCodeType Global String sType String sDescription String sComment String[] asCodes
+    Integer i iPos
+
+    Clear CodeType
+    Move sType to CodeType.Type
+    Move sDescription to CodeType.Description
+    Move sComment to CodeType.Comment
+    SaveRecord CodeType
+    For i from 0 to (SizeOfArray(asCodes) - 1)
+        Move (Pos("=", asCodes[i])) to iPos
+        Clear CodeMast
+        Move sType to CodeMast.Type
+        Move (Left(asCodes[i], (iPos - 1))) to CodeMast.Code
+        Move (Mid(asCodes[i], Length(asCodes[i]), (iPos + 1))) to CodeMast.Description
+        SaveRecord CodeMast
+    Loop
+End_Procedure
+
+// A few rows for two empty tables.
+Procedure SeedCodeTables Global
+    String[] asColours asPriorities asUnits
+
+    Move "AMBER=The flow colour" to asColours[-1]
+    Move "MINT=Done, and well" to asColours[-1]
+    Move "CORAL=Needs attention" to asColours[-1]
+    Move "LOW=When there is time" to asPriorities[-1]
+    Move "NORMAL=In its turn" to asPriorities[-1]
+    Move "HIGH=Before anything else" to asPriorities[-1]
+    Move "PCS=Pieces" to asUnits[-1]
+    Move "BOX=Boxes of twelve" to asUnits[-1]
+
+    Open CodeType
+    Open CodeMast
+    Lock
+        Send DemoAddCodeType "COLOUR" "Colours" "The colours the demo's pages use. A comment is text of several lines, so the dialog shows it in a cWebEdit." asColours
+        Send DemoAddCodeType "PRIORITY" "Priorities" "How soon a task is due." asPriorities
+        Send DemoAddCodeType "UNIT" "Units" "" asUnits
+    Unlock
+    Close CodeMast
+    Close CodeType
+End_Procedure
+
+// Sent before the tables are opened: a table whose data file is not on the data path is copied from
+// DataFlex's folder, and two new tables get their rows.
+Procedure EnsureCodeTables Global
+    Boolean bTypeCopied bMastCopied
+
+    If (not(DemoFileOnDataPath("CodeType.dat"))) ;
+        Get DemoCopyCodeTable "CodeType" to bTypeCopied
+    If (not(DemoFileOnDataPath("CodeMast.dat"))) ;
+        Get DemoCopyCodeTable "CodeMast" to bMastCopied
+    If (bTypeCopied and bMastCopied) ;
+        Send SeedCodeTables
+End_Procedure
