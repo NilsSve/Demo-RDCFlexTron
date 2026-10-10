@@ -109,12 +109,12 @@ Function DemoPageHtml Global Returns String
         """)))
     Append sItems (BulletItem(MarkedText("""
         Web controls is a before and after: the framework's own web controls - a `cWebForm`, a `cWebCombo`,
-        a `cWebDateForm`, a `cWebEdit`, radio buttons, a group, tab pages - on an FT host on the left, and the
-        same objects, line for line, on the framework's own `cLocalWebControlHost` on the right. The difference
-        is what the library does: an FT host takes the theme and marks its page with the class `FtHost`, and
-        ftcontrols.css gives the framework's form controls there the FT look - the FT text size, the palette's
-        colours, a label on the left right-justified. So a control needs a cFT class for what it does, not
-        for how it looks.
+        a `cWebDateForm`, check boxes and radio buttons in each of their states, a group, tab pages - on an FT
+        host on the left, and the same objects, line for line, on the framework's own `cLocalWebControlHost`
+        on the right. The difference is what the library does: an FT host takes the theme and marks its page
+        with the class `FtHost`, and ftcontrols.css gives the framework's controls there the FT look - the FT
+        text size, the palette's colours, a label on the left right-justified. So a control needs a cFT class
+        for what it does, not for how it looks.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Windows controls opens native controls on a `cFTModalPanel`: a check box and a radio group whose

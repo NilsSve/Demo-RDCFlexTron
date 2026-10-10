@@ -6,7 +6,8 @@
 // Created     : 2026-10-10
 //
 // Description : What the library does to the framework's own web controls, as a before and after: the same
-//               controls on an FT host, on the left, and on the framework's own host, on the right.
+//               controls on an FT host, on the left, and on the framework's own host, on the right - a check
+//               box and a radio button in each of their states, a group, and tab pages with one switched off.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,25 +22,29 @@ Use FTMarkupBuilders.pkg            // DivOpen, TagText, BarButtonHtml, IconLabe
 Use FTDashIcons.pkg                 // the CS_Glyph* names
 Use FTMessageBox.dg                 // FTInfoBox
 
-/* A BEFORE AND AFTER (Nils 2026-10-10, RDCFlexTron 0.9.21). The two columns hold THE SAME OBJECTS, line for line:
-   the framework's own web controls - cWebForm, cWebCombo, cWebCheckbox, cWebLabel, cWebDateForm, cWebRadio,
-   cWebEdit, cWebGroup, cWebTabContainer - with the same properties. Not one of them is a cFT class.
+/* A BEFORE AND AFTER (Nils 2026-10-10, RDCFlexTron 0.9.21 to 0.9.23). The two columns hold THE SAME OBJECTS,
+   line for line: the framework's own web controls - cWebForm, cWebCombo, cWebDateForm, cWebCheckbox, cWebRadio,
+   cWebGroup, cWebEdit, cWebTabContainer, cWebLabel - with the same properties. Not one of them is a cFT class.
+
+   THE STATES (Nils 2026-10-10: "much clearer with the different modes"). A look is more than one picture of a
+   control: a check box is ticked or not, and either of them switched off; a radio button the same; a tab is
+   open, shut or switched off. So each stands here in each of its states, with a caption that says which - the
+   two check boxes and the two radio buttons that can be clicked write their captions anew as they change.
 
    - On the left their host is a cFTGridHost. An FT host takes the theme, and it marks its page with the class
-     FtHost, which the library's ftcontrols.css gives the framework's form controls the FT look on: the FT
-     text size, the palette's colours, and a label on the left right-justified - not one of these objects
-     names an alignment. So a control needs no cFT class to look right here; a cFT class adds what a control
-     DOES - cFTWebForm its change events, cFTWebButton its glyph and its click after the web event - not how
-     it looks.
+     FtHost, which the library's ftcontrols.css gives the framework's controls the FT look on: the FT text
+     size, the palette's colours, and a label on the left right-justified - not one of these objects names
+     an alignment. A check box's box and a radio's ring are the palette's, green when ticked or chosen and
+     dim when switched off; a group and the tab pages are FT cards, the open tab marked by the amber line;
+     the date picker's panel is painted from the palette, the chosen day in amber. So a control needs no cFT
+     class to look right here; a cFT class adds what a control DOES - cFTWebForm its change events,
+     cFTWebButton its glyph and its click after the web event - not how it looks.
    - On the right their host is the framework's own cLocalWebControlHost, with nothing of the library's: the
      Web UI theme as it comes. It is given a cFTGridHost's layout - 8 px columns, the same rows - so the columns
      line up row for row and what differs is the look alone: larger text, the theme's colours, labels
      left-justified. It does not follow the Dark / Light choice, so in Dark it is a light block: that is what
      the page is without the library. Both columns are 232 units wide: a date picker's panel cannot leave
      its host's window, and at the theme's own text size it needs that much (Nils 2026-10-10).
-
-   What still looks the theme's own on the left - a date picker's panel, a radio's dot, a group's frame, a tab
-   strip, a check box's larger caption - is what more style rules, or a class, would have to add.
 
    THE BAR at the bottom is a third host, an FT one. Its line says what a control reported: a framework
    control's events reach the program the same on both hosts. A cFTWebCheckbox switches the line on and off,
@@ -53,8 +58,8 @@ Use FTMessageBox.dg                 // FTInfoBox
 Object oDemoWebControls is a cFTModalPanel
     Set Label to "The framework's web controls, with the library and without it"
     Set Location to 10 10
-    Set Size to 362 476
-    Set piMinSize to 362 476
+    Set Size to 376 476
+    Set piMinSize to 376 476
     // The dialog grows downwards only - the tab pages take the room. Its width is fixed, so the two columns
     // stay the same width: anchors cannot share a width between two controls.
     Set piMaxSize to 2000 476
@@ -85,18 +90,20 @@ Object oDemoWebControls is a cFTModalPanel
     End_Object
 
     /* THE FT HOST: a grid of 8 px columns - 33 of them, of which columns 8 and 24 share the extra width, one
-       in each half of the row: the two radio buttons sit side by side, and each needs room for its caption
-       (with one stretching column the other half stayed 128 px, and its caption folded - Nils 2026-10-10). A
-       control that spans the row is as wide as the host either way. Row 10, the tab pages, takes the extra
-       height. The objects in it are the framework's own classes; the host is all the library there is on
-       this side. */
+       in each half of the row: the check boxes stand in the left half and the radio buttons in the right, and
+       each needs room for its caption (with one stretching column the other half stayed 128 px, and its
+       caption folded - Nils 2026-10-10). A control that spans the row is as wide as the host either way. Row
+       10, the tab pages, takes the extra height. The objects in it are the framework's own classes; the host
+       is all the library there is on this side. */
     Object oFTHost is a cFTGridHost
         Set Location to 16 4
-        Set Size to 290 232
+        Set Size to 304 232
         Set peAnchors to anTopBottomLeft
         Set piColumnCount to 33
         Set psColumnWidths to "8/1fr 24/1fr"
         Set psRowHeights to "10/1fr"
+
+        Register_Object oRadioTwo           // oRadioOne's OnSelect names it, and it stands below
 
         // Row 0: a field of text.
         Object oForm is a cWebForm
@@ -136,32 +143,9 @@ Object oDemoWebControls is a cFTModalPanel
             End_Procedure
         End_Object
 
-        // Row 2: a check box. Its label is empty and as wide as the others, so the box starts where the fields do.
-        Object oCheckbox is a cWebCheckbox
-            Set piRowIndex to 2
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set piLabelOffset to 104
-            Set psLabel to ""
-            Set psCaption to "A cWebCheckbox"
-            Set pbServerOnChange to True
-
-            Procedure OnChange String sNewValue String sOldValue
-                Send ShowChange ("cWebCheckbox: " + If(GetChecked(Self), "ticked", "not ticked"))
-            End_Procedure
-        End_Object
-
-        // Row 3: a caption.
-        Object oLabel is a cWebLabel
-            Set piRowIndex to 3
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set psCaption to "A cWebLabel: a caption of its own"
-        End_Object
-
-        // Row 4: a date, with its picker.
+        // Row 2: a date, with its picker.
         Object oDate is a cWebDateForm
-            Set piRowIndex to 4
+            Set piRowIndex to 2
             Set piColumnIndex to 0
             Set piColumnSpan to 33
             Set piLabelOffset to 104
@@ -173,75 +157,150 @@ Object oDemoWebControls is a cFTModalPanel
             End_Procedure
         End_Object
 
-        // Row 5: two radio buttons - one group, since they share a container. Each half of the row has a
-        // column that stretches, so both captions have room.
-        Object oRadioOne is a cWebRadio
+        /* Rows 3 to 6, the left half: a check box in each of its states - not ticked, ticked, and the two again
+           switched off. Each caption says the state: the two that can be clicked write their caption anew when
+           they change, so it stays true. */
+        Object oTick is a cWebCheckbox
+            Set piRowIndex to 3
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Not ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "0"
+            Set pbServerOnChange to True
+
+            Procedure OnChange String sNewValue String sOldValue
+                WebSet psCaption to (If(GetChecked(Self), "Ticked", "Not ticked"))
+                Send ShowChange ("cWebCheckbox, the first: " + If(GetChecked(Self), "ticked", "not ticked"))
+            End_Procedure
+        End_Object
+
+        Object oTickOn is a cWebCheckbox
+            Set piRowIndex to 4
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "1"
+            Set pbServerOnChange to True
+
+            Procedure OnChange String sNewValue String sOldValue
+                WebSet psCaption to (If(GetChecked(Self), "Ticked", "Not ticked"))
+                Send ShowChange ("cWebCheckbox, the second: " + If(GetChecked(Self), "ticked", "not ticked"))
+            End_Procedure
+        End_Object
+
+        Object oTickDisabled is a cWebCheckbox
             Set piRowIndex to 5
             Set piColumnIndex to 0
             Set piColumnSpan to 16
-            Set psCaption to "cWebRadio: one"
+            Set pbShowLabel to False
+            Set psCaption to "Switched off"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "0"
+            Set pbEnabled to False
+        End_Object
+
+        Object oTickDisabledOn is a cWebCheckbox
+            Set piRowIndex to 6
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Off, ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "1"
+            Set pbEnabled to False
+        End_Object
+
+        /* Rows 3 to 6, the right half: radio buttons, two groups of two. The first two can be clicked, and the
+           one that is chosen says so; the other two are switched off, one of them chosen. A group is the radio
+           buttons of one host that share a psGroupName, and a psValue on one of them - its own psRadioValue -
+           chooses it at the start. */
+        Object oRadioOne is a cWebRadio
+            Set piRowIndex to 3
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "live"
+            Set psCaption to "Not chosen"
             Set psRadioValue to "1"
             Set pbServerOnSelect to True
 
             Procedure OnSelect
-                Send ShowChange "cWebRadio: one"
+                WebSet psCaption to "Chosen"
+                WebSet psCaption of (oRadioTwo(Self)) to "Not chosen"
+                Send ShowChange "cWebRadio: the first"
             End_Procedure
         End_Object
 
         Object oRadioTwo is a cWebRadio
-            Set piRowIndex to 5
+            Set piRowIndex to 4
             Set piColumnIndex to 16
             Set piColumnSpan to 17
-            Set psCaption to "cWebRadio: two"
+            Set psGroupName to "live"
+            Set psCaption to "Chosen"
             Set psRadioValue to "2"
+            Set psValue to "2"
             Set pbServerOnSelect to True
 
             Procedure OnSelect
-                Send ShowChange "cWebRadio: two"
+                WebSet psCaption to "Chosen"
+                WebSet psCaption of (oRadioOne(Self)) to "Not chosen"
+                Send ShowChange "cWebRadio: the second"
             End_Procedure
         End_Object
 
-        // Rows 6 and 7: text of several lines.
-        Object oEdit is a cWebEdit
+        Object oRadioDisabled is a cWebRadio
+            Set piRowIndex to 5
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "off"
+            Set psCaption to "Switched off"
+            Set psRadioValue to "1"
+            Set pbEnabled to False
+        End_Object
+
+        Object oRadioDisabledOn is a cWebRadio
             Set piRowIndex to 6
-            Set piRowSpan to 2
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set piLabelOffset to 104
-            Set psLabel to "cWebEdit:"
-            Set psValue to "Text of several lines."
-            Set pbFillHeight to True
-            Set pbServerOnChange to True
-
-            Procedure OnChange String sNewValue String sOldValue
-                Send ShowChange ("cWebEdit: " + String(Length(sNewValue)) + " characters")
-            End_Procedure
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "off"
+            Set psCaption to "Off, chosen"
+            Set psRadioValue to "2"
+            Set psValue to "2"
+            Set pbEnabled to False
         End_Object
 
-        // Rows 8 and 9: a group, with a field inside it.
+        // Rows 7 to 9: a group with its caption, and text of several lines inside it.
         Object oGroup is a cWebGroup
-            Set piRowIndex to 8
-            Set piRowSpan to 2
+            Set piRowIndex to 7
+            Set piRowSpan to 3
             Set piColumnIndex to 0
             Set piColumnSpan to 33
             Set psCaption to "A cWebGroup"
             Set piColumnCount to 1
 
-            Object oInGroup is a cWebForm
+            Object oEdit is a cWebEdit
                 Set piColumnIndex to 0
                 Set piColumnSpan to 1
-                Set piLabelOffset to 70
-                Set psLabel to "Inside it:"
-                Set psValue to "A cWebForm"
+                Set piLabelOffset to 88
+                Set psLabel to "cWebEdit:"
+                Set psValue to "Text of several lines."
+                Set piHeight to 50
                 Set pbServerOnChange to True
 
                 Procedure OnChange String sNewValue String sOldValue
-                    Send ShowChange ("The field in the group: " + sNewValue)
+                    Send ShowChange ("cWebEdit, in the group: " + String(Length(sNewValue)) + " characters")
                 End_Procedure
             End_Object
         End_Object
 
-        // Row 10: pages. It takes the extra height.
+        // Row 10: pages - one that is open, one more, and one that is switched off. It takes the extra height.
         Object oTabs is a cWebTabContainer
             Set piRowIndex to 10
             Set piColumnIndex to 0
@@ -254,12 +313,10 @@ Object oDemoWebControls is a cFTModalPanel
                 Set psCaption to "A cWebTabPage"
                 Set piColumnCount to 1
 
-                Object oFirstField is a cWebForm
+                Object oLabel is a cWebLabel
                     Set piColumnIndex to 0
                     Set piColumnSpan to 1
-                    Set piLabelOffset to 80
-                    Set psLabel to "On page one:"
-                    Set psValue to "A cWebForm"
+                    Set psCaption to "A cWebLabel: a caption of its own"
                 End_Object
             End_Object
 
@@ -272,6 +329,12 @@ Object oDemoWebControls is a cFTModalPanel
                     Set piColumnSpan to 1
                     Set psCaption to "A cWebCheckbox on page two"
                 End_Object
+            End_Object
+
+            Object oThirdPage is a cWebTabPage
+                Set psCaption to "Switched off"
+                Set pbEnabled to False
+                Set piColumnCount to 1
             End_Object
 
             Procedure OnCardChange String sNewSelectedTab String sPrevSelectedTab
@@ -292,7 +355,7 @@ Object oDemoWebControls is a cFTModalPanel
        colour, as it does every native child; the page inside is the framework's.) */
     Object oPlainHost is a cLocalWebControlHost
         Set Location to 16 240
-        Set Size to 290 232
+        Set Size to 304 232
         Set peAnchors to anTopBottomRight
         Set peLayoutType to ltGrid
         Set psDefaultColumnWidth to "8px"
@@ -300,6 +363,8 @@ Object oDemoWebControls is a cFTModalPanel
         Set piColumnCount to 33
         Set psColumnWidths to "8/1fr 24/1fr"
         Set psRowHeights to "10/1fr"
+
+        Register_Object oRadioTwo           // oRadioOne's OnSelect names it, and it stands below
 
         // Row 0: a field of text.
         Object oForm is a cWebForm
@@ -339,32 +404,9 @@ Object oDemoWebControls is a cFTModalPanel
             End_Procedure
         End_Object
 
-        // Row 2: a check box. Its label is empty and as wide as the others, so the box starts where the fields do.
-        Object oCheckbox is a cWebCheckbox
-            Set piRowIndex to 2
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set piLabelOffset to 104
-            Set psLabel to ""
-            Set psCaption to "A cWebCheckbox"
-            Set pbServerOnChange to True
-
-            Procedure OnChange String sNewValue String sOldValue
-                Send ShowChange ("cWebCheckbox: " + If(GetChecked(Self), "ticked", "not ticked"))
-            End_Procedure
-        End_Object
-
-        // Row 3: a caption.
-        Object oLabel is a cWebLabel
-            Set piRowIndex to 3
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set psCaption to "A cWebLabel: a caption of its own"
-        End_Object
-
-        // Row 4: a date, with its picker.
+        // Row 2: a date, with its picker.
         Object oDate is a cWebDateForm
-            Set piRowIndex to 4
+            Set piRowIndex to 2
             Set piColumnIndex to 0
             Set piColumnSpan to 33
             Set piLabelOffset to 104
@@ -376,75 +418,150 @@ Object oDemoWebControls is a cFTModalPanel
             End_Procedure
         End_Object
 
-        // Row 5: two radio buttons - one group, since they share a container. Each half of the row has a
-        // column that stretches, so both captions have room.
-        Object oRadioOne is a cWebRadio
+        /* Rows 3 to 6, the left half: a check box in each of its states - not ticked, ticked, and the two again
+           switched off. Each caption says the state: the two that can be clicked write their caption anew when
+           they change, so it stays true. */
+        Object oTick is a cWebCheckbox
+            Set piRowIndex to 3
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Not ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "0"
+            Set pbServerOnChange to True
+
+            Procedure OnChange String sNewValue String sOldValue
+                WebSet psCaption to (If(GetChecked(Self), "Ticked", "Not ticked"))
+                Send ShowChange ("cWebCheckbox, the first: " + If(GetChecked(Self), "ticked", "not ticked"))
+            End_Procedure
+        End_Object
+
+        Object oTickOn is a cWebCheckbox
+            Set piRowIndex to 4
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "1"
+            Set pbServerOnChange to True
+
+            Procedure OnChange String sNewValue String sOldValue
+                WebSet psCaption to (If(GetChecked(Self), "Ticked", "Not ticked"))
+                Send ShowChange ("cWebCheckbox, the second: " + If(GetChecked(Self), "ticked", "not ticked"))
+            End_Procedure
+        End_Object
+
+        Object oTickDisabled is a cWebCheckbox
             Set piRowIndex to 5
             Set piColumnIndex to 0
             Set piColumnSpan to 16
-            Set psCaption to "cWebRadio: one"
+            Set pbShowLabel to False
+            Set psCaption to "Switched off"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "0"
+            Set pbEnabled to False
+        End_Object
+
+        Object oTickDisabledOn is a cWebCheckbox
+            Set piRowIndex to 6
+            Set piColumnIndex to 0
+            Set piColumnSpan to 16
+            Set pbShowLabel to False
+            Set psCaption to "Off, ticked"
+            Set psChecked to "1"
+            Set psUnchecked to "0"
+            Set psValue to "1"
+            Set pbEnabled to False
+        End_Object
+
+        /* Rows 3 to 6, the right half: radio buttons, two groups of two. The first two can be clicked, and the
+           one that is chosen says so; the other two are switched off, one of them chosen. A group is the radio
+           buttons of one host that share a psGroupName, and a psValue on one of them - its own psRadioValue -
+           chooses it at the start. */
+        Object oRadioOne is a cWebRadio
+            Set piRowIndex to 3
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "live"
+            Set psCaption to "Not chosen"
             Set psRadioValue to "1"
             Set pbServerOnSelect to True
 
             Procedure OnSelect
-                Send ShowChange "cWebRadio: one"
+                WebSet psCaption to "Chosen"
+                WebSet psCaption of (oRadioTwo(Self)) to "Not chosen"
+                Send ShowChange "cWebRadio: the first"
             End_Procedure
         End_Object
 
         Object oRadioTwo is a cWebRadio
-            Set piRowIndex to 5
+            Set piRowIndex to 4
             Set piColumnIndex to 16
             Set piColumnSpan to 17
-            Set psCaption to "cWebRadio: two"
+            Set psGroupName to "live"
+            Set psCaption to "Chosen"
             Set psRadioValue to "2"
+            Set psValue to "2"
             Set pbServerOnSelect to True
 
             Procedure OnSelect
-                Send ShowChange "cWebRadio: two"
+                WebSet psCaption to "Chosen"
+                WebSet psCaption of (oRadioOne(Self)) to "Not chosen"
+                Send ShowChange "cWebRadio: the second"
             End_Procedure
         End_Object
 
-        // Rows 6 and 7: text of several lines.
-        Object oEdit is a cWebEdit
+        Object oRadioDisabled is a cWebRadio
+            Set piRowIndex to 5
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "off"
+            Set psCaption to "Switched off"
+            Set psRadioValue to "1"
+            Set pbEnabled to False
+        End_Object
+
+        Object oRadioDisabledOn is a cWebRadio
             Set piRowIndex to 6
-            Set piRowSpan to 2
-            Set piColumnIndex to 0
-            Set piColumnSpan to 33
-            Set piLabelOffset to 104
-            Set psLabel to "cWebEdit:"
-            Set psValue to "Text of several lines."
-            Set pbFillHeight to True
-            Set pbServerOnChange to True
-
-            Procedure OnChange String sNewValue String sOldValue
-                Send ShowChange ("cWebEdit: " + String(Length(sNewValue)) + " characters")
-            End_Procedure
+            Set piColumnIndex to 16
+            Set piColumnSpan to 17
+            Set psGroupName to "off"
+            Set psCaption to "Off, chosen"
+            Set psRadioValue to "2"
+            Set psValue to "2"
+            Set pbEnabled to False
         End_Object
 
-        // Rows 8 and 9: a group, with a field inside it.
+        // Rows 7 to 9: a group with its caption, and text of several lines inside it.
         Object oGroup is a cWebGroup
-            Set piRowIndex to 8
-            Set piRowSpan to 2
+            Set piRowIndex to 7
+            Set piRowSpan to 3
             Set piColumnIndex to 0
             Set piColumnSpan to 33
             Set psCaption to "A cWebGroup"
             Set piColumnCount to 1
 
-            Object oInGroup is a cWebForm
+            Object oEdit is a cWebEdit
                 Set piColumnIndex to 0
                 Set piColumnSpan to 1
-                Set piLabelOffset to 70
-                Set psLabel to "Inside it:"
-                Set psValue to "A cWebForm"
+                Set piLabelOffset to 88
+                Set psLabel to "cWebEdit:"
+                Set psValue to "Text of several lines."
+                Set piHeight to 50
                 Set pbServerOnChange to True
 
                 Procedure OnChange String sNewValue String sOldValue
-                    Send ShowChange ("The field in the group: " + sNewValue)
+                    Send ShowChange ("cWebEdit, in the group: " + String(Length(sNewValue)) + " characters")
                 End_Procedure
             End_Object
         End_Object
 
-        // Row 10: pages. It takes the extra height.
+        // Row 10: pages - one that is open, one more, and one that is switched off. It takes the extra height.
         Object oTabs is a cWebTabContainer
             Set piRowIndex to 10
             Set piColumnIndex to 0
@@ -457,12 +574,10 @@ Object oDemoWebControls is a cFTModalPanel
                 Set psCaption to "A cWebTabPage"
                 Set piColumnCount to 1
 
-                Object oFirstField is a cWebForm
+                Object oLabel is a cWebLabel
                     Set piColumnIndex to 0
                     Set piColumnSpan to 1
-                    Set piLabelOffset to 80
-                    Set psLabel to "On page one:"
-                    Set psValue to "A cWebForm"
+                    Set psCaption to "A cWebLabel: a caption of its own"
                 End_Object
             End_Object
 
@@ -475,6 +590,12 @@ Object oDemoWebControls is a cFTModalPanel
                     Set piColumnSpan to 1
                     Set psCaption to "A cWebCheckbox on page two"
                 End_Object
+            End_Object
+
+            Object oThirdPage is a cWebTabPage
+                Set psCaption to "Switched off"
+                Set pbEnabled to False
+                Set piColumnCount to 1
             End_Object
 
             Procedure OnCardChange String sNewSelectedTab String sPrevSelectedTab
@@ -494,7 +615,7 @@ Object oDemoWebControls is a cFTModalPanel
        two rows, 66 px, and the 4 px the theme pads a host's content by, above and below - a host shorter than
        its content scrolls. 48 units hold that at 100 % and above. */
     Object oBarHost is a cFTGridHost
-        Set Location to 310 4
+        Set Location to 324 4
         Set Size to 48 468
         Set peAnchors to anBottomLeftRight
         Set piColumnCount to 57
