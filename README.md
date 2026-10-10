@@ -34,9 +34,10 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 - what the library does to the framework's own web controls, as a before and after
   (`AppSrc/DemoWebControls.dg`, the Web controls button): the same objects, line for line - a `cWebForm`, a
   `cWebCombo`, a `cWebDateForm`, check boxes and radio buttons in each of their states (not ticked or chosen,
-  ticked or chosen, and both again switched off), a `cWebGroup` with a `cWebEdit` in it, and tab pages, one
-  of them switched off - on an FT host on the left and on the framework's own `cLocalWebControlHost` on the
-  right. An FT host takes the theme and marks its page with the class `FtHost`, and the library's
+  ticked or chosen, and both again switched off), a `cWebGroup` with a `cWebEdit` in it, and tab pages - one
+  with a check box drawn as a switch, one with a `cWebList` that has a check box column, one switched off -
+  on an FT host on the left and on the framework's own `cLocalWebControlHost` on the right. An FT host
+  takes the theme and marks its page with the class `FtHost`, and the library's
   `ftcontrols.css` gives the framework's controls there the FT look - the FT text size, the palette's
   colours, a label on the left right-justified, a box that is green when ticked and dim when switched off,
   a group and tab pages as FT cards, the date picker in the palette; the right-hand host has none of it, and
