@@ -129,7 +129,10 @@ Function DemoPageHtml Global Returns String
         """)))
     Append sItems (BulletItem(MarkedText("""
         The Data row opens CodeType and CodeMast, the two code tables DataFlex gives every workspace, three
-        ways - each a `cFTDbModalPanel` with the same two data dictionaries. CodeJock: two `cFTDbCJGrid` grids
+        ways - each a `cFTDbModalPanel` with the same two data dictionaries, and its actions (New, Save, Delete)
+        in a menu at its top right: a `cFTActionBarHost`, whose action bar shows the dialog's `cWebMenuGroup`, as a
+        web view's `oActionGroup` does. The items act on the grid or the host the focus came from, as a Windows
+        toolbar's do. CodeJock: two `cFTDbCJGrid` grids
         you type in, the types and the chosen type's codes, and the type's comment in a `cDbTextEdit`. Web: a
         `cFTDbGridHost` per data dictionary, each with a data-aware `cFTWebList` - its columns are bound with
         `Entry_Item`, and it reads its rows from the data dictionary - beside `cFTWebForm` fields bound to its

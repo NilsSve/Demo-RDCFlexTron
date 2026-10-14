@@ -53,7 +53,12 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   The program Uses this dialog below the application object: the grid's library, RDCToolsLib, asks the
   application object for the program's name and folder as it is Used;
 - the data-aware classes on CodeType and CodeMast, the two code tables DataFlex gives every workspace, in
-  three dialogs (the Data row's buttons), each a `cFTDbModalPanel` with the same two data dictionaries. A
+  three dialogs (the Data row's buttons), each a `cFTDbModalPanel` with the same two data dictionaries and its actions - New,
+  Save and Delete - in a menu at its top right: a `cFTActionBarHost`, whose action bar shows the dialog's
+  `cWebMenuGroup` (`cFTWebMenuNew`, `cFTWebMenuSave`, `cFTWebMenuDelete`), as a web view's `oActionGroup` does.
+  The items act on the grid or the host the focus came from, as a Windows toolbar's items do; a delete asks in
+  the FT look. A type that still has codes is not deleted: its data dictionary refuses
+  (`Cascade_Delete_State` False). A
   type's key is typed for a new type only: the data dictionary says so (`DD_COMMIT`, with
   `Field_CommitNoEnterOnIndex`), and a grid's column and a web field both follow it. The two data
   dictionaries are the demo's (`DDSrc/cCodeTypeDataDictionary.dd`, `DDSrc/cCodeMastDataDictionary.dd`,

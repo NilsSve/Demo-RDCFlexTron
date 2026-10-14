@@ -20,6 +20,8 @@ Use cFTDbCJGrid.pkg                 // RDCToolsLib's data-aware grid in the FT l
 Use cRDCDbCJGridColumn.pkg          // its column
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the button bar's host
+Use cFTActionBarHost.pkg            // the action menu at the top right
+Use FTMessageBox.dg                 // FTDelete_Confirmation asks in its dialog
 Use cFTDbGridHost.pkg               // the data-aware host, on the same grid of 8 px columns
 Use FTAllWebControlClasses.pkg      // cFTWebForm, cFTWebList, cFTWebButton - and the framework's cWebEdit
 Use FTPageIsUp.pkg                  // FTHostPageIsUp - can the host's page take a live push now?
@@ -45,8 +47,8 @@ Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
      the host carries out on its Server, the CodeType DD: a FlexTron data-aware host is a data-entry client,
      as a Windows view is, so it moves what was typed in the bound fields into the DD and has the DD validate
      and save it. Clear is its Request_Clear.
-   - Clear, beside Save, adds a NEW type from the web side (Nils 2026-10-10), as the grid's own new row does
-     from the native side: the DD lets go of its record, the fields empty, the grid on the left gets an empty
+   - New in the action menu, with the focus in the web fields, adds a NEW type from the web side (Nils 2026-10-10), as the
+     grid's own new row does from the native side: the DD lets go of its record, the fields empty, the grid on the left gets an empty
      row - the CodeJock grid does that itself when its DD is cleared by another control - and the Type field,
      shut for a type that exists, can be typed in. Save then saves the new type, and the grid's row takes it.
      That the key is typed for a new type only is the DD's rule (DD_COMMIT), so the grid's Type column and
@@ -56,13 +58,17 @@ Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
      shares the DD with the grid, so the two follow each other: a row chosen in one is the DD's record, and
      the other shows it; a code added or changed in the grid is in the list once it is saved.
 
+   THE ACTION MENU at the top right (cFTActionBarHost) holds New, Save and Delete. They act on the object the
+   focus came from - a grid, or the web fields of the type - the way a Windows toolbar's items act on the focus object;
+   the menu is declared the way a web view declares its actions (ZoomInventory.wo's oActionGroup).
+
    The DDs belong to the panel, a cFTDbModalPanel, so the grids and the host share them. Each side alone is a
    dialog of its own: DemoDataCodeJock.dg (the grids) and DemoDataWeb.dg (the web controls). */
 Object oDemoData is a cFTDbModalPanel
     Set Label to "Data-aware, mixed: code types and their codes"
     Set Location to 10 10
-    Set Size to 282 430
-    Set piMinSize to 282 430
+    Set Size to 310 430
+    Set piMinSize to 310 430
 
     Object oCodeType_DD is a cCodeTypeDataDictionary
     End_Object
@@ -77,7 +83,7 @@ Object oDemoData is a cFTDbModalPanel
 
     // ------------------------------------------------------------------------------- the left column: native
     Object oTypes_tb is a TextBox
-        Set Location to 6 10
+        Set Location to 34 10
         Set Size to 9 196
         Set Label to "Code types - a cFTDbCJGrid you can type in."
     End_Object
@@ -88,8 +94,8 @@ Object oDemoData is a cFTDbModalPanel
        grid clears its DD for it - and the row is saved when it is left. pbAllowEdit and pbAllowAppendRow say
        so; the library's class has both off. A description can be changed in place; the Type column takes
        typing in a new row only, because the DD says its key is committed once saved (DD_COMMIT,
-       cCodeTypeDataDictionary.dd), and the grid asks the DD before it lets a cell be edited. Rows are not
-       deleted here: a type has codes under it.
+       cCodeTypeDataDictionary.dd), and the grid asks the DD before it lets a cell be edited. A type is deleted only while it has no codes:
+       the DD refuses one that has (Cascade_Delete_State False, cCodeTypeDataDictionary.dd).
 
        NO CHECK BOX COLUMN, and that is the class's own default: phoCheckbox_Col and phoData_Col are -1, which
        its footer routine reads as "none". Leave them alone - 0 is not "none" there, and the routine then asks
@@ -97,13 +103,15 @@ Object oDemoData is a cFTDbModalPanel
        how many types there are. */
     Object oTypes_grd is a cFTDbCJGrid
         Set Server to oCodeType_DD
-        Set Location to 18 10
+        Set Ordering to 1                   // index 1: the type
+        Set Location to 46 10
         Set Size to 110 196
         Set peAnchors to anTopLeftRight
         Set pbAllowEdit to True
         Set pbAllowAppendRow to True
         Set pbAllowInsertRow to False
-        Set pbAllowDeleteRow to False
+        Set pbAllowDeleteRow to True
+        Set Verify_Delete_Msg to (RefFunc(FTLine_Delete_Confirmation))  // Delete asks in the FT look
         Set pbAutoAppend to False
         Set Status_Help to "Choose a type. The down arrow on the last row adds one; a new type's name is typed in its first cell."
 
@@ -128,7 +136,7 @@ Object oDemoData is a cFTDbModalPanel
     End_Object
 
     Object oCodes_tb is a TextBox
-        Set Location to 134 10
+        Set Location to 162 10
         Set Size to 9 196
         Set Label to "The type's codes - a cFTDbCJGrid you can type in."
     End_Object
@@ -136,13 +144,15 @@ Object oDemoData is a cFTDbModalPanel
     // No check box column here either (the class's default), and no footer: the grid has nothing to count.
     Object oCodes_grd is a cFTDbCJGrid
         Set Server to oCodeMast_DD
-        Set Location to 146 10
+        Set Ordering to 1                   // index 1: the type, then the code
+        Set Location to 174 10
         Set Size to 100 196
         Set peAnchors to anAll
         Set pbAllowEdit to True
         Set pbAllowAppendRow to True
         Set pbAutoAppend to True
         Set pbAllowDeleteRow to True
+        Set Verify_Delete_Msg to (RefFunc(FTLine_Delete_Confirmation))  // Delete asks in the FT look
         Set pbShowFooter to False
         Set Status_Help to "Type in a cell. The down arrow on the last row adds a code, Delete removes one."
 
@@ -161,34 +171,35 @@ Object oDemoData is a cFTDbModalPanel
 
     // -------------------------------------------------------------------------------- the right column: web
     Object oType_tb is a TextBox
-        Set Location to 6 212
+        Set Location to 34 212
         Set Size to 9 208
         Set peAnchors to anTopRight
         Set Label to "The same data as web controls - a cFTDbGridHost"
     End_Object
 
     /* THE DATA-AWARE HOST: 8 px columns, as a cFTGridHost has. Column 16 takes the extra width, so the fields
-       fill the host; Clear and Save, 11 columns each, end at its right edge. Row 8, the list, takes the extra
+       fill the host. Row 7, the list, takes the extra
        height, so it grows with the dialog. The host's own Server is the CodeType DD - the fields' - and the
        list names the CodeMast DD as its own: a host holds controls of more than one DD, as a view does.
 
        AIR UNDER THE COMMENT (Nils 2026-10-10: the buttons sat too close to it). The Comment field spans rows 2
        to 4, and row 4 is 25 px where a row is 33, so the field is 8 px shorter; row 5 is those 8 px, empty.
-       Clear and Save, in row 6, are where they were. */
+       The type's New and Save are in the action menu at the dialog's top right. */
     Object oTypeHost is a cFTDbGridHost
-        Set Location to 18 212
+        Set Location to 46 212
         Set Size to 228 208
         Set peAnchors to anTopBottomRight
         Set piColumnCount to 39
         Set psColumnWidths to "16/1fr"
-        Set psRowHeights to "4/25px 5/8px 8/1fr"
+        Set psRowHeights to "4/25px 5/8px 7/1fr"
         Set Server to oCodeType_DD
         Set Auto_Clear_DEO_State to False   // the saved type stays chosen
         Set Verify_Save_Msg to 0            // no Windows boxes
         Set Verify_Data_Loss_Msg to 0
+        Set Verify_Delete_Msg to (RefFunc(FTDelete_Confirmation))        // Delete asks in the FT look
 
         /* THE TYPE'S KEY: shown for a type that exists - it is chosen in the grid, and a key is not changed -
-           and typed in for a new one, after Clear. The field opens and shuts itself: a DD tells its controls
+           and typed in for a new one, after New. The field opens and shuts itself: a DD tells its controls
            whenever its record changes - a row chosen in the grid, Clear, Save - and this one asks the panel
            then (SyncTypeField). It starts shut: the dialog opens on the first type. */
         Object oType_wf is a cFTWebForm
@@ -231,37 +242,8 @@ Object oDemoData is a cFTDbModalPanel
             Set pbFillHeight to True
         End_Object
 
-        // Clear, to the left of Save: the fields emptied for a new type.
-        Object oClearBtn is a cFTWebButton
-            Set piRowIndex to 6
-            Set piColumnIndex to 17
-            Set piColumnSpan to 11
-            Set psCaption to "Clear"
-            Set psCSSClass to "ftbtn ftg-eraser"
-            Set psToolTip to "Empty the fields for a new code type"
-
-            // After the web click has returned.
-            Procedure OnButtonClick
-                Send DoClearType of (oDemoData(Self))
-            End_Procedure
-        End_Object
-
-        Object oSaveBtn is a cFTWebButton
-            Set piRowIndex to 6
-            Set piColumnIndex to 28
-            Set piColumnSpan to 11
-            Set psCaption to "Save"
-            Set psCSSClass to "ftbtn ftg-check"
-            Set psToolTip to "Save the type - a new one, after Clear, or the description and the comment of the chosen one"
-
-            // After the web click has returned.
-            Procedure OnButtonClick
-                Send DoSaveType of (oDemoData(Self))
-            End_Procedure
-        End_Object
-
         Object oCodesLabel is a cFTWebLabel
-            Set piRowIndex to 7
+            Set piRowIndex to 6
             Set piColumnIndex to 0
             Set piColumnSpan to 39
             Set psCaption to "The type's codes - a data-aware cFTWebList"
@@ -276,7 +258,7 @@ Object oDemoData is a cFTDbModalPanel
            not edit - the grid on the left does that, on the same DD. */
         Object oCodes_lst is a cFTWebList
             Set Server to oCodeMast_DD
-            Set piRowIndex to 8
+            Set piRowIndex to 7
             Set piColumnIndex to 0
             Set piColumnSpan to 39
             Set pbFillHeight to True
@@ -298,13 +280,37 @@ Object oDemoData is a cFTDbModalPanel
         End_Object
     End_Object
 
+    /* THE ACTION MENU (cFTActionBarHost, RDCFlexTron 0.9.26): New, Save and Delete at the dialog's top right,
+       declared the way a web view declares its actions (DataFlex's FlexTron sample ZoomInventory.wo, oActionGroup).
+       They act where the user is - on the object the focus came from, as a Windows toolbar's items do: a grid adds, saves or deletes a row, the web host the type. */
+    Object oActions is a cFTActionBarHost
+        Set Location to 2 250
+        Set Size to 26 170
+        Set peAnchors to anTopRight
+
+        // The bar and the group, both declared here, so the Studio's Designer draws the buttons too.
+        Object oActionBar is a cFTWebActionBar
+        End_Object
+
+        Object oActionGroup is a cWebMenuGroup
+            Object oNew_itm is a cFTWebMenuNew
+            End_Object
+
+            Object oSave_itm is a cFTWebMenuSave
+            End_Object
+
+            Object oDelete_itm is a cFTWebMenuDelete
+            End_Object
+        End_Object
+    End_Object
+
     /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Close at the right edge.
 
        ITS HEIGHT: one row of buttons is 33 px, and the Web UI theme pads a host's content by 4 px above and
        below - 41 px in all. A host shorter than its content scrolls, so at 20 units, about 33 px, this bar had
        a scroll bar (Nils 2026-10-10). 26 units hold the row at 100 % and above. */
     Object oButtonBar is a cFTGridHost
-        Set Location to 250 320
+        Set Location to 278 320
         Set Size to 26 100
         Set peAnchors to anBottomRight
         Set piColumnCount to 12         // column 0, then Close's 11
@@ -335,24 +341,6 @@ Object oDemoData is a cFTDbModalPanel
             WebSet pbEnabled of oType_wf to (not(bHasRecord))
     End_Procedure
 
-    /* Clear and Save, from the web buttons (Save from Ctrl+S too): the type host carries out the framework's own
-       request on its Server, the CodeType DD. Clear lets go of the record, and its controls follow - the fields
-       empty, the Type field opens (its Refresh), the grid on the left gets an empty row, the codes go. A save
-       leaves the DD with no changes to save - a save the DD refused leaves them, and its error has said why. */
-    Procedure DoClearType
-        Send Request_Clear of oTypeHost
-        Send Focus of oType_wf
-        Set StatusText to "A new type: enter it, and press Save."        // the panel's own status bar
-    End_Procedure
-
-    Procedure DoSaveType
-        Boolean bChanged
-        Send Request_Save of oTypeHost
-        Get Should_Save of oCodeType_DD to bChanged
-        If (not(bChanged)) ;
-            Set StatusText to "The type is saved. A new type's codes go in the grid below the types."
-    End_Procedure
-
     // The first type, when none is chosen yet - so the fields and the codes have something to show.
     Procedure Activating
         Boolean bHasRecord
@@ -366,7 +354,6 @@ Object oDemoData is a cFTDbModalPanel
     Procedure Request_Clear
     End_Procedure
 
-    On_Key Key_Ctrl+Key_S Send DoSaveType
     On_Key Key_Alt+Key_C  Send Close_Panel
     On_Key kCancel        Send Close_Panel
 End_Object

@@ -20,6 +20,8 @@ Use cFTDbCJGrid.pkg                 // RDCToolsLib's data-aware grid in the FT l
 Use cRDCDbCJGridColumn.pkg          // its column
 Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the button bar's host
+Use cFTActionBarHost.pkg            // the action menu at the top right
+Use FTMessageBox.dg                 // FTDelete_Confirmation asks in its dialog
 Use FTAllWebControlClasses.pkg      // cFTWebButton
 Use cCodeTypeDataDictionary.dd      // CodeType - it makes sure the two tables are there
 Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
@@ -31,18 +33,22 @@ Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
 
    - oTypes_grd, a cFTDbCJGrid on the CodeType DD: the types. A row chosen there is the DD's record. A
      description is changed in place, and the down arrow on the last row adds a type.
-   - oComment_edt, a cDbTextEdit on the same DD: the chosen type's comment. Save in the bar, or F2, saves it.
+   - oComment_edt, a cDbTextEdit on the same DD: the chosen type's comment. Save in the action menu, or F2, saves it.
    - oCodes_grd, a cFTDbCJGrid on the CodeMast DD, which the CodeType DD constrains: the chosen type's codes.
      Type in a cell to change one; the down arrow on the last row adds one; Delete removes one; the row is
      saved when it is left.
+
+   THE ACTION MENU at the top right (cFTActionBarHost) holds New, Save and Delete. They act on the object the
+   focus came from - the types grid, the comment or the codes grid - the way a Windows toolbar's items act on the focus object;
+   the menu is declared the way a web view declares its actions (ZoomInventory.wo's oActionGroup).
 
    The DDs belong to the panel, a cFTDbModalPanel, which gives its native children - the text boxes and the
    comment - the FT colours (pbFTColorChildren). The same dialog in web controls is DemoDataWeb.dg. */
 Object oDemoDataCodeJock is a cFTDbModalPanel
     Set Label to "Data-aware, CodeJock: code types and their codes"
     Set Location to 10 10
-    Set Size to 282 430
-    Set piMinSize to 282 430
+    Set Size to 310 430
+    Set piMinSize to 310 430
 
     Object oCodeType_DD is a cCodeTypeDataDictionary
     End_Object
@@ -57,7 +63,7 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
 
     // ------------------------------------------------------------------------------ the left column: the types
     Object oTypes_tb is a TextBox
-        Set Location to 6 10
+        Set Location to 34 10
         Set Size to 9 196
         Set Label to "Code types - a cFTDbCJGrid you can type in."
     End_Object
@@ -67,18 +73,21 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
        A NEW TYPE: the down arrow on the last row appends an empty row - the grid clears its DD for it - and the
        row is saved when it is left. pbAllowEdit and pbAllowAppendRow say so; the library's class has both off.
        The Type column takes typing in a new row only, because the DD says its key is committed once saved
-       (DD_COMMIT, cCodeTypeDataDictionary.dd). Rows are not deleted here: a type has codes under it.
+       (DD_COMMIT, cCodeTypeDataDictionary.dd). A type is deleted only while it has no codes:
+       the DD refuses one that has (Cascade_Delete_State False, cCodeTypeDataDictionary.dd).
 
        No check box column: phoCheckbox_Col and phoData_Col are -1 by default, which the class's footer routine
        reads as "none" - leave them alone (0 is not "none" there). The footer counts the types. */
     Object oTypes_grd is a cFTDbCJGrid
         Set Server to oCodeType_DD
-        Set Location to 18 10
+        Set Ordering to 1                   // index 1: the type
+        Set Location to 46 10
         Set Size to 110 196
         Set pbAllowEdit to True
         Set pbAllowAppendRow to True
         Set pbAllowInsertRow to False
-        Set pbAllowDeleteRow to False
+        Set pbAllowDeleteRow to True
+        Set Verify_Delete_Msg to (RefFunc(FTLine_Delete_Confirmation))  // Delete asks in the FT look
         Set pbAutoAppend to False
         Set Status_Help to "Choose a type. The down arrow on the last row adds one; a new type's name is typed in its first cell."
 
@@ -103,28 +112,29 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
     End_Object
 
     Object oComment_tb is a TextBox
-        Set Location to 134 10
+        Set Location to 162 10
         Set Size to 9 196
         Set Label to "The type's comment - a cDbTextEdit."
     End_Object
 
     /* THE COMMENT: text of several lines, bound to the chosen type like the grid's columns, so it follows the
-       grid. Save in the bar, or F2 here, saves it with the rest of the type.
+       grid. Save in the action menu, or F2 here, saves it with the rest of the type.
 
        The edit saves by itself - it does not hand its save to the panel - and a data-entry control clears its
        record after a save unless its Auto_Clear_DEO_State is False (True is the default). */
     Object oComment_edt is a cDbTextEdit
         Entry_Item CodeType.Comment
         Set Server to oCodeType_DD
-        Set Location to 146 10
+        Set Location to 174 10
         Set Size to 100 196
         Set peAnchors to anTopBottomLeft
         Set Auto_Clear_DEO_State to False   // a save keeps the type on screen
+        Set Verify_Delete_Msg to (RefFunc(FTDelete_Confirmation))        // Delete asks in the FT look
     End_Object
 
     // ----------------------------------------------------------------------------- the right column: the codes
     Object oCodes_tb is a TextBox
-        Set Location to 6 212
+        Set Location to 34 212
         Set Size to 9 208
         Set Label to "The type's codes - a cFTDbCJGrid you can type in."
     End_Object
@@ -133,13 +143,15 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
     // takes the extra width and height, so it grows with the dialog.
     Object oCodes_grd is a cFTDbCJGrid
         Set Server to oCodeMast_DD
-        Set Location to 18 212
+        Set Ordering to 1                   // index 1: the type, then the code
+        Set Location to 46 212
         Set Size to 228 208
         Set peAnchors to anAll
         Set pbAllowEdit to True
         Set pbAllowAppendRow to True
         Set pbAutoAppend to True
         Set pbAllowDeleteRow to True
+        Set Verify_Delete_Msg to (RefFunc(FTLine_Delete_Confirmation))  // Delete asks in the FT look
         Set pbShowFooter to False
         Set Status_Help to "Type in a cell. The down arrow on the last row adds a code, Delete removes one."
 
@@ -156,30 +168,41 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
         End_Object
     End_Object
 
-    /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Save and Close at the right edge. 26
-       units hold its row of buttons (33 px, and the theme's 4 px above and below) without a scroll bar. */
-    Object oButtonBar is a cFTGridHost
-        Set Location to 250 290
-        Set Size to 26 130
-        Set peAnchors to anBottomRight
-        Set piColumnCount to 23         // column 0, then Save's 11 and Close's 11
-        Set psColumnWidths to "0/1fr"
+    /* THE ACTION MENU (cFTActionBarHost, RDCFlexTron 0.9.26): New, Save and Delete at the dialog's top right,
+       declared the way a web view declares its actions (DataFlex's FlexTron sample ZoomInventory.wo, oActionGroup).
+       They act where the user is - on the object the focus came from, as a Windows toolbar's items do: the types grid adds, saves or deletes a row, the comment saves or deletes the type, the codes grid its row. */
+    Object oActions is a cFTActionBarHost
+        Set Location to 2 250
+        Set Size to 26 170
+        Set peAnchors to anTopRight
 
-        Object oSaveBtn is a cFTWebButton
-            Set piColumnIndex to 1
-            Set piColumnSpan to 11
-            Set psCaption to "Save"
-            Set psCSSClass to "ftbtn ftg-save"
-            Set psToolTip to "Save the chosen type - its comment, and a description changed in the grid"
-
-            // After the web click has returned.
-            Procedure OnButtonClick
-                Send DoSaveType of (oDemoDataCodeJock(Self))
-            End_Procedure
+        // The bar and the group, both declared here, so the Studio's Designer draws the buttons too.
+        Object oActionBar is a cFTWebActionBar
         End_Object
 
+        Object oActionGroup is a cWebMenuGroup
+            Object oNew_itm is a cFTWebMenuNew
+            End_Object
+
+            Object oSave_itm is a cFTWebMenuSave
+            End_Object
+
+            Object oDelete_itm is a cFTWebMenuDelete
+            End_Object
+        End_Object
+    End_Object
+
+    /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Close at the right edge. 26 units hold
+       its row of buttons (33 px, and the theme's 4 px above and below) without a scroll bar. */
+    Object oButtonBar is a cFTGridHost
+        Set Location to 278 320
+        Set Size to 26 100
+        Set peAnchors to anBottomRight
+        Set piColumnCount to 12         // column 0, then Close's 11
+        Set psColumnWidths to "0/1fr"
+
         Object oCloseBtn is a cFTWebButton
-            Set piColumnIndex to 12
+            Set piColumnIndex to 1
             Set piColumnSpan to 11
             Set psCaption to "Close"
             Set psCSSClass to "ftbtn ftg-close"
@@ -191,12 +214,6 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
         End_Object
     End_Object
 
-    // Save, from the web button: the type, through the comment - as F2 there does. A save sent to a control
-    // takes every changed value of the DD's controls along.
-    Procedure DoSaveType
-        Send Request_Save of oComment_edt
-    End_Procedure
-
     // The first type, when none is chosen yet - so the comment and the codes have something to show.
     Procedure Activating
         Boolean bHasRecord
@@ -206,7 +223,6 @@ Object oDemoDataCodeJock is a cFTDbModalPanel
             Send Find of oCodeType_DD FIRST_RECORD 1
     End_Procedure
 
-    On_Key Key_Ctrl+Key_S Send DoSaveType
     On_Key Key_Alt+Key_C  Send Close_Panel
     On_Key kCancel        Send Close_Panel
 End_Object
