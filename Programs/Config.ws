@@ -2,10 +2,10 @@
 Home=..\
 AppSrcPath=AppSrc
 AppHTMLPath=AppHtml
-BitmapPath=.
+BitmapPath=Bitmaps
 IdeSrcPath=IdeSrc
 DataPath=Data
-DDSrcPath=.
+DDSrcPath=DDSrc
 HelpPath=Help
 ProgramPath=Programs
 FileList=Data\Filelist.cfg

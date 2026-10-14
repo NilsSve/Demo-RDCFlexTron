@@ -9,12 +9,14 @@
 //               as a grid (cFTGridHost) holding a page built with the markup builders and icons,
 //               cFTWebButton objects - real web buttons the Studio's Designer draws - a combo, a list and
 //               the message boxes; a modal panel with a Close button of its own (DemoDialog.dg); the mockups
-//               the Studio's Designer draws for content built at run time (DemoMockups.dg); three dialogs of
+//               the Studio's Designer draws for content built at run time (DemoMockups.dg); two dialogs of
 //               controls - the framework's web controls on an FT host and on the framework's own, a before
-//               and after (DemoWebControls.dg), native Windows controls on an FT panel
-//               (DemoWindowsControls.dg) and the data-aware classes on DataFlex's two code tables
-//               (DemoData.dg); the input box and a message written in HTML; the library's About dialog, the
-//               way StdAbout.pkg works (FTStdAbout.pkg); and the Dark / Light / Follow Windows choice.
+//               and after (DemoWebControls.dg), and native Windows controls on an FT panel
+//               (DemoWindowsControls.dg); the data-aware classes on DataFlex's two code tables in three
+//               dialogs - CodeJock grids (DemoDataCodeJock.dg), web lists and fields (DemoDataWeb.dg), and
+//               the two together (DemoData.dg); the input box and a message written in HTML; the library's
+//               About dialog, the way StdAbout.pkg works (FTStdAbout.pkg); and the Dark / Light / Follow
+//               Windows choice.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -30,7 +32,7 @@ Use cThemeButton.pkg                // a cFTWebButton for one theme: Dark, Light
 Use cFTHtmlPage.pkg                 // a whole page: its title (psLabel) and the picture beside it (psTitleIcon)
 Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, MarkedText, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
-Use DemoDialog.dg                   // oDemoDialog - the modal panel that "Open the dialog" opens
+Use DemoDialog.dg                   // oDemoDialog - the modal panel that "ModalPanel Sample" opens
 Use DemoMockups.dg                  // oDemoMockups - the Designer's mockups, which "Designer mockups" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
 Use FTInputBox.dg                   // FTInputBox: the message box with one field to type in
@@ -46,13 +48,15 @@ Object oApplication is a cFTApplication
     Set peHelpType to htNoHelp
 End_Object
 
-// The three dialogs of controls. BELOW the application object, unlike the dialogs above, for two of them: the
-// selection grid's library (RDCToolsLib) asks the application object for the program's name and folder as it is
-// Used, and the data-aware dialog's data dictionaries open their tables as the program starts - through the
-// workspace, which the application object opens.
+// The dialogs of controls and the data-aware dialogs. BELOW the application object, unlike the dialogs above,
+// for most of them: the grids' library (RDCToolsLib) asks the application object for the program's name and
+// folder as it is Used, and the data-aware dialogs' data dictionaries open their tables as the program starts -
+// through the workspace, which the application object opens.
 Use DemoWebControls.dg              // oDemoWebControls - the framework's web controls, a before and after
 Use DemoWindowsControls.dg          // oDemoWindowsControls - native controls on an FT panel
-Use DemoData.dg                     // oDemoData - the data-aware classes on CodeType and CodeMast
+Use DemoDataCodeJock.dg             // oDemoDataCodeJock - CodeType and CodeMast in CodeJock grids
+Use DemoDataWeb.dg                  // oDemoDataWeb - the same in data-aware web lists and fields
+Use DemoData.dg                     // oDemoData - the two together, on the same data dictionaries
 
 // ---------------------------------------------------------------------------------------------------
 // The pages - global functions, so they are defined before the objects that call them.
@@ -73,10 +77,11 @@ Function DemoPageHtml Global Returns String
     Append s (TagText("h2", "", "On this window"))
 
     Append sItems (BulletItem(MarkedText("""
-        The whole window is ONE host, a `cFTGridHost`: a grid of 8 px columns and seven rows - the theme
-        buttons with Open the dialog, the glyph combo with Designer mockups, the three dialogs of controls, the
-        two boxes, the glyph list with this page, a row of air, and the message boxes with About and Exit. A
-        control takes a row with `piRowIndex`, and this page fills its row with `pbFillHeight`.
+        The whole window is ONE host, a `cFTGridHost`: a grid of 8 px columns and eight rows - the theme
+        buttons with ModalPanel Sample, the glyph combo with Designer mockups, the two dialogs of controls, the
+        three data-aware dialogs, the two boxes, the glyph list with this page, a row of air, and the message
+        boxes with About and Exit. A control takes a row with `piRowIndex`, and this page fills its row with
+        `pbFillHeight`.
         """)))
     Append sItems (BulletItem(MarkedText("""
         This page is a `cFTHtmlPage`, built with `FTMarkupBuilders`.
@@ -123,23 +128,26 @@ Function DemoPageHtml Global Returns String
         says what changed.
         """)))
     Append sItems (BulletItem(MarkedText("""
-        Data-aware opens a `cFTDbModalPanel` on CodeType and CodeMast, the two code tables DataFlex gives every
-        workspace. On the left, two `cFTDbCJGrid` grids: the types, and the chosen type's codes. On the right, a
-        `cFTDbGridHost`: web fields bound to the chosen type with `Entry_Item`, and a data-aware `cFTWebList`
-        of the same codes - its columns are bound too, and it reads its rows from the data dictionary. A new
-        type is added on either side: the down arrow on the types grid's last row, or Clear and Save beside
-        the fields. Its key is typed for a new type only - the data dictionary says so (`DD_COMMIT`), and the
-        grid's column and the web field both follow it. The demo copies the two empty tables into its Data
+        The Data row opens CodeType and CodeMast, the two code tables DataFlex gives every workspace, three
+        ways - each a `cFTDbModalPanel` with the same two data dictionaries. CodeJock: two `cFTDbCJGrid` grids
+        you type in, the types and the chosen type's codes, and the type's comment in a `cDbTextEdit`. Web: a
+        `cFTDbGridHost` per data dictionary, each with a data-aware `cFTWebList` - its columns are bound with
+        `Entry_Item`, and it reads its rows from the data dictionary - beside `cFTWebForm` fields bound to its
+        chosen row. A list shows and the fields edit; Save, Clear and Delete are the framework's own requests,
+        which a host carries out on its own data dictionary. Mixed: the CodeJock grids beside a web host, on
+        the same data dictionaries, so a row chosen on one side is chosen on the other. A type's key is typed for a new type only - the data dictionary says so (`DD_COMMIT`),
+        and a grid's column and a web field both follow it. The demo copies the two empty tables into its Data
         folder the first time it runs, and adds a few rows.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Input box shows `FTInputBox`, the message box with one field to type in, and HTML message shows
         `FTHtmlMessage`, a message written in HTML with button captions of its own. Both return True for the
-        first button.
+        answer at the bottom right - the caption the call names first, `sYesLabel` - and False for the button
+        beside it, or Esc.
         """)))
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
-        it says otherwise - Follow Windows takes 15, Open the dialog 20. One column takes the extra width -
+        it says otherwise - Follow Windows takes 15, ModalPanel Sample 20. One column takes the extra width -
         empty in the rows of buttons, part of this page in its own - and this page's row the extra height,
         so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows
         dialog.
@@ -200,17 +208,18 @@ End_Function
 // The main window
 // ---------------------------------------------------------------------------------------------------
 
-/* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and seven rows - the
-   theme buttons, the glyph combo, the dialogs of controls and the two boxes at the top, the glyph list and the
-   page in the middle taking the extra height, a row of air, and the message boxes with About and Exit at the
-   bottom. The grid does the layout, in the browser, on every resize; cFTPanel fits the host itself to the
-   window's client area (phoClientHost). The two rows added on 2026-10-10 take 66 px, about 42 units: the
-   window and its least height grew by as much, so the page kept its own. */
+/* The main window: ONE host, laid out like a Windows dialog on a grid of 8 px columns and eight rows - the
+   theme buttons, the glyph combo, the dialogs of controls, the data-aware dialogs and the two boxes at the top,
+   the glyph list and the page in the middle taking the extra height, a row of air, and the message boxes with
+   About and Exit at the bottom. The grid does the layout, in the browser, on every resize; cFTPanel fits the
+   host itself to the window's client area (phoClientHost). The two rows added on 2026-10-10 take 66 px, about
+   42 units, and the Data row of 2026-10-14 33 px, 21 units: the window and its least height grew by as much,
+   so the page kept its own. */
 Object oMain is a cFTPanel
     Set Label to "RDCFlexTron Demo"
     Set Location to 190 119
-    Set Size to 342 450
-    Set piMinSize to 222 360  
+    Set Size to 363 450
+    Set piMinSize to 243 360  
 
     /* THE ABOUT DIALOG, wired as a standard program wires it: FTStdAbout.pkg Used in the object that answers
        Activate_About - the client area in a program with a menu, this window here - and that object's own
@@ -235,13 +244,13 @@ Object oMain is a cFTPanel
        so the Studio's Designer draws it where it sits. */
     Object oHost is a cFTGridHost
         Set Location to 4 4
-        Set Size to 275 432
+        Set Size to 296 432
         Set peAnchors to anNone             // placed by cFTPanel (phoClientHost)
         // 64 columns: 63 of 8 px (504 px) and column 43, which takes the extra width. The window's minimum
         // width (360 units, about 516 px for the host at 1.5 px a unit) still holds them.
         Set piColumnCount to 64
         Set psColumnWidths to "43/1fr"      // column 43 - empty - takes the extra width
-        Set psRowHeights to "4/1fr 5/8px"   // row 4, the list and the page, takes the extra height; row 5 is 8 px of air
+        Set psRowHeights to "5/1fr 6/8px"   // row 5, the list and the page, takes the extra height; row 6 is 8 px of air
 
         // Row 0: the theme choice on the left, the dialog button at the right edge.
         Object oThemeLabel is a cFTWebLabel
@@ -278,13 +287,13 @@ Object oMain is a cFTPanel
             Set piRowIndex to 0
             Set piColumnIndex to 44    // the right edge: column 43 before it takes the extra width
             Set piColumnSpan to 20
-            Set psCaption to "Open the dialog"
+            Set psCaption to "ModalPanel Sample"
             Set pbBold to True
             // The glyph as a class (ftglyphs.css), with the primary look: a literal class list is what the
             // Studio's Designer draws - it never runs the code that turns psGlyph / pbPrimary into classes.
             Set psCSSClass to "ftbtn ftbtn-primary ftg-info"
             Set pbPrimary to True
-            Set psToolTip to "A cFTModalPanel with a Close button of its own"
+            Set psToolTip to "A sample cFTModalPanel with a Close button."
 
             Procedure OnButtonClick
                 Send Popup of (oDemoDialog(Self))
@@ -350,8 +359,7 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Row 2: the dialogs of controls. Two on the left - their 40 columns (8 + 15 + 17) stay inside the left
-        // group's 43 - and the data-aware one at the right edge, under the two dialog buttons above it.
+        // Row 2: the two dialogs of controls - their 40 columns (8 + 15 + 17) stay inside the left group's 43.
         Object oDialogsLabel is a cFTWebLabel
             Set piRowIndex to 2
             Set piColumnIndex to 0
@@ -386,22 +394,56 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        Object oDataBtn is a cFTWebButton
-            Set piRowIndex to 2
-            Set piColumnIndex to 44
-            Set piColumnSpan to 20
-            Set psCaption to "Data-aware"
+        // Row 3: CodeType and CodeMast, three ways - CodeJock grids, web lists and fields, and the two together.
+        // Its 41 columns (8 + 13 + 10 + 10) stay inside the left group's 43, as the rows above.
+        Object oDataLabel is a cFTWebLabel
+            Set piRowIndex to 3
+            Set piColumnIndex to 0
+            Set piColumnSpan to 8
+            Set psCaption to "Data"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        Object oDataCodeJockBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 8
+            Set piColumnSpan to 13
+            Set psCaption to "CodeJock"
+            Set psCSSClass to "ftbtn ftg-listcheck"
+            Set psToolTip to "Code types and their codes in CodeJock grids: cFTDbCJGrid, and a cDbTextEdit for the comment"
+
+            Procedure OnButtonClick
+                Send Popup of (oDemoDataCodeJock(Self))
+            End_Procedure
+        End_Object
+
+        Object oDataWebBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 21
+            Set psCaption to "Web"
+            Set psCSSClass to "ftbtn ftg-edit"
+            Set psToolTip to "The same in web controls: data-aware cFTWebList lists beside bound cFTWebForm fields"
+
+            Procedure OnButtonClick
+                Send Popup of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        Object oDataMixedBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 31
+            Set psCaption to "Mixed"
             Set psCSSClass to "ftbtn ftg-database"
-            Set psToolTip to "The data-aware classes on DataFlex's two code tables, CodeType and CodeMast"
+            Set psToolTip to "The two together: CodeJock grids beside a web host, on the same data dictionaries"
 
             Procedure OnButtonClick
                 Send Popup of (oDemoData(Self))
             End_Procedure
         End_Object
 
-        // Row 3: the two boxes the message boxes at the bottom do not show.
+        // Row 4: the two boxes the message boxes at the bottom do not show.
         Object oBoxesLabel is a cFTWebLabel
-            Set piRowIndex to 3
+            Set piRowIndex to 4
             Set piColumnIndex to 0
             Set piColumnSpan to 8
             Set psCaption to "Boxes"
@@ -409,7 +451,7 @@ Object oMain is a cFTPanel
         End_Object
 
         Object oInputBoxBtn is a cFTWebButton
-            Set piRowIndex to 3
+            Set piRowIndex to 4
             Set piColumnIndex to 8
             Set piColumnSpan to 15
             Set psCaption to "Input box"
@@ -422,17 +464,17 @@ Object oMain is a cFTPanel
                 Boolean bUse
                 Move "RDCFlexTron" to sName
                 Move (ParaHtml("", ("FTInputBox is the message box with " + BoldText("one field") + " to type in."))) to sBody
-                Append sBody (ParaHtml("", "It returns True for the first button, or Enter in the field, and hands back what was typed."))
+                Append sBody (ParaHtml("", "It returns True for Use it, or Enter in the field, and hands back what was typed."))
                 Get FTInputBox "A name, please" sBody "Name:" (&sName) "Use it" "Not now" to bUse
                 If (bUse) ;
                     Send FTInfoBox ("FTInputBox returned True, and the field held: " + sName) "Your answer"
                 Else ;
-                    Send FTInfoBox "FTInputBox returned False: the second button, or Esc. The text is left as it was." "Your answer"
+                    Send FTInfoBox "FTInputBox returned False: Not now, or Esc. The text is left as it was." "Your answer"
             End_Procedure
         End_Object
 
         Object oHtmlMessageBtn is a cFTWebButton
-            Set piRowIndex to 3
+            Set piRowIndex to 4
             Set piColumnIndex to 23
             Set piColumnSpan to 17
             Set psCaption to "HTML message"
@@ -446,20 +488,20 @@ Object oMain is a cFTPanel
                 Append sBody (ParaHtml("", (CodeText("Get FTHtmlMessage sTitle sBodyHtml sYesLabel sNoLabel sGlyph to bYes"))))
                 Get FTHtmlMessage "A message written in HTML" sBody "Sounds good" "Not now" CS_GlyphInfo to bYes
                 If (bYes) ;
-                    Send FTInfoBox "FTHtmlMessage returned True: the first button." "Your answer"
+                    Send FTInfoBox "FTHtmlMessage returned True: Sounds good, the caption the call names first (sYesLabel)." "Your answer"
                 Else ;
-                    Send FTInfoBox "FTHtmlMessage returned False: the second button, or Esc." "Your answer"
+                    Send FTInfoBox "FTHtmlMessage returned False: Not now (sNoLabel), or Esc." "Your answer"
             End_Procedure
         End_Object
 
-        // Row 4: the glyph list on the left - its 43 columns end where the rows above end their left groups -
+        // Row 5: the glyph list on the left - its 43 columns end where the rows above end their left groups -
         // and the page on the right. Both fill the row, which takes the extra height.
         Object oGlyphList is a cFTWebList
-            Set piRowIndex to 4
+            Set piRowIndex to 5
             Set piColumnIndex to 0
             Set piColumnSpan to 43
             Set pbFillHeight to True
-            Set pbDataAware to False        // the rows come from OnManualLoadData
+            Set pbDataAware to False            // the rows come from OnManualLoadData
 
             Object oGlyphCol is a cWebColumn
                 Set piWidth to 36               // 36 px
@@ -509,10 +551,10 @@ Object oMain is a cFTPanel
         End_Object
 
         Object oPage is a cFTHtmlPage
-            Set piRowIndex to 4
+            Set piRowIndex to 5
             Set piColumnIndex to 43
             Set piColumnSpan to 21          // column 43, which takes the extra width, and the 20 after it
-            Set pbFillHeight to True        // fills row 4, which takes the extra height; it scrolls itself
+            Set pbFillHeight to True        // fills row 5, which takes the extra height; it scrolls itself
             Set psLabel to "RDCFlexTron"    // the page's title - the Studio's Designer shows it too
             // The picture beside it, the RDC Tools mark: the demo's own glyph rdcmark (AppHtml\FTGlyphs\rdcmark.svg).
             // Named by its class, not by psTitleIcon "rdcmark": the Designer runs no code and shows only a class.
@@ -525,10 +567,10 @@ Object oMain is a cFTPanel
             End_Procedure
         End_Object
 
-        // Row 5 is empty: 8 px of air (psRowHeights), so Exit does not sit right under the page.
-        // Row 6: the message boxes on the left - FTMessageBox.dg's three - and About with Exit at the bottom right.
+        // Row 6 is empty: 8 px of air (psRowHeights), so Exit does not sit right under the page.
+        // Row 7: the message boxes on the left - FTMessageBox.dg's three - and About with Exit at the bottom right.
         Object oInfoBoxBtn is a cFTWebButton
-            Set piRowIndex to 6
+            Set piRowIndex to 7
             Set piColumnIndex to 0
             Set piColumnSpan to 14
             Set psCaption to "Information"
@@ -544,7 +586,7 @@ Object oMain is a cFTPanel
         End_Object
 
         Object oStopBoxBtn is a cFTWebButton
-            Set piRowIndex to 6
+            Set piRowIndex to 7
             Set piColumnIndex to 14
             Set psCaption to "Stop"
             Set psCSSClass to "ftbtn ftg-stop"
@@ -556,7 +598,7 @@ Object oMain is a cFTPanel
         End_Object
 
         Object oQuestionBoxBtn is a cFTWebButton
-            Set piRowIndex to 6
+            Set piRowIndex to 7
             Set piColumnIndex to 24
             Set piColumnSpan to 12
             Set psCaption to "Question"
@@ -576,7 +618,7 @@ Object oMain is a cFTPanel
 
         // About, beside Exit: the two together are as wide as the dialog button above them.
         Object oAboutBtn is a cFTWebButton
-            Set piRowIndex to 6
+            Set piRowIndex to 7
             Set piColumnIndex to 44
             Set psCaption to "About"
             Set psCSSClass to "ftbtn ftg-info"
@@ -590,7 +632,7 @@ Object oMain is a cFTPanel
 
         // Exit: its 10 columns end where the dialog button's 20 do.
         Object oExitBtn is a cFTWebButton
-            Set piRowIndex to 6
+            Set piRowIndex to 7
             Set piColumnIndex to 54
             Set psCaption to "Exit"
             Set psCSSClass to "ftbtn ftg-exit"     // the glyph as a class, so the Designer draws it too (ftglyphs.css)

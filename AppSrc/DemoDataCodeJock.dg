@@ -1,0 +1,212 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoDataCodeJock
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-14
+//
+// Description : The data-aware classes on DataFlex's own two code tables, CodeJock only: a cFTDbModalPanel
+//               with two cFTDbCJGrid grids - the code types, and the chosen type's codes - and the type's
+//               comment in a cDbTextEdit. The same data in web controls is DemoDataWeb.dg; the two
+//               together, on the same data dictionaries, DemoData.dg.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use Windows.pkg
+Use cDbTextEdit.pkg                 // the type's comment: text of several lines
+Use cFTDbModalPanel.pkg
+Use cFTDbCJGrid.pkg                 // RDCToolsLib's data-aware grid in the FT look
+Use cRDCDbCJGridColumn.pkg          // its column
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the button bar's host
+Use FTAllWebControlClasses.pkg      // cFTWebButton
+Use cCodeTypeDataDictionary.dd      // CodeType - it makes sure the two tables are there
+Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
+
+/* CODE TYPES AND THEIR CODES IN CODEJOCK GRIDS: a Windows data-entry dialog in the FT look, with no web control
+   but the button bar. CodeType and CodeMast are the two code tables DataFlex gives every workspace: a type with a
+   description and a comment, and the codes of a type. The demo copies the empty tables into its Data folder the
+   first time it runs and adds a few rows (DemoCodeTables.pkg).
+
+   - oTypes_grd, a cFTDbCJGrid on the CodeType DD: the types. A row chosen there is the DD's record. A
+     description is changed in place, and the down arrow on the last row adds a type.
+   - oComment_edt, a cDbTextEdit on the same DD: the chosen type's comment. Save in the bar, or F2, saves it.
+   - oCodes_grd, a cFTDbCJGrid on the CodeMast DD, which the CodeType DD constrains: the chosen type's codes.
+     Type in a cell to change one; the down arrow on the last row adds one; Delete removes one; the row is
+     saved when it is left.
+
+   The DDs belong to the panel, a cFTDbModalPanel, which gives its native children - the text boxes and the
+   comment - the FT colours (pbFTColorChildren). The same dialog in web controls is DemoDataWeb.dg. */
+Object oDemoDataCodeJock is a cFTDbModalPanel
+    Set Label to "Data-aware, CodeJock: code types and their codes"
+    Set Location to 10 10
+    Set Size to 282 430
+    Set piMinSize to 282 430
+
+    Object oCodeType_DD is a cCodeTypeDataDictionary
+    End_Object
+
+    Object oCodeMast_DD is a cCodeMastDataDictionary
+        Set DDO_Server to oCodeType_DD
+        Set Constrain_File to CodeType.File_Number
+    End_Object
+
+    Set Main_DD to oCodeType_DD
+    Set Server to oCodeType_DD
+
+    // ------------------------------------------------------------------------------ the left column: the types
+    Object oTypes_tb is a TextBox
+        Set Location to 6 10
+        Set Size to 9 196
+        Set Label to "Code types - a cFTDbCJGrid you can type in."
+    End_Object
+
+    /* The types: a row chosen here is the DD's record, and the comment and the codes follow it.
+
+       A NEW TYPE: the down arrow on the last row appends an empty row - the grid clears its DD for it - and the
+       row is saved when it is left. pbAllowEdit and pbAllowAppendRow say so; the library's class has both off.
+       The Type column takes typing in a new row only, because the DD says its key is committed once saved
+       (DD_COMMIT, cCodeTypeDataDictionary.dd). Rows are not deleted here: a type has codes under it.
+
+       No check box column: phoCheckbox_Col and phoData_Col are -1 by default, which the class's footer routine
+       reads as "none" - leave them alone (0 is not "none" there). The footer counts the types. */
+    Object oTypes_grd is a cFTDbCJGrid
+        Set Server to oCodeType_DD
+        Set Location to 18 10
+        Set Size to 110 196
+        Set pbAllowEdit to True
+        Set pbAllowAppendRow to True
+        Set pbAllowInsertRow to False
+        Set pbAllowDeleteRow to False
+        Set pbAutoAppend to False
+        Set Status_Help to "Choose a type. The down arrow on the last row adds one; a new type's name is typed in its first cell."
+
+        Object oCodeType_Type is a cRDCDbCJGridColumn
+            Entry_Item CodeType.Type
+            Set piWidth to 110
+            Set psCaption to "Type"
+        End_Object
+
+        Object oCodeType_Description is a cRDCDbCJGridColumn
+            Entry_Item CodeType.Description
+            Set piWidth to 220
+            Set psCaption to "Description"
+        End_Object
+
+        // The class sends this whenever the row or the data changes; it writes the footer.
+        Procedure DoSetCheckboxFooterText
+            Integer iTypes
+            Get_Attribute DF_FILE_RECORDS_USED of CodeType.File_Number to iTypes
+            Set psFooterText of (oCodeType_Type(Self)) to ("Types:" * String(iTypes))
+        End_Procedure
+    End_Object
+
+    Object oComment_tb is a TextBox
+        Set Location to 134 10
+        Set Size to 9 196
+        Set Label to "The type's comment - a cDbTextEdit."
+    End_Object
+
+    /* THE COMMENT: text of several lines, bound to the chosen type like the grid's columns, so it follows the
+       grid. Save in the bar, or F2 here, saves it with the rest of the type.
+
+       The edit saves by itself - it does not hand its save to the panel - and a data-entry control clears its
+       record after a save unless its Auto_Clear_DEO_State is False (True is the default). */
+    Object oComment_edt is a cDbTextEdit
+        Entry_Item CodeType.Comment
+        Set Server to oCodeType_DD
+        Set Location to 146 10
+        Set Size to 100 196
+        Set peAnchors to anTopBottomLeft
+        Set Auto_Clear_DEO_State to False   // a save keeps the type on screen
+    End_Object
+
+    // ----------------------------------------------------------------------------- the right column: the codes
+    Object oCodes_tb is a TextBox
+        Set Location to 6 212
+        Set Size to 9 208
+        Set Label to "The type's codes - a cFTDbCJGrid you can type in."
+    End_Object
+
+    // No check box column here either (the class's default), and no footer: the grid has nothing to count. It
+    // takes the extra width and height, so it grows with the dialog.
+    Object oCodes_grd is a cFTDbCJGrid
+        Set Server to oCodeMast_DD
+        Set Location to 18 212
+        Set Size to 228 208
+        Set peAnchors to anAll
+        Set pbAllowEdit to True
+        Set pbAllowAppendRow to True
+        Set pbAutoAppend to True
+        Set pbAllowDeleteRow to True
+        Set pbShowFooter to False
+        Set Status_Help to "Type in a cell. The down arrow on the last row adds a code, Delete removes one."
+
+        Object oCodeMast_Code is a cRDCDbCJGridColumn
+            Entry_Item CodeMast.Code
+            Set piWidth to 110
+            Set psCaption to "Code"
+        End_Object
+
+        Object oCodeMast_Description is a cRDCDbCJGridColumn
+            Entry_Item CodeMast.Description
+            Set piWidth to 220
+            Set psCaption to "Description"
+        End_Object
+    End_Object
+
+    /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Save and Close at the right edge. 26
+       units hold its row of buttons (33 px, and the theme's 4 px above and below) without a scroll bar. */
+    Object oButtonBar is a cFTGridHost
+        Set Location to 250 290
+        Set Size to 26 130
+        Set peAnchors to anBottomRight
+        Set piColumnCount to 23         // column 0, then Save's 11 and Close's 11
+        Set psColumnWidths to "0/1fr"
+
+        Object oSaveBtn is a cFTWebButton
+            Set piColumnIndex to 1
+            Set piColumnSpan to 11
+            Set psCaption to "Save"
+            Set psCSSClass to "ftbtn ftg-save"
+            Set psToolTip to "Save the chosen type - its comment, and a description changed in the grid"
+
+            // After the web click has returned.
+            Procedure OnButtonClick
+                Send DoSaveType of (oDemoDataCodeJock(Self))
+            End_Procedure
+        End_Object
+
+        Object oCloseBtn is a cFTWebButton
+            Set piColumnIndex to 12
+            Set piColumnSpan to 11
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"
+            Set psToolTip to "Close this dialog"
+
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoDataCodeJock(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    // Save, from the web button: the type, through the comment - as F2 there does. A save sent to a control
+    // takes every changed value of the DD's controls along.
+    Procedure DoSaveType
+        Send Request_Save of oComment_edt
+    End_Procedure
+
+    // The first type, when none is chosen yet - so the comment and the codes have something to show.
+    Procedure Activating
+        Boolean bHasRecord
+        Forward Send Activating
+        Get HasRecord of oCodeType_DD to bHasRecord
+        If (not(bHasRecord)) ;
+            Send Find of oCodeType_DD FIRST_RECORD 1
+    End_Procedure
+
+    On_Key Key_Ctrl+Key_S Send DoSaveType
+    On_Key Key_Alt+Key_C  Send Close_Panel
+    On_Key kCancel        Send Close_Panel
+End_Object

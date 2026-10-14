@@ -4,8 +4,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
 
 - ONE themed host for the whole window, the library's `cFTGridHost`: laid out on a grid of 8 px columns
   the way a Windows dialog is - one column and the page's row take the extra space - with the buttons,
-  the glyph combo, the dialogs of controls, the two boxes, the glyph list beside the page, a row of air,
-  and the message boxes with About and Exit in its seven rows (`piRowIndex`);
+  the glyph combo, the dialogs of controls, the data-aware dialogs, the two boxes, the glyph list beside
+  the page, a row of air, and the message boxes with About and Exit in its eight rows (`piRowIndex`);
 - the page, a `cFTHtmlPage`: its title is `psLabel`, and its body is built with the `FTMarkupBuilders`
   functions. The RDC Tools mark beside the title is a glyph of the demo's own: `rdcmark.svg` in
   `AppHtml/FTGlyphs`. The program writes the folder's classes into `AppHtml/FTGlyphs/ftglyphs-app.css`
@@ -52,21 +52,29 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   behind the line that says what changed; the buttons at the bottom are web buttons on a small grid host.
   The program Uses this dialog below the application object: the grid's library, RDCToolsLib, asks the
   application object for the program's name and folder as it is Used;
-- the data-aware classes (`AppSrc/DemoData.dg`, the Data-aware button) on CodeType and CodeMast, the two
-  code tables DataFlex gives every workspace: a `cFTDbModalPanel` with two `cFTDbCJGrid` grids on the left -
-  the code types, and the chosen type's codes - and a `cFTDbGridHost` on the right, whose web fields are
-  bound to the chosen type with `Entry_Item`, the comment in the framework's own `cWebEdit`, and whose
-  data-aware `cFTWebList` shows the same codes as the grid beside it: its columns are bound with
-  `Entry_Item` and it reads its rows from the data dictionary, where the main window's glyph list gets
-  them from code. The grid and the list share one data dictionary. A new type is added on either side:
-  the down arrow on the types grid's last row appends one, and Clear, beside Save, empties the fields for
-  one - the types grid gets an empty row for it, and Save saves it. A type's key is typed for a new type
-  only: the data dictionary says so (`DD_COMMIT`, with `Field_CommitNoEnterOnIndex`), and the grid's column
-  and the web field both follow it. The two data dictionaries are the
-  demo's (`cCodeTypeDataDictionary.dd`, `cCodeMastDataDictionary.dd`). A repository carries no tables, so
-  the program copies the two empty ones DataFlex ships (`Usr\New\Data` in the DataFlex folder) into `Data`
-  the first time it runs, and adds a few rows (`AppSrc/DemoCodeTables.pkg`). This dialog is Used below the
-  application object too: its data dictionaries open their tables as the program starts;
+- the data-aware classes on CodeType and CodeMast, the two code tables DataFlex gives every workspace, in
+  three dialogs (the Data row's buttons), each a `cFTDbModalPanel` with the same two data dictionaries. A
+  type's key is typed for a new type only: the data dictionary says so (`DD_COMMIT`, with
+  `Field_CommitNoEnterOnIndex`), and a grid's column and a web field both follow it. The two data
+  dictionaries are the demo's (`DDSrc/cCodeTypeDataDictionary.dd`, `DDSrc/cCodeMastDataDictionary.dd`,
+  registered in `DDSrc/DDClassList.xml`). A repository carries no tables, so the program copies the two
+  empty ones DataFlex ships (`Usr\New\Data` in the DataFlex folder) into `Data` the first time it runs, and
+  adds a few rows (`AppSrc/DemoCodeTables.pkg`). The dialogs are Used below the application object: their
+  data dictionaries open their tables as the program starts.
+  - CodeJock (`AppSrc/DemoDataCodeJock.dg`): two `cFTDbCJGrid` grids you type in - the code types, and the
+    chosen type's codes - and the type's comment in a `cDbTextEdit`. The down arrow on a grid's last row
+    adds a row, and a row is saved when it is left;
+  - Web (`AppSrc/DemoDataWeb.dg`): a `cFTDbGridHost` per data dictionary, as a web program has a view per
+    data dictionary, each with a data-aware `cFTWebList` - its columns are bound with `Entry_Item`, and it
+    reads its rows from the data dictionary, where the main window's glyph list gets them from code - beside
+    `cFTWebForm` fields bound to its chosen row, the comment in the framework's own `cWebEdit`. A list shows
+    and the fields beside it edit. Save, Clear and Delete are the framework's own `Request_Save`,
+    `Request_Clear` and `Request_Delete`, which a host carries out on its own data dictionary: a FlexTron
+    data-aware host is a data-entry client, as a view is. DataFlex's FlexTron sample does the same with a list
+    view and an edit view (`SelectInventory.wo`, `ZoomInventory.wo`); here a list and its fields share a host;
+  - Mixed (`AppSrc/DemoData.dg`): the CodeJock grids on the left and a web host on the right, on the same
+    data dictionaries, so the grid and the list follow each other - a row chosen in one is chosen in the
+    other, and a code saved in the grid is in the list. A new type is added on either side;
 - `FTInputBox`, the message box with one field to type in, and `FTHtmlMessage`, a message written in HTML
   with button captions of its own (the Input box and HTML message buttons);
 - the About dialog (the About button): the library's `FTStdAbout.pkg`, Used in the main window as

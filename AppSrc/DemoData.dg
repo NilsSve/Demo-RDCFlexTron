@@ -8,7 +8,8 @@
 // Description : The data-aware classes on DataFlex's own two code tables: a cFTDbModalPanel with two
 //               cFTDbCJGrid grids on the left - the code types, and the chosen type's codes - and a
 //               cFTDbGridHost on the right, whose web fields are bound to the chosen type and whose
-//               cFTWebList shows the same codes.
+//               cFTWebList shows the same codes. Each side alone is a dialog of its own: DemoDataCodeJock.dg
+//               and DemoDataWeb.dg.
 //
 // This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,6 +22,7 @@ Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
 Use cFTGridHost.pkg                 // the button bar's host
 Use cFTDbGridHost.pkg               // the data-aware host, on the same grid of 8 px columns
 Use FTAllWebControlClasses.pkg      // cFTWebForm, cFTWebList, cFTWebButton - and the framework's cWebEdit
+Use FTPageIsUp.pkg                  // FTHostPageIsUp - can the host's page take a live push now?
 Use cCodeTypeDataDictionary.dd      // CodeType - it makes sure the two tables are there
 Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
 
@@ -39,7 +41,10 @@ Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
    The right column is ONE web host, oTypeHost, a cFTDbGridHost:
    - web fields bound to the CodeType DD with Entry_Item, as a dbForm is - so they show the chosen type and
      follow the grid. The comment is text of several lines, in the framework's own cWebEdit: the library has
-     no class for it, and it takes the FT look from the host. Save reads the fields and saves the DD.
+     no class for it, and it takes the FT look from the host. Save is the framework's own Request_Save, which
+     the host carries out on its Server, the CodeType DD: a FlexTron data-aware host is a data-entry client,
+     as a Windows view is, so it moves what was typed in the bound fields into the DD and has the DD validate
+     and save it. Clear is its Request_Clear.
    - Clear, beside Save, adds a NEW type from the web side (Nils 2026-10-10), as the grid's own new row does
      from the native side: the DD lets go of its record, the fields empty, the grid on the left gets an empty
      row - the CodeJock grid does that itself when its DD is cleared by another control - and the Type field,
@@ -51,9 +56,10 @@ Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
      shares the DD with the grid, so the two follow each other: a row chosen in one is the DD's record, and
      the other shows it; a code added or changed in the grid is in the list once it is saved.
 
-   The DDs belong to the panel, a cFTDbModalPanel, so the grids and the host share them. */
+   The DDs belong to the panel, a cFTDbModalPanel, so the grids and the host share them. Each side alone is a
+   dialog of its own: DemoDataCodeJock.dg (the grids) and DemoDataWeb.dg (the web controls). */
 Object oDemoData is a cFTDbModalPanel
-    Set Label to "Data-aware: code types and their codes"
+    Set Label to "Data-aware, mixed: code types and their codes"
     Set Location to 10 10
     Set Size to 282 430
     Set piMinSize to 282 430
@@ -177,6 +183,9 @@ Object oDemoData is a cFTDbModalPanel
         Set psColumnWidths to "16/1fr"
         Set psRowHeights to "4/25px 5/8px 8/1fr"
         Set Server to oCodeType_DD
+        Set Auto_Clear_DEO_State to False   // the saved type stays chosen
+        Set Verify_Save_Msg to 0            // no Windows boxes
+        Set Verify_Data_Loss_Msg to 0
 
         /* THE TYPE'S KEY: shown for a type that exists - it is chosen in the grid, and a key is not changed -
            and typed in for a new one, after Clear. The field opens and shuts itself: a DD tells its controls
@@ -271,7 +280,7 @@ Object oDemoData is a cFTDbModalPanel
             Set piColumnIndex to 0
             Set piColumnSpan to 39
             Set pbFillHeight to True
-            Set piOrdering to 1             // index 1: the type, then the code
+            Set piOrdering to 1                 // index 1: the type, then the code
             Set psPlaceHolder to "No codes yet"
 
             Object oCode_col is a cWebColumn
@@ -315,71 +324,33 @@ Object oDemoData is a cFTDbModalPanel
     End_Object
 
     /* The Type field is typed in for a NEW type only. The value is stored for a page that loads (Set) and
-       pushed to a page that is up (WebSet): the host's pbInitWebApp is True until its page has called home,
-       and a WebSet before then has nowhere to go - the dialog finds its first type before that. */
+       pushed to a page that is up (WebSet) - FTHostPageIsUp: the host active, and its page has called home. A
+       WebSet before then has nowhere to go, and the dialog finds its first type before that. */
     Procedure SyncTypeField
-        Boolean bHasRecord bInitializing
+        Boolean bHasRecord
 
         Get HasRecord of oCodeType_DD to bHasRecord
         Set pbEnabled of oType_wf to (not(bHasRecord))
-        Get pbInitWebApp of oTypeHost to bInitializing
-        If (not(bInitializing)) ;
+        If (FTHostPageIsUp(oTypeHost(Self))) ;
             WebSet pbEnabled of oType_wf to (not(bHasRecord))
     End_Procedure
 
-    // Clear, from the web button: the DD lets go of its record, and its controls follow - the fields empty,
-    // the Type field opens (its Refresh), the grid on the left gets an empty row, the codes go.
+    /* Clear and Save, from the web buttons (Save from Ctrl+S too): the type host carries out the framework's own
+       request on its Server, the CodeType DD. Clear lets go of the record, and its controls follow - the fields
+       empty, the Type field opens (its Refresh), the grid on the left gets an empty row, the codes go. A save
+       leaves the DD with no changes to save - a save the DD refused leaves them, and its error has said why. */
     Procedure DoClearType
-        Send Clear of oCodeType_DD
+        Send Request_Clear of oTypeHost
         Send Focus of oType_wf
         Set StatusText to "A new type: enter it, and press Save."        // the panel's own status bar
     End_Procedure
 
-    /* Save, from the web button: the fields' values go into the DD, and the DD saves its record - a save
-       aimed at the DD, never a broadcast to every control. A NEW type needs its key first, in capitals as
-       the DD keeps it; a key that exists is found and shown instead, the way a key field finds as it is
-       left (the read is done on the table itself, so the buffer is emptied again before the values go in). */
     Procedure DoSaveType
-        String sType sDescription sComment
-        Boolean bHasRecord bNew
-
-        Get HasRecord of oCodeType_DD to bHasRecord
-        Move (not(bHasRecord)) to bNew
-        WebGet psValue of oType_wf to sType
-        WebGet psValue of oDescription_wf to sDescription
-        WebGet psValue of oComment_we to sComment
-        If (bNew) Begin
-            Move (Uppercase(Trim(sType))) to sType
-            If (sType = "") Begin
-                Set StatusText to "A new type needs its name: enter the type first."
-                Send Focus of oType_wf
-                Procedure_Return
-            End
-            Clear CodeType
-            Move sType to CodeType.Type
-            Find EQ CodeType by Index.1
-            If (Found) Begin
-                Send FindByRowId of oCodeType_DD CodeType.File_Number (GetRowId(CodeType.File_Number))
-                Set StatusText to ("The type " + sType + " exists already - here it is.")
-                Procedure_Return
-            End
-            Clear CodeType
-            Set Field_Changed_Value of oCodeType_DD Field CodeType.Type to sType
-        End
-        Set Field_Changed_Value of oCodeType_DD Field CodeType.Description to sDescription
-        Set Field_Changed_Value of oCodeType_DD Field CodeType.Comment to sComment
-        Send Request_Save of oCodeType_DD
-        Get HasRecord of oCodeType_DD to bHasRecord
-        If (not(bHasRecord)) Begin
-            Set StatusText to "The type was not saved."
-            Procedure_Return
-        End
-        If (bNew) Begin
-            Set StatusText to ("The new type " + sType + " is saved. Its codes go in the grid below the types.")
-        End
-        Else Begin
-            Set StatusText to "The type is saved."
-        End
+        Boolean bChanged
+        Send Request_Save of oTypeHost
+        Get Should_Save of oCodeType_DD to bChanged
+        If (not(bChanged)) ;
+            Set StatusText to "The type is saved. A new type's codes go in the grid below the types."
     End_Procedure
 
     // The first type, when none is chosen yet - so the fields and the codes have something to show.

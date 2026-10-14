@@ -1,0 +1,427 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoDataWeb
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-10-14
+//
+// Description : The data-aware classes on DataFlex's own two code tables, web controls only: a
+//               cFTDbModalPanel with two cFTDbGridHost hosts, one per data dictionary - the code types, and
+//               the chosen type's codes - each with a data-aware cFTWebList beside cFTWebForm fields bound to
+//               its chosen row. The same data in CodeJock grids is DemoDataCodeJock.dg; the two together, on
+//               the same data dictionaries, DemoData.dg.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use Windows.pkg
+Use cFTDbModalPanel.pkg
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the button bar's host
+Use cFTDbGridHost.pkg               // the data-aware host, on the same grid of 8 px columns
+Use FTAllWebControlClasses.pkg      // cFTWebForm, cFTWebList, cFTWebButton, cFTWebLabel - and the framework's cWebEdit
+Use FTPageIsUp.pkg                  // FTHostPageIsUp - can the host's page take a live push now?
+Use FTMessageBox.dg                 // FTYesNoBox - Delete asks first
+Use cCodeTypeDataDictionary.dd      // CodeType - it makes sure the two tables are there
+Use cCodeMastDataDictionary.dd      // CodeMast, a type's codes
+
+/* CODE TYPES AND THEIR CODES IN WEB CONTROLS: the data entry of DemoDataCodeJock.dg with no native control. CodeType
+   and CodeMast are the two code tables DataFlex gives every workspace (DemoCodeTables.pkg).
+
+   ONE DATA-AWARE HOST PER DATA DICTIONARY, as a web program has one view per DD (the FlexTron sample's
+   SelectInventory.wo lists, ZoomInventory.wo edits):
+   - oTypeHost, a cFTDbGridHost whose Server is the CodeType DD: a data-aware cFTWebList of the types, and
+     beside it cFTWebForm fields bound to the chosen type with Entry_Item - the comment in the framework's own
+     cWebEdit, which takes the FT look from the host.
+   - oCodeHost, a cFTDbGridHost whose Server is the CodeMast DD, which the CodeType DD constrains: the chosen
+     type's codes in a cFTWebList, and the chosen code's fields. The framework reads the codes again when the
+     type changes.
+
+   A list shows; it does not edit. The fields beside it do: a list and its fields are the web way of a grid you
+   type in. A row chosen in a list is its DD's record, and the fields follow it.
+
+   SAVE, CLEAR AND DELETE ARE THE FRAMEWORK'S OWN: a button has its host - the one that names the DD as its
+   Server - carry out Request_Save, Request_Clear or Request_Delete on that DD. A FlexTron data-aware host is a
+   data-entry client, as a Windows view is (cDbLocalWebControlHost takes in Entry_Client_mixin): Request_Save
+   moves what was typed in the bound fields into the DD and has the DD validate and save it. Nothing here reads
+   a field or touches a table's buffer, and a key the table holds already is the DD's to refuse. Each host is
+   set up for a dialog: it keeps the record after a save (Auto_Clear_DEO_State), and it asks nothing in a
+   Windows box (Verify_*_Msg) - Delete asks in an FTYesNoBox first.
+
+   A KEY IS TYPED FOR A NEW ROW ONLY. The Type and Code fields are shut for a row that exists - it is chosen in
+   the list, and a key is not changed - and open after Clear. Each opens and shuts itself: a DD tells its
+   controls whenever its record changes, and the field asks the panel then (SyncKeyField). */
+Object oDemoDataWeb is a cFTDbModalPanel
+    Set Label to "Data-aware, web: code types and their codes"
+    Set Location to 10 10
+    Set Size to 340 430
+    Set piMinSize to 340 430
+
+    Object oCodeType_DD is a cCodeTypeDataDictionary
+    End_Object
+
+    Object oCodeMast_DD is a cCodeMastDataDictionary
+        Set DDO_Server to oCodeType_DD
+        Set Constrain_File to CodeType.File_Number
+    End_Object
+
+    Set Main_DD to oCodeType_DD
+    Set Server to oCodeType_DD
+
+    /* THE TYPES: 73 columns of 8 px - the list in columns 0 to 31, the fields in 33 to 72 - and column 16, in the
+       list, takes the extra width. Row 4 takes the extra height: the comment grows with it, and the list, which
+       spans rows 1 to 6. Row 5 is 8 px of air under the comment. The fields come before the list in the source,
+       so the first field is the one Clear puts the focus in. */
+    Object oTypeHost is a cFTDbGridHost
+        Set Location to 6 10
+        Set Size to 150 410
+        Set peAnchors to anTopLeftRight
+        Set piColumnCount to 73
+        Set psColumnWidths to "16/1fr"
+        Set psRowHeights to "4/1fr 5/8px"
+        Set Server to oCodeType_DD
+        Set Auto_Clear_DEO_State to False   // the saved type stays chosen
+        Set Verify_Save_Msg to 0            // no Windows boxes
+        Set Verify_Data_Loss_Msg to 0
+
+        Object oTypesLabel is a cFTWebLabel
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 32
+            Set psCaption to "Code types - a cFTWebList"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        Object oTypeLabel is a cFTWebLabel
+            Set piRowIndex to 0
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set psCaption to "The chosen type - bound cFTWebForm fields"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        // The type's key: shut for a type that exists, open for a new one, after Clear (SyncKeyField). It starts
+        // shut: the dialog opens on the first type.
+        Object oType_wf is a cFTWebForm
+            Entry_Item CodeType.Type
+            Set Server to oCodeType_DD
+            Set piRowIndex to 1
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set piLabelOffset to 80
+            Set psLabel to "Type:"
+            Set pbEnabled to False
+
+            Procedure Refresh Integer eMode
+                Forward Send Refresh eMode
+                Send SyncKeyField Self
+            End_Procedure
+        End_Object
+
+        Object oDescription_wf is a cFTWebForm
+            Entry_Item CodeType.Description
+            Set Server to oCodeType_DD
+            Set piRowIndex to 2
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set piLabelOffset to 80
+            Set psLabel to "Description:"
+        End_Object
+
+        // Text of several lines: the framework's own cWebEdit, bound like the fields above. No cFT class - the
+        // host gives it the FT look, its label's right justification too.
+        Object oComment_we is a cWebEdit
+            Entry_Item CodeType.Comment
+            Set Server to oCodeType_DD
+            Set piRowIndex to 3
+            Set piRowSpan to 2
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set piLabelOffset to 80
+            Set psLabel to "Comment:"
+            Set pbFillHeight to True
+        End_Object
+
+        // The buttons have the host carry out the framework's own requests on its Server, the CodeType DD (the
+        // panel's DoClearType, DoSaveType). OnButtonClick runs after the web click has returned.
+        Object oClearTypeBtn is a cFTWebButton
+            Set piRowIndex to 6
+            Set piColumnIndex to 51
+            Set piColumnSpan to 11
+            Set psCaption to "Clear"
+            Set psCSSClass to "ftbtn ftg-eraser"
+            Set psToolTip to "Empty the fields for a new code type"
+
+            Procedure OnButtonClick
+                Send DoClearType of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        Object oSaveTypeBtn is a cFTWebButton
+            Set piRowIndex to 6
+            Set piColumnIndex to 62
+            Set piColumnSpan to 11
+            Set psCaption to "Save"
+            Set psCSSClass to "ftbtn ftg-save"
+            Set psToolTip to "Save the type - a new one, after Clear, or the description and the comment of the chosen one"
+
+            Procedure OnButtonClick
+                Send DoSaveType of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        /* THE TYPES, a data-aware list on the host's own DD: its columns name their fields with Entry_Item, so
+           the framework reads the rows from the DD, and a row chosen is the DD's record. pbDataAware is True by
+           default. */
+        Object oTypes_lst is a cFTWebList
+            Set Server to oCodeType_DD
+            Set piRowIndex to 1
+            Set piRowSpan to 6
+            Set piColumnIndex to 0
+            Set piColumnSpan to 32
+            Set pbFillHeight to True
+            Set piOrdering to 1             // index 1: the type
+            Set psPlaceHolder to "No types yet"
+
+            Object oType_col is a cWebColumn
+                Entry_Item CodeType.Type
+                Set psCaption to "Type"
+                Set piWidth to 90               // 90 px
+                Set pbFixedWidth to True
+            End_Object
+
+            Object oTypeDescription_col is a cWebColumn
+                Entry_Item CodeType.Description
+                Set psCaption to "Description"
+                Set piWidth to 1                // the rest of the list's width
+            End_Object
+        End_Object
+    End_Object
+
+    /* THE CODES: the same grid of columns as the types above, so the lists and the fields line up. Row 4 takes the
+       extra height - the list spans rows 1 to 4 - so the codes grow with the dialog. */
+    Object oCodeHost is a cFTDbGridHost
+        Set Location to 160 10
+        Set Size to 144 410
+        Set peAnchors to anAll
+        Set piColumnCount to 73
+        Set psColumnWidths to "16/1fr"
+        Set psRowHeights to "4/1fr"
+        Set Server to oCodeMast_DD
+        Set Auto_Clear_DEO_State to False   // the saved code stays chosen
+        Set Verify_Save_Msg to 0            // no Windows boxes: Delete asks in an FTYesNoBox
+        Set Verify_Data_Loss_Msg to 0
+        Set Verify_Delete_Msg to 0
+
+        Object oCodesLabel is a cFTWebLabel
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 32
+            Set psCaption to "The type's codes - a cFTWebList"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        Object oCodeLabel is a cFTWebLabel
+            Set piRowIndex to 0
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set psCaption to "The chosen code - bound cFTWebForm fields"
+            Set psCSSClass to "FtCompact ftaccent"
+        End_Object
+
+        // The code's key: shut for a code that exists, open for a new one - after Clear, or while the type has
+        // no code chosen (SyncKeyField).
+        Object oCode_wf is a cFTWebForm
+            Entry_Item CodeMast.Code
+            Set Server to oCodeMast_DD
+            Set piRowIndex to 1
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set piLabelOffset to 80
+            Set psLabel to "Code:"
+
+            Procedure Refresh Integer eMode
+                Forward Send Refresh eMode
+                Send SyncKeyField Self
+            End_Procedure
+        End_Object
+
+        Object oCodeDescription_wf is a cFTWebForm
+            Entry_Item CodeMast.Description
+            Set Server to oCodeMast_DD
+            Set piRowIndex to 2
+            Set piColumnIndex to 33
+            Set piColumnSpan to 40
+            Set piLabelOffset to 80
+            Set psLabel to "Description:"
+        End_Object
+
+        Object oClearCodeBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 40
+            Set piColumnSpan to 11
+            Set psCaption to "Clear"
+            Set psCSSClass to "ftbtn ftg-eraser"
+            Set psToolTip to "Empty the fields for a new code of the chosen type"
+
+            Procedure OnButtonClick
+                Send DoClearCode of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        Object oDeleteCodeBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 51
+            Set piColumnSpan to 11
+            Set psCaption to "Delete"
+            Set psCSSClass to "ftbtn ftg-delete"
+            Set psToolTip to "Delete the chosen code"
+
+            Procedure OnButtonClick
+                Send DoDeleteCode of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        // A new code is saved under the chosen type: the DD fills in its Type from the CodeType DD (DoSaveCode).
+        Object oSaveCodeBtn is a cFTWebButton
+            Set piRowIndex to 3
+            Set piColumnIndex to 62
+            Set piColumnSpan to 11
+            Set psCaption to "Save"
+            Set psCSSClass to "ftbtn ftg-save"
+            Set psToolTip to "Save the code - a new one, after Clear, or the description of the chosen one"
+
+            Procedure OnButtonClick
+                Send DoSaveCode of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+
+        /* THE CODES, a data-aware list on the host's own DD - the chosen type's codes, since the CodeType DD
+           constrains it. cFTWebList asks for its first rows itself when the page draws it. */
+        Object oCodes_lst is a cFTWebList
+            Set Server to oCodeMast_DD
+            Set piRowIndex to 1
+            Set piRowSpan to 4
+            Set piColumnIndex to 0
+            Set piColumnSpan to 32
+            Set pbFillHeight to True
+            Set piOrdering to 1             // index 1: the type, then the code
+            Set psPlaceHolder to "No codes yet"
+
+            Object oCode_col is a cWebColumn
+                Entry_Item CodeMast.Code
+                Set psCaption to "Code"
+                Set piWidth to 90               // 90 px
+                Set pbFixedWidth to True
+            End_Object
+
+            Object oCodeDescription_col is a cWebColumn
+                Entry_Item CodeMast.Description
+                Set psCaption to "Description"
+                Set piWidth to 1                // the rest of the list's width
+            End_Object
+        End_Object
+    End_Object
+
+    /* THE BUTTON BAR: a plain grid host - it holds no bound field - with Close at the right edge. 26 units hold
+       its row of buttons (33 px, and the theme's 4 px above and below) without a scroll bar. */
+    Object oButtonBar is a cFTGridHost
+        Set Location to 308 320
+        Set Size to 26 100
+        Set peAnchors to anBottomRight
+        Set piColumnCount to 12         // column 0, then Close's 11
+        Set psColumnWidths to "0/1fr"
+
+        Object oCloseBtn is a cFTWebButton
+            Set piColumnIndex to 1
+            Set piColumnSpan to 11
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"
+            Set psToolTip to "Close this dialog"
+
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoDataWeb(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    /* A key field - Type or Code - is typed in for a NEW row only: shut while its DD has a record, open while it
+       has none. The value is stored for a page that loads (Set) and pushed to a page that is up (WebSet) - the
+       DDs find their first records before the page is. */
+    Procedure SyncKeyField Handle hoField
+        Handle hoDD hoHost
+        Boolean bHasRecord
+
+        Get Server of hoField to hoDD
+        Get Parent of hoField to hoHost
+        Get HasRecord of hoDD to bHasRecord
+        Set pbEnabled of hoField to (not(bHasRecord))
+        If (FTHostPageIsUp(hoHost)) ;
+            WebSet pbEnabled of hoField to (not(bHasRecord))
+    End_Procedure
+
+    /* THE REQUESTS, from the web buttons: the host whose Server the DD is carries each out. A save leaves the DD
+       with no changes to save - a save the DD refused leaves them, and its error has said why - so that is
+       what the status line goes by. */
+    Procedure DoClearType
+        Send Request_Clear of oTypeHost
+        Send Focus of oType_wf
+        Set StatusText to "A new type: enter it, and press Save."        // the panel's own status bar
+    End_Procedure
+
+    Procedure DoSaveType
+        Boolean bChanged
+        Send Request_Save of oTypeHost
+        Get Should_Save of oCodeType_DD to bChanged
+        If (not(bChanged)) ;
+            Set StatusText to "The type is saved."
+    End_Procedure
+
+    // Clear keeps the chosen type: a DD that is cleared keeps the record it is constrained to.
+    Procedure DoClearCode
+        Send Request_Clear of oCodeHost
+        Send Focus of oCode_wf
+        Set StatusText to "A new code: enter it, and press Save."
+    End_Procedure
+
+    Procedure DoSaveCode
+        Boolean bChanged
+        Send Request_Save of oCodeHost
+        Get Should_Save of oCodeMast_DD to bChanged
+        If (not(bChanged)) ;
+            Set StatusText to "The code is saved."
+    End_Procedure
+
+    // Delete: the code's host deletes it - and clears the deleted record - once the user has said yes here.
+    Procedure DoDeleteCode
+        String sCode
+        Boolean bHasRecord
+        Integer iAnswer
+
+        Get HasRecord of oCodeMast_DD to bHasRecord
+        If (not(bHasRecord)) Begin
+            Set StatusText to "Choose the code to delete in the list first."
+            Procedure_Return
+        End
+        Get Field_Current_Value of oCodeMast_DD Field CodeMast.Code to sCode
+        Get FTYesNoBox ("Delete the code " + Trim(sCode) + "?") "Delete a code" to iAnswer
+        If (iAnswer <> MBR_Yes) ;
+            Procedure_Return
+        Send Request_Delete of oCodeHost
+        Get HasRecord of oCodeMast_DD to bHasRecord
+        If (not(bHasRecord)) ;
+            Set StatusText to ("The code " + Trim(sCode) + " is deleted.")
+    End_Procedure
+
+    // The first type, when none is chosen yet - so the fields and the codes have something to show.
+    Procedure Activating
+        Boolean bHasRecord
+        Forward Send Activating
+        Get HasRecord of oCodeType_DD to bHasRecord
+        If (not(bHasRecord)) ;
+            Send Find of oCodeType_DD FIRST_RECORD 1
+    End_Procedure
+
+    On_Key Key_Alt+Key_C  Send Close_Panel
+    On_Key kCancel        Send Close_Panel
+End_Object

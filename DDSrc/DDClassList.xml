@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<DataDictionaryList xmlns="http://www.dataaccess.com/VisualDataFlex/2008/DataDictionaryList/">
+	<Tables>
+		<Table>
+			<tableNumber>253</tableNumber>
+			<tableName>CODETYPE</tableName>
+			<DDClasses>
+				<DDClass>
+					<className>cCodeTypeDataDictionary</className>
+					<classFile>cCodeTypeDataDictionary.dd</classFile>
+					<preferred>true</preferred>
+				</DDClass>
+			</DDClasses>
+		</Table>
+		<Table>
+			<tableNumber>254</tableNumber>
+			<tableName>CODEMAST</tableName>
+			<DDClasses>
+				<DDClass>
+					<className>cCodeMastDataDictionary</className>
+					<classFile>cCodeMastDataDictionary.dd</classFile>
+					<preferred>true</preferred>
+				</DDClass>
+			</DDClasses>
+		</Table>
+	</Tables>
+</DataDictionaryList>
