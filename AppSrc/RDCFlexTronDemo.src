@@ -376,7 +376,7 @@ Object oMain is a cFTPanel
             Set piColumnIndex to 8
             Set piColumnSpan to 15
             Set psCaption to "Web controls"
-            Set psCSSClass to "ftbtn ftg-edit"
+            Set psCSSClass to "ftbtn ftg-web"
             Set psToolTip to "A before and after: the framework's web controls on an FT host, and on the framework's own"
 
             Procedure OnButtonClick
@@ -389,7 +389,7 @@ Object oMain is a cFTPanel
             Set piColumnIndex to 23
             Set piColumnSpan to 17
             Set psCaption to "Windows controls"
-            Set psCSSClass to "ftbtn ftg-listcheck"
+            Set psCSSClass to "ftbtn ftg-windows"
             Set psToolTip to "Native controls on an FT panel: captions that can be read, a combo, a selection grid"
 
             Procedure OnButtonClick
@@ -398,7 +398,9 @@ Object oMain is a cFTPanel
         End_Object
 
         // Row 3: CodeType and CodeMast, three ways - CodeJock grids, web lists and fields, and the two together.
-        // Its 41 columns (8 + 13 + 10 + 10) stay inside the left group's 43, as the rows above.
+        // The buttons are in a cFTWebButtonRow: each is as wide as its glyph and caption, in the order declared,
+        // so a caption can change and nothing else moves. The row reaches the host's right edge (columns 8 to 63);
+        // the buttons sit at its left.
         Object oDataLabel is a cFTWebLabel
             Set piRowIndex to 3
             Set piColumnIndex to 0
@@ -407,41 +409,40 @@ Object oMain is a cFTPanel
             Set psCSSClass to "FtCompact ftaccent"
         End_Object
 
-        Object oDataCodeJockBtn is a cFTWebButton
+        Object oDataRow is a cFTWebButtonRow
             Set piRowIndex to 3
             Set piColumnIndex to 8
-            Set piColumnSpan to 13
-            Set psCaption to "CodeJock"
-            Set psCSSClass to "ftbtn ftg-listcheck"
-            Set psToolTip to "Code types and their codes in CodeJock grids: cFTDbCJGrid, and a cDbTextEdit for the comment"
+            Set piColumnSpan to 56
 
-            Procedure OnButtonClick
-                Send Popup of (oDemoDataCodeJock(Self))
-            End_Procedure
-        End_Object
+            Object oDataCodeJockBtn is a cFTWebButton
+                Set psCaption to "CodeJock Grid"
+                Set psCSSClass to "ftbtn ftg-database"
+                Set psToolTip to "Code types and their codes in CodeJock grids: cFTDbCJGrid, and a cDbTextEdit for the comment"
 
-        Object oDataWebBtn is a cFTWebButton
-            Set piRowIndex to 3
-            Set piColumnIndex to 21
-            Set psCaption to "Web"
-            Set psCSSClass to "ftbtn ftg-edit"
-            Set psToolTip to "The same in web controls: data-aware cFTWebList lists beside bound cFTWebForm fields"
+                Procedure OnButtonClick
+                    Send Popup of (oDemoDataCodeJock(Self))
+                End_Procedure
+            End_Object
 
-            Procedure OnButtonClick
-                Send Popup of (oDemoDataWeb(Self))
-            End_Procedure
-        End_Object
+            Object oDataWebBtn is a cFTWebButton
+                Set psCaption to "Web Grid"
+                Set psCSSClass to "ftbtn ftg-database"
+                Set psToolTip to "The same in web controls: data-aware cFTWebList lists beside bound cFTWebForm fields"
 
-        Object oDataMixedBtn is a cFTWebButton
-            Set piRowIndex to 3
-            Set piColumnIndex to 31
-            Set psCaption to "Mixed"
-            Set psCSSClass to "ftbtn ftg-database"
-            Set psToolTip to "The two together: CodeJock grids beside a web host, on the same data dictionaries"
+                Procedure OnButtonClick
+                    Send Popup of (oDemoDataWeb(Self))
+                End_Procedure
+            End_Object
 
-            Procedure OnButtonClick
-                Send Popup of (oDemoData(Self))
-            End_Procedure
+            Object oDataMixedBtn is a cFTWebButton
+                Set psCaption to "Mixed Grid"
+                Set psCSSClass to "ftbtn ftg-database"
+                Set psToolTip to "The two together: CodeJock grids beside a web host, on the same data dictionaries"
+
+                Procedure OnButtonClick
+                    Send Popup of (oDemoData(Self))
+                End_Procedure
+            End_Object
         End_Object
 
         // Row 4: the two boxes the message boxes at the bottom do not show.
@@ -481,7 +482,7 @@ Object oMain is a cFTPanel
             Set piColumnIndex to 23
             Set piColumnSpan to 17
             Set psCaption to "HTML message"
-            Set psCSSClass to "ftbtn ftg-info"
+            Set psCSSClass to "ftbtn ftg-code"
             Set psToolTip to "FTHtmlMessage - a message written in HTML, with button captions of its own"
 
             Procedure OnButtonClick
