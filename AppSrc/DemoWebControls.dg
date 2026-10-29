@@ -355,7 +355,7 @@ Object oDemoWebControls is a cFTModalPanel
             // A list with a check box column. Its rows come from code, and a list of the framework's own reads
             // them only when it is told to: here, each time its page is shown.
             Object oListPage is a cWebTabPage
-                Set psCaption to "List"
+                Set psCaption to "Grid"
                 Set piColumnCount to 1
                 Set pbServerOnShow to True
 
@@ -677,7 +677,7 @@ Object oDemoWebControls is a cFTModalPanel
             // A list with a check box column. Its rows come from code, and a list of the framework's own reads
             // them only when it is told to: here, each time its page is shown.
             Object oListPage is a cWebTabPage
-                Set psCaption to "List"
+                Set psCaption to "Grid"
                 Set piColumnCount to 1
                 Set pbServerOnShow to True
 
