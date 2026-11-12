@@ -40,6 +40,3 @@ AppHtml/WebUI/
 AppHtml/WebUI_Designer/
 AppHtml/CssThemes/
 AppHtml/RDCFlexTron/
-# the two setup files the DFUnit package drops into the workspace folder
-/SetupUnitTests.bat
-/SetupUnitTests.ps1
