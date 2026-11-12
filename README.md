@@ -120,6 +120,24 @@ library to df-cli, and it skips the library's install step ("its install files a
 `setup.bat` copies the sheets into `AppHtml\RDCFlexTron` instead. (A junction to the library folder does
 not do: through one, the pages stayed unstyled.)
 
+## Unit tests
+
+The library has no workspace of its own to build in, so its unit tests live here: `AppSrc\UnitTests.src`,
+built on [DFUnit](https://github.com/NilsSve/Library-DFUnit), which this workspace takes as a package like
+the library. The tests are in `AppSrc\o<Subject>-Tests.pkg`, one file per subject, and `AppSrc\oUnit_Tests.pkg`
+lists them. The first files cover the library code that needs no window: `FTHtmlEscape` and `FTPlainText`,
+the SVG text helpers of `FTAppGlyphs.pkg`, and a check that every name `FTGlyphNames` lists has a drawing in
+`DashIcon` (an unknown name draws an empty path, so a missing drawing shows as a blank glyph and no error).
+
+Compile `UnitTests.src` in the Studio and run it, or from a command prompt:
+
+```
+df-cli build --target UnitTests RDCFlexTronDemo.sws
+Programs\UnitTests64.exe -c
+```
+
+`-c` runs the tests on the console and ends with exit code 0 when all passed.
+
 ## Licence
 
 MIT - see [LICENSE](LICENSE).

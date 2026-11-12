@@ -1,5 +1,10 @@
 {
     "dependencies": [
+        {
+            "source": "https://github.com/NilsSve/Library-DFUnit.git",
+            "sws": "RDC-DFUnit-Library.sws",
+            "version": "0.1.0"
+        },
         "DataFlex-dev/Web UI FlexTron#1.0.56",
         "DataFlex-dev/Web UI Material Theme#1.0.4",
         {
@@ -14,7 +19,8 @@
         "indexHtml": "AppSrc/FlexTronScriptIncludes.html"
     },
     "projects": [
-        "RDCFlexTronDemo.src"
+        "RDCFlexTronDemo.src",
+        "UnitTests.src"
     ],
     "studio": {
         "DefaultFormHeight": 12
