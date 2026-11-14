@@ -99,8 +99,8 @@ The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RD
   (`"ftbtn ftg-exit"`): the Designer runs none of the library's code, so `psGlyph` shows only when the
   program runs.
 
-> **Private until FlexTron is released.** The library is a separate repository,
-> **Library-RDCFlexTron** - a package, so it carries no programs; this is where they go.
+> The library is a separate repository, [Library-RDCFlexTron](https://github.com/NilsSve/Library-RDCFlexTron) -
+> a package, so it carries no programs; this is where they go.
 
 ## Running it
 
