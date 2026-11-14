@@ -40,3 +40,5 @@ AppHtml/WebUI/
 AppHtml/WebUI_Designer/
 AppHtml/CssThemes/
 AppHtml/RDCFlexTron/
+# ... and into Bitmaps: RDCFlexTron's dark toolbar and menu icons (Bitmaps\RDCFlexTron\Dk)
+Bitmaps/RDCFlexTron/
