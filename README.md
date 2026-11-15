@@ -1,6 +1,6 @@
 # Demo-RDCFlexTron
 
-The **RDCFlexTron** library at work in a DataFlex 26 Windows program (`AppSrc/RDCFlexTronDemo.src`):
+The **RDCFlexTron** is a FlexTron package for DataFlex 26 **Windows programs** (`AppSrc/RDCFlexTronDemo.src`):
 
 - ONE themed host for the whole window, the library's `cFTGridHost`: laid out on a grid of 8 px columns
   the way a Windows dialog is - one column and the page's row take the extra space - with the buttons,
