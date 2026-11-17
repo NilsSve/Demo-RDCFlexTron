@@ -2,6 +2,8 @@
 
 The **RDCFlexTron** is a FlexTron package for DataFlex 26 **Windows programs** and this is a demo program (`AppSrc/RDCFlexTronDemo.src`) using the RDCFlexTron package/library:
 
+![Sample: RDCFlexTron Demo Program Interface](Bitmaps/RDCFlexTronDemo.png)
+
 - ONE themed host for the whole window, the library's `cFTGridHost`: laid out on a grid of 8 px columns
   the way a Windows dialog is - one column and the page's row take the extra space - with the buttons,
   the glyph combo, the dialogs of controls, the data-aware dialogs, the two boxes, the glyph list beside
