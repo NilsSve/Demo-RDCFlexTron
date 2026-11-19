@@ -1,0 +1,300 @@
+﻿//****************************************************************************
+// $Module type: Dialog
+// $Module name: DemoThemeIcons
+// $Author     : Nils Svedmyr, RDC Tools International, <mailto:support@rdctools.com>
+// Web-site    : http://www.rdctools.com
+// Created     : 2026-11-19
+//
+// Description : The toolbar and menu icons the RDCFlexTron package installs - the dark ones and the light ones -
+//               each at 16, 24 and 32 pixels, with how a program uses them.
+//
+// This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//****************************************************************************
+Use cFTModalPanel.pkg
+Use cFTLocalWebControlHost.pkg      // a web control needs a host Used before it
+Use cFTGridHost.pkg                 // the host as a grid, laid out like a Windows dialog
+Use FTAllWebControlClasses.pkg      // cFTWebButton
+Use cFTHtmlPage.pkg                 // a whole page: its title and its body
+Use cCharTranslate.pkg              // Base64EncodeToStr
+
+/* THE THEME ICONS (Nils 2026-11-19). The package installs a dark and a light version of the icons its programs
+   share into the workspace's Bitmaps folder: Bitmaps\RDCFlexTron\Dk and Bitmaps\RDCFlexTron\Lt. A program names
+   an icon by its file name only, and FTSeedThemeIcons puts the theme's folder first in the bitmap path - so the
+   same psImage gives the dark icon in the dark theme and the light one in the light theme.
+
+   Each icon is shown here as the toolbar draws it, at the size it is drawn: an .ico file holds a picture for each
+   size, and a browser given the whole file draws its largest picture, shrunk. So each size is cut out of the file
+   as an icon of one picture (IconFrameDataUrl) and given to the page as a data: URL. Drawn on a dark tile for the
+   dark icons and on a light one for the light icons, as a toolbar of each theme would show them. */
+Object oDemoThemeIcons is a cFTModalPanel
+    Set Label to "The theme icons of the RDCFlexTron package"
+
+    // The page, built the first time the dialog opens: "" until then.
+    Property String psIconsHtml ""
+    Set Location to 10 10
+    Set Size to 330 470
+    Set piMinSize to 240 400
+
+    // The Bitmaps folder the package installs its icons under: the folder of the workspace's bitmap path that holds
+    // RDCFlexTron\Dk. The theme has put its own folders in front of the path by now (FTSeedThemeIcons), so the
+    // first folder is not always the one. "" when no folder holds them.
+    Function ThemeIconsFolder Returns String
+        String sPath sFolder
+        String[] asIcons
+        Integer iPos
+        If (ghoApplication = 0) Begin
+            Function_Return ""
+        End
+        Get psBitmapPath of (phoWorkspace(ghoApplication)) to sPath
+        Move (sPath + ";") to sPath
+        While (sPath <> "")
+            Move (Pos(";", sPath)) to iPos
+            Move (Trim(Left(sPath, (iPos - 1)))) to sFolder
+            Move (Right(sPath, (Length(sPath) - iPos))) to sPath
+            If (sFolder <> "") Begin
+                If (Right(sFolder, 1) <> "\") Begin
+                    Move (sFolder + "\") to sFolder
+                End
+                Get IconFiles (sFolder + "RDCFlexTron\Dk\") to asIcons
+                If (SizeOfArray(asIcons) > 0) Begin
+                    Function_Return sFolder
+                End
+            End
+        Loop
+        Function_Return ""
+    End_Function
+
+    // The .ico files of sFolder (ending with a backslash), by name, sorted.
+    Function IconFiles String sFolder Returns String[]
+        String[] asIcons
+        String sLine
+        Integer iCh
+        Get Seq_New_Channel to iCh
+        If (iCh = DF_SEQ_CHANNEL_NOT_AVAILABLE) Begin
+            Function_Return asIcons
+        End
+        Direct_Input channel iCh ("dir: " + sFolder + "*.ico")
+        While (not(SeqEof))
+            Readln channel iCh sLine
+            Move (Trim(sLine)) to sLine
+            If (Lowercase(Right(sLine, 4)) = ".ico") Begin
+                Move sLine to asIcons[SizeOfArray(asIcons)]
+            End
+        Loop
+        Close_Input channel iCh
+        Send Seq_Release_Channel iCh
+        Function_Return (SortArray(asIcons))
+    End_Function
+
+    // Byte iPos of ucData as 0 to 255: a UChar element of 128 and up reads negative in an expression.
+    Function ByteAt UChar[] ByRef ucData Integer iPos Returns Integer
+        Integer iByte
+        Move ucData[iPos] to iByte
+        If (iByte < 0) Begin
+            Move (iByte + 256) to iByte
+        End
+        Function_Return iByte
+    End_Function
+
+    Function DWordAt UChar[] ByRef ucData Integer iPos Returns Integer
+        Function_Return (ByteAt(Self, &ucData, iPos) + (256 * ByteAt(Self, &ucData, (iPos + 1))) + ;
+            (65536 * ByteAt(Self, &ucData, (iPos + 2))) + (16777216 * ByteAt(Self, &ucData, (iPos + 3))))
+    End_Function
+
+    // The bytes of the file sFile; none when it cannot be read.
+    Function FileBytes String sFile Returns UChar[]
+        UChar[] ucFile
+        Integer iCh
+        Get Seq_New_Channel to iCh
+        If (iCh = DF_SEQ_CHANNEL_NOT_AVAILABLE) Begin
+            Function_Return ucFile
+        End
+        Direct_Input channel iCh ("binary: " + sFile)
+        Read_Block channel iCh ucFile 4000000
+        Close_Input channel iCh
+        Send Seq_Release_Channel iCh
+        Function_Return ucFile
+    End_Function
+
+    // The picture of size iSize in the icon file ucFile (its bytes), as a data: URL of an icon of that one picture -
+    // "" when the file has none of that size. hoTranslate is a cCharTranslate, for the base64.
+    Function IconFrameDataUrl UChar[] ByRef ucFile Integer iSize Handle hoTranslate Returns String
+        UChar[] ucIcon
+        Integer iCount i iDirEntry iWidth iBytes iOffset iFound iBpp iBestBpp
+        String sBase64
+
+        If (SizeOfArray(ucFile) < 22) Begin
+            Function_Return ""
+        End
+
+        // The directory: 6 bytes, then 16 for each picture. The one of iSize with the most colours.
+        Move (ByteAt(Self, &ucFile, 4) + (256 * ByteAt(Self, &ucFile, 5))) to iCount
+        Move -1 to iFound
+        Move 0 to iBestBpp
+        For i from 0 to (iCount - 1)
+            Move (6 + (16 * i)) to iDirEntry
+            Move (ByteAt(Self, &ucFile, iDirEntry)) to iWidth
+            If (iWidth = 0) Begin
+                Move 256 to iWidth
+            End
+            Move (ByteAt(Self, &ucFile, (iDirEntry + 6)) + (256 * ByteAt(Self, &ucFile, (iDirEntry + 7)))) to iBpp
+            If ((iWidth = iSize) and (iBpp > iBestBpp)) Begin
+                Move iDirEntry to iFound
+                Move iBpp to iBestBpp
+            End
+        Loop
+        If (iFound = -1) Begin
+            Function_Return ""
+        End
+        Move (DWordAt(Self, &ucFile, (iFound + 8))) to iBytes
+        Move (DWordAt(Self, &ucFile, (iFound + 12))) to iOffset
+        If ((iOffset + iBytes) > SizeOfArray(ucFile)) Begin
+            Function_Return ""
+        End
+
+        // An icon of that one picture: its header, its one directory entry - the picture now right after it, at
+        // byte 22 - and the picture's bytes.
+        Move 0 to ucIcon[0]
+        Move 0 to ucIcon[1]
+        Move 1 to ucIcon[2]
+        Move 0 to ucIcon[3]
+        Move 1 to ucIcon[4]
+        Move 0 to ucIcon[5]
+        For i from 0 to 11
+            Move ucFile[(iFound + i)] to ucIcon[(6 + i)]
+        Loop
+        Move 22 to ucIcon[18]
+        Move 0  to ucIcon[19]
+        Move 0  to ucIcon[20]
+        Move 0  to ucIcon[21]
+        For i from 0 to (iBytes - 1)
+            Move ucFile[(iOffset + i)] to ucIcon[(22 + i)]
+        Loop
+
+        Get Base64EncodeToStr of hoTranslate (AddressOf(ucIcon)) (SizeOfArray(ucIcon)) to sBase64
+        Function_Return ("data:image/x-icon;base64," + sBase64)
+    End_Function
+
+    // One icon file's three sizes, as <img> elements: 16, 24 and 32 pixels.
+    Function IconSizesHtml String sFile Handle hoTranslate Returns String
+        String sHtml sUrl
+        UChar[] ucFile
+        Integer i iSize
+        Get FileBytes sFile to ucFile
+        For i from 0 to 2
+            Move (16 + (8 * i)) to iSize
+            Get IconFrameDataUrl (&ucFile) iSize hoTranslate to sUrl
+            If (sUrl <> "") Begin
+                Move (sHtml + '<img src="' + sUrl + '" width="' + String(iSize) + '" height="' + String(iSize) + '" alt="' + String(iSize) + ' px">') to sHtml
+            End
+            Else Begin
+                Move (sHtml + '<span class="dti-none" style="width:' + String(iSize) + 'px">-</span>') to sHtml
+            End
+        Loop
+        Function_Return sHtml
+    End_Function
+
+    // The page: a line on how a program uses the icons, then a row for each - its name, the dark icon at its three
+    // sizes on a dark tile, the light one on a light tile.
+    Function ThemeIconsHtml Returns String
+        String sBitmaps sHtml sName sLight
+        String[] asIcons
+        Handle hoTranslate
+        Integer i
+
+        Get ThemeIconsFolder to sBitmaps
+        If (sBitmaps = "") Begin
+            Function_Return '<p>The package&#39;s icons are not in this workspace&#39;s Bitmaps folder (Bitmaps\RDCFlexTron\Dk). The package installs them there.</p>'
+        End
+        Get IconFiles (sBitmaps + "RDCFlexTron\Dk\") to asIcons
+
+        Move '<style>' to sHtml
+        Move (sHtml + '.dti p{margin:0 0 8px 0;line-height:1.4}') to sHtml
+        Move (sHtml + '.dti table{border-collapse:collapse}') to sHtml
+        Move (sHtml + '.dti th{text-align:left;font-weight:600;padding:4px 10px}') to sHtml
+        Move (sHtml + '.dti td{padding:4px 10px;vertical-align:middle;white-space:nowrap}') to sHtml
+        Move (sHtml + '.dti td.dti-dk{background:#202020}') to sHtml
+        Move (sHtml + '.dti td.dti-lt{background:#f3f3f3}') to sHtml
+        Move (sHtml + '.dti img,.dti .dti-none{display:inline-block;vertical-align:middle;margin-right:10px;image-rendering:pixelated}') to sHtml
+        Move (sHtml + '.dti .dti-none{color:#888;text-align:center}') to sHtml
+        Move (sHtml + '.dti code{font-family:Consolas,monospace}') to sHtml
+        Move (sHtml + '</style><div class="dti">') to sHtml
+        Move (sHtml + '<p>' + String(SizeOfArray(asIcons)) + ' icons, in <code>Bitmaps\RDCFlexTron\Dk</code> (dark) and <code>Bitmaps\RDCFlexTron\Lt</code> (light). ') to sHtml
+        Move (sHtml + 'A program names an icon by its file name only - <code>Set psImage to "ActionSaveRecord.ico"</code> - and the theme decides which folder it comes from: ') to sHtml
+        Move (sHtml + 'FTSeedThemeIcons puts the dark folder first in the dark theme and the light one in the light theme. ') to sHtml
+        Move (sHtml + 'A program&#39;s own <code>Bitmaps\Dk</code> or <code>Bitmaps\Lt</code> comes before the package&#39;s. Each icon at 16, 24 and 32 pixels.</p>') to sHtml
+        Move (sHtml + '<table><tr><th>Icon</th><th>Dark theme</th><th>Light theme</th></tr>') to sHtml
+
+        Get Create (RefClass(cCharTranslate)) to hoTranslate
+        For i from 0 to (SizeOfArray(asIcons) - 1)
+            Move (Left(asIcons[i], (Length(asIcons[i]) - 4))) to sName
+            Move (sHtml + '<tr><td>' + sName + '</td><td class="dti-dk">') to sHtml
+            Move (sHtml + IconSizesHtml(Self, (sBitmaps + "RDCFlexTron\Dk\" + asIcons[i]), hoTranslate) + '</td><td class="dti-lt">') to sHtml
+            Move (sBitmaps + "RDCFlexTron\Lt\" + asIcons[i]) to sLight
+            Move (sHtml + IconSizesHtml(Self, sLight, hoTranslate) + '</td></tr>') to sHtml
+        Loop
+        Send Destroy of hoTranslate
+
+        Move (sHtml + '</table></div>') to sHtml
+        Function_Return sHtml
+    End_Function
+
+    /* THE HOST: the page, and Close under it at the right. Column 0 takes the width; column 1, 88 px, holds Close,
+       and the page spans it too. Row 0 takes the height; row 1 is 8 px of air. */
+    Object oThemeIconsHost is a cFTGridHost
+        Set Location to 4 4
+        Set Size to 322 462
+        Set peAnchors to anNone             // placed by cFTModalPanel (phoClientHost)
+        Set piColumnCount to 2
+        Set psColumnWidths to "0/1fr 1/88px"
+        Set psRowHeights to "0/1fr 1/8px"
+
+        Object oIconsPage is a cFTHtmlPage
+            Set piRowIndex to 0
+            Set piColumnIndex to 0
+            Set piColumnSpan to 2
+            Set pbFillHeight to True
+            Set psLabel to "Theme icons"
+            Set psCSSClass to "ftpage ftg-photo"
+            // What the Studio's Designer draws: the page is built when the program runs (BodyHtml).
+            Set psHtml to '<div class="ftph-grid" style="--rows:8"><b>Icon</b><b>Dark theme</b><b>Light theme</b></div>'
+
+            // Built the first time the dialog opens, and kept: the icons do not change while the program runs. Not
+            // from End_Construct_Object: the dialog is made as the program starts, before its application object is
+            // there to give the workspace's Bitmaps folder ("Invalid message GET_PHOWORKSPACE").
+            Function BodyHtml Returns String
+                String sHtml
+                Get psIconsHtml of oDemoThemeIcons to sHtml
+                If (sHtml = "") Begin
+                    Get ThemeIconsHtml of oDemoThemeIcons to sHtml
+                    Set psIconsHtml of oDemoThemeIcons to sHtml
+                End
+                Function_Return sHtml
+            End_Function
+        End_Object
+
+        Object oCloseBtn is a cFTWebButton
+            Set piRowIndex to 2
+            Set piColumnIndex to 1
+            Set piColumnSpan to 1
+            Set psCaption to "Close"
+            Set psCSSClass to "ftbtn ftg-close"
+            Set psToolTip to "Close this dialog"
+
+            // Runs after the web click has returned - ending a panel inside it would fault (4410).
+            Procedure OnButtonClick
+                Send Close_Panel of (oDemoThemeIcons(Self))
+            End_Procedure
+        End_Object
+    End_Object
+
+    // The page's body as the dialog opens (cFTHtmlPage: RefreshBody stores it for the page still to mount).
+    Procedure Activating
+        Forward Send Activating
+        Send RefreshBody of (oIconsPage(oThemeIconsHost(Self)))
+    End_Procedure
+
+    // cFTModalPanel fits the host to the panel, when it is shown and on every resize.
+    Set phoClientHost to (oThemeIconsHost(Self))
+End_Object

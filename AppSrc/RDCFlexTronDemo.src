@@ -34,6 +34,7 @@ Use FTMarkupBuilders.pkg            // DivOpen, TagHtml, MarkedText, CssLink ...
 Use FTDashIcons.pkg                 // DashIcon and its CS_Glyph* names
 Use DemoDialog.dg                   // oDemoDialog - the modal panel that "ModalPanel Sample" opens
 Use DemoMockups.dg                  // oDemoMockups - the Designer's mockups, which "Designer mockups" opens
+Use DemoThemeIcons.dg               // oDemoThemeIcons - the package's dark and light icons, which "Theme icons" opens
 Use FTMessageBox.dg                 // FTInfoBox, FTStopBox, FTYesNoBox: Info_Box and the rest in the FT look
 Use FTInputBox.dg                   // FTInputBox: the message box with one field to type in
 
@@ -381,6 +382,20 @@ Object oMain is a cFTPanel
 
             Procedure OnButtonClick
                 Send Popup of (oDemoWebControls(Self))
+            End_Procedure
+        End_Object
+
+        // Row 2, at the right edge under the mockups button, as wide as it: the package's theme icons.
+        Object oThemeIconsBtn is a cFTWebButton
+            Set piRowIndex to 2
+            Set piColumnIndex to 44
+            Set piColumnSpan to 20
+            Set psCaption to "Theme icons"
+            Set psCSSClass to "ftbtn ftg-photo"
+            Set psToolTip to "The toolbar and menu icons the package installs: the dark ones and the light ones, at three sizes"
+
+            Procedure OnButtonClick
+                Send Popup of (oDemoThemeIcons(Self))
             End_Procedure
         End_Object
 
