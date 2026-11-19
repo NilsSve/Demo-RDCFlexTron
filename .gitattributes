@@ -29,6 +29,10 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
+# Markdown too (README.md): kept with CRLF in the working copy, as the editors save it - stored with LF, so
+# a file saved with CRLF does not show every line as changed.
+*.md  text eol=crlf
+
 # Exclude compiled or generated files
 *.prn linguist-generated=true
 *.dbg linguist-generated=true
