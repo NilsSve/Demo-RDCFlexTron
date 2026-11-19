@@ -84,6 +84,7 @@ Function DemoPageHtml Global Returns String
         boxes with About and Exit. A control takes a row with `piRowIndex`, and this page fills its row with
         `pbFillHeight`.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         This page is a `cFTHtmlPage`, built with `FTMarkupBuilders`.
         """)))
@@ -93,26 +94,31 @@ Function DemoPageHtml Global Returns String
         the folder's classes into a sheet there, so the Studio's Designer shows the mark too, with Lorem
         ipsum for this text.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         The buttons above are `cFTWebButton` objects: real web buttons, so the Studio's Designer draws them.
         A glyph is a class in `psCSSClass` - `ftg-exit` and the like, from ftglyphs.css - so the Designer
         draws it too. The font is `psFontFamily`, `piFontSize` and `pbBold`.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         The combo is a `cFTWebCombo`, in the FT look (`FtCompact`, from ftcontrols.css), which the Studio's
         Designer draws too. Its `OnChange` sends the glyph to the Preview button's `UpdateGlyph`, which
         changes it while the program runs.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         The list on the left is a `cFTWebList` with every glyph there is (`FTGlyphNames`) - the library's,
         and the demo's own `rdcmark`. Its rows come from code (`OnManualLoadData`), and it asks for them
         itself when the page first draws it. Choose a row, and `OnChangeCurrentRow` gives its glyph to the
         Preview button and the combo.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         Designer mockups opens the mockups the library's ftcontrols.css draws for the Studio's Designer - a
         grid, a list, a tree, a log, a chart and cards. How to use them is below.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         Web controls is a before and after: the framework's own web controls - a `cWebForm`, a `cWebCombo`,
         a `cWebDateForm`, check boxes and radio buttons in each of their states, a group, tab pages - on an FT
@@ -122,14 +128,16 @@ Function DemoPageHtml Global Returns String
         text size, the palette's colours, a label on the left right-justified. So a control needs a cFT class
         for what it does, not for how it looks.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         Windows controls opens native controls on a `cFTModalPanel`: a check box and a radio group whose
         captions can be read on the FT ground (`cFTCheckBoxCaption`, `cFTRadioCaption`, `cFTRadioGroup`), a
         `cFTComboForm`, a `cFTCJSelectionGrid` with rows from code, and a `cFTDeferTimer` behind the line that
         says what changed.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
-        The Data row opens CodeType and CodeMast, the two code tables DataFlex gives every workspace, three
+        The Data row opens CodeType and CodeMast, the two code tables DataFlex expects for every workspace, three
         ways - each a `cFTDbModalPanel` with the same two data dictionaries, and its actions (New, Save, Delete)
         in a menu at its top right: a `cFTActionBarHost`, whose action bar shows the dialog's `cWebMenuGroup`, as a
         web view's `oActionGroup` does. The items act on the grid or the host the focus came from, as a Windows
@@ -143,12 +151,14 @@ Function DemoPageHtml Global Returns String
         and a grid's column and a web field both follow it. The demo copies the two empty tables into its Data
         folder the first time it runs, and adds a few rows.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         Input box shows `FTInputBox`, the message box with one field to type in, and HTML message shows
         `FTHtmlMessage`, a message written in HTML with button captions of its own. Both return True for the
         answer at the bottom right - the caption the call names first, `sYesLabel` - and False for the button
         beside it, or Esc.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         Each column is 8 px, so a button's span is its width in 8 px steps: a `cFTWebButton` takes 10 unless
         it says otherwise - Follow Windows takes 15, ModalPanel Sample 20. One column takes the extra width -
@@ -156,14 +166,17 @@ Function DemoPageHtml Global Returns String
         so the buttons keep their size and the right-hand ones stay at the edge - like anchors in a Windows
         dialog.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         A click's work is the button's `OnButtonClick`, which runs after the web click has returned - so it
         can open a dialog, or restart the program.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         The three buttons at the bottom left show `FTInfoBox`, `FTStopBox` and `FTYesNoBox`: `Info_Box`,
         `Stop_Box` and `YesNo_Box` in the FT look, with the same arguments and return values.
         """)))
+    Append sItems CS_Br
     Append sItems (BulletItem(MarkedText("""
         About opens the library's About dialog the way a standard program does with `StdAbout.pkg`: the button
         sends `Activate_About` to this window, as a menu's About item sends it to the client area, and the
@@ -222,7 +235,7 @@ End_Function
 Object oMain is a cFTPanel
     Set Label to "RDCFlexTron Demo"
     Set Location to 190 119
-    Set Size to 363 450
+    Set Size to 325 450
     Set piMinSize to 243 360  
 
     /* THE ABOUT DIALOG, wired as a standard program wires it: FTStdAbout.pkg Used in the object that answers
@@ -295,7 +308,7 @@ Object oMain is a cFTPanel
             Set pbBold to True
             // The glyph as a class (ftglyphs.css), with the primary look: a literal class list is what the
             // Studio's Designer draws - it never runs the code that turns psGlyph / pbPrimary into classes.
-            Set psCSSClass to "ftbtn ftbtn-primary ftg-info"
+            Set psCSSClass to "ftbtn ftbtn-primary ftg-prompt"
             Set pbPrimary to True
             Set psToolTip to "A sample cFTModalPanel with a Close button."
 
